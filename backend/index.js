@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 
@@ -20,14 +20,13 @@ const port = process.env.PORT;
 //     res.send('Hello World!');
 // });
 
-
 app.use('/', router).all((_, res) => {
-    res.setHeader('content-type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
 });
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening on port ${port}`);
 });
 
 export default app;
