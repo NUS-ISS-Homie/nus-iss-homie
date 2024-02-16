@@ -1,5 +1,9 @@
 import express from 'express'
 import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import createEventListeners from './controllers/socket-controller.js';
+import { getHome, updateHome } from './controllers/home-controller.js';
 import 'dotenv/config';
 
 const app = express();
@@ -20,13 +24,24 @@ const port = process.env.PORT;
 //     res.send('Hello World!');
 // });
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: [process.env.ORIGIN || 'http://localhost:3000'],
+    },
+});
+
+io.on('connection', (socket) => {
+    console.log(`Connected to ${socket.id}`);
+    createEventListeners(socket, io);
+});
 
 app.use('/', router).all((_, res) => {
     res.setHeader('content-type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
 
