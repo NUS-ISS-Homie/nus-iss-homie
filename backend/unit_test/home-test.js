@@ -1,4 +1,4 @@
-import chai from 'chai';
+import { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import io from 'socket.io-client';
 import app from '../index.js';
@@ -8,9 +8,6 @@ import 'dotenv/config';
 import assert from 'assert';
 
 assert(process.env.ENV == 'TEST');
-
-chai.use(chaiHttp);
-const expect = chai.expect;
 
 const SOCKET_OPTIONS = {
     transports: ['websocket'],

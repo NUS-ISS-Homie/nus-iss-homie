@@ -7,19 +7,24 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha unit_test --timeout 10000 --exit"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.0.3"
+    "nodemon": "^3.0.3",
+    "socket.io-client": "^4.7.4"
   },
   "dependencies": {
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
+    "chai": "^5.1.0",
+    "chai-http": "^4.4.0",
+    "chai-shallow-deep-equal": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
+    "mocha": "^10.3.0",
     "mongoose": "^8.1.2",
     "socket.io": "^4.7.4"
   }
