@@ -9,29 +9,47 @@ let mongoDB =
         ? process.env.DB_CLOUD_URI
         : process.env.DB_CLOUD_URI_TEST;
 
-mongoose.connect(mongoDB, { useNewUrlParser: true });
+mongoose.connect(mongoDB);
 
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
 db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
 
+// CRUD functions
+
 export async function createHomeModel(params) {
-    return new HomeModel(params);
+    return await HomeModel(params);
 }
 
-export async function getHomeModel(roomId) {
-    return HomeModel.findOne({ _id: mongoose.Types.ObjectId(roomId) });
+export async function getHomeModel(homeId) {
+    return await HomeModel.findOne({ _id: params.homeId });
+}
+
+export const updateOperation = {
+    Join: 'Join',
+    Remove: 'Remove User'
 }
 
 export async function updateHomeModel(params) {
-    return HomeModel.findOneAndUpdate(
-        { _id: mongoose.Types.ObjectId(params.homeId) },
-        // { $set: {  } },
-        { returnDocument: 'after' }
-    );
+    switch (params.operation) {
+        case (updateOperation.Join):
+            return await HomeModel.findOneAndUpdate(
+                { _id: params.homeId },
+                { $addToSet: { users: params.userId } },
+                { returnDocument: 'after' }
+            );
+        case (updateOperation.Remove):
+            return await HomeModel.findOneAndUpdate(
+                { _id: params.homeId },
+                { $pull: { users: params.userId } },
+                { returnDocument: 'after' }
+            );
+        default:
+            throw new Error("Invalid update operation");
+    }
 }
 
 export async function deleteHomeModel(homeId) {
-    return HomeModel.deleteOne({ _id: mongoose.Types.ObjectId(homeId) });
+    return await HomeModel.deleteOne({ _id: params.homeId });
 }

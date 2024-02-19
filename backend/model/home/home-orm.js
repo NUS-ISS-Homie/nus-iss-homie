@@ -1,6 +1,7 @@
 import {
     createHomeModel,
     getHomeModel,
+    updateOperation,
     updateHomeModel,
     deleteHomeModel
 } from "./home-repository.js";
@@ -10,11 +11,7 @@ export async function ormCreateHome(adminUser) {
         const newHome = await createHomeModel({ users: adminUser });
         await newHome.save();
 
-        return {
-            error: false,
-            message: "Room creation successful!",
-            roomId: newHome._id,
-        };
+        return newHome;
     } catch (err) {
         return { error: true, message: err };
     }
@@ -29,9 +26,18 @@ export async function ormGetHome(homeId) {
     }
 }
 
-export async function ormUpdateHome(homeId) {
+export async function ormJoinHome(homeId, userId) {
     try {
-        const updatedHome = await updateHomeModel({ homeId });
+        const updatedHome = await updateHomeModel({ homeId, userId, operation: updateOperation.Join });
+        return updatedHome;
+    } catch (err) {
+        return { error: true, message: err };
+    }
+}
+
+export async function ormLeaveHome(homeId, userId) {
+    try {
+        const updatedHome = await updateHomeModel({ homeId, userId, operation: updateOperation.Remove });
         return updatedHome;
     } catch (err) {
         return { error: true, message: err };
@@ -43,7 +49,7 @@ export async function ormDeleteHome(homeId) {
         await deleteHomeModel(homeId);
         return {
             error: false,
-            message: "Room deletion successful!",
+            message: "Home deletion successful!",
         };
     } catch (err) {
         return { error: true, message: err };

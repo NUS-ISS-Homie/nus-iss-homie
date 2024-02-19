@@ -2,8 +2,8 @@ import express from 'express'
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import homeRouter from './routes/home-routes.js'
 import createEventListeners from './controllers/socket-controller.js';
-import { getHome, updateHome } from './controllers/home-controller.js';
 import 'dotenv/config';
 
 const app = express();
@@ -13,16 +13,11 @@ app.use(express.json());
 app.use(cors()); // config cors so that front-end can use
 app.options('*', cors());
 
-const router = express.Router();
-
-// Controller will contain all the User-defined Routes
-router.get('/', (_, res) => res.send('Hello World from Homie!'));
-
 const port = process.env.PORT;
 
-// app.get('/', (req, res) => {
-//     res.send('Hello World!');
-// });
+app.get('/', (req, res) => {
+    res.send('Hello World from Homie!');
+});
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -36,7 +31,7 @@ io.on('connection', (socket) => {
     createEventListeners(socket, io);
 });
 
-app.use('/', router).all((_, res) => {
+app.use('/api/home', homeRouter).all((_, res) => {
     res.setHeader('content-type', 'application/json');
     res.setHeader('Access-Control-Allow-Origin', '*');
 });

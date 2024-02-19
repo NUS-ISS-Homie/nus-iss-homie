@@ -1,5 +1,6 @@
-import { expect } from 'chai';
+import chai from 'chai';
 import chaiHttp from 'chai-http';
+import chaiShallowDeepEqual from 'chai-shallow-deep-equal';
 import io from 'socket.io-client';
 import app from '../index.js';
 import { DEV_SERVER_URI } from '../constants.js';
@@ -8,6 +9,10 @@ import 'dotenv/config';
 import assert from 'assert';
 
 assert(process.env.ENV == 'TEST');
+chai.use(chaiHttp);
+chai.use(chaiShallowDeepEqual);
+
+// Socket
 
 const SOCKET_OPTIONS = {
     transports: ['websocket'],
@@ -53,5 +58,93 @@ describe('Socket disconnect', function () {
     it('should disconnect user3', function (done) {
         user3.on('disconnect', () => done());
         user3.disconnect();
+    });
+});
+
+// CRUD
+
+describe('MongoDB Connection', () => {
+    it('Connect to MongoDB', async function () {
+        mongoose.connect(process.env.DB_CLOUD_URI_TEST);
+    });
+});
+
+let adminUserId = new mongoose.Types.ObjectId();
+let userId1 = new mongoose.Types.ObjectId();
+let homeId;
+
+describe('Admin user creates a new home', () => {
+    it('should create a new home', function (done) {
+      const expectedBody = {
+        message: 'Successfully created home!'
+      };
+  
+      chai.request(app)
+        .post(`/api/home/create`)
+        .send({ adminUser: adminUserId })
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(201);
+          chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+          homeId = res.body.home._id;
+          done();
+        });
+    });
+});
+
+describe('User joins then leaves an existing home', () => {
+    it('should join an existing home', function (done) {
+      const expectedBody = {
+        home: {
+            users: userId1
+        },
+        message: 'Successfully joined home!',
+      };
+  
+      chai.request(app)
+        .put(`/api/home/join`)
+        .send({homeId, userId: userId1})
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(200);
+          chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+          done();
+        });
+    });
+
+    it('should leave an existing home', function (done) {
+        const expectedBody = {
+          message: 'Successfully left home!',
+        };
+    
+        chai.request(app)
+          .put(`/api/home/leave`)
+          .send({homeId, userId: userId1})
+          .end((err, res) => {
+            err && console.log(err);
+            chai.expect(res).to.have.status(200);
+            chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+            chai.expect(res.body.home.users).to.not.contain(userId1);
+            done();
+          });
+      });
+});
+
+describe('Admin user deletes their home', () => {
+    it('should delete an existing home', function (done) {
+      const expectedBody = {
+        message: 'Successfully deleted home!'
+      };
+  
+      chai.request(app)
+        .delete(`/api/home/delete`)
+        .send({ adminUser: adminUserId, homeId })
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(200);
+          chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+          homeId = res.body.homeId;
+          done();
+        });
     });
 });
