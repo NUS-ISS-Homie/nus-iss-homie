@@ -21,7 +21,6 @@ export async function createUser(params) {
         username: params.username,
         hashedPassword: params.hashedPassword,
     });
-    // return new UserModel(params);
 }
 
 // READ FUNCTION
@@ -30,14 +29,8 @@ export async function getUser(username) {
     return user;
 }
 
-export async function getToken(username) {
-    const user = await UserModel.findOne({ username: username }, 'token');
-    return user.token;
-}
-
 // UPDATE FUNCTION
 export async function changePassword(params) {
-    console.log(params);
     const user = await UserModel.findOne({ username: params.username });
     if (!user) {
         throw new Error('Database Error');
@@ -68,27 +61,18 @@ export async function changeUsername(params) {
     }
 }
 
-export async function addTokenToUser(params) {
-    const updated = await UserModel.updateOne(
-        { username: params.username },
-        { $set: { token: params.token } }
-    );
-    return updated;
-}
-
 // DELETE FUNCTION
-export async function deleteUser(username) {
-    const user = await UserModel.findOne({ username: username });
-    if (user) {
-        const deleted = await UserModel.deleteOne({ username: username });
-        console.log(deleted);
-        return deleted.acknowledged;
-    }
-}
+export async function deleteUser(params) {
+    const user = await UserModel.findOne({ username: params.username });
 
-export async function deleteToken(username, token) {
-    console.log('Username : ', username);
-    console.log('Token : ', token);
-    const user = await UserModel.findOne({ username: username });
-    return await user.updateOne({ $unset: { token: '' } });
+    if (!user) {
+        throw new Error('Database Error');
+    }
+
+    if (user.comparePassword(params.password)) {
+        const deleted = await UserModel.deleteOne({ username: params.username });
+        return deleted.acknowledged;
+    } else {
+        return false;
+    }
 }

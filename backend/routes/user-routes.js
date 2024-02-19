@@ -13,7 +13,7 @@ import {
     createUser,
     deleteUser,
     signIn,
-} from './controllers/user-controller.js';
+} from '../controllers/user-controller.js';
 
 const router = express.Router();
 
@@ -22,16 +22,8 @@ router.get('/', (_, res) => res.send('Hello World from user-service'));
 
 router.post('/signup', createUser);
 router.post('/login', signIn);
-router.post('/change-password', verifyToken, changePassword);
-router.post('/change-username', verifyToken, changeUsername);
+router.put('/change-password', changePassword);
+router.put('/change-username', changeUsername);
 router.delete('/delete-user', deleteUser);
 
-app.use('/api/user', router).all((_, res) => {
-    res.setHeader('content-type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-});
-
-
-app.listen(8000, () => console.log('user-service listening on port 8000'));
-
-export default app;
+export default router;

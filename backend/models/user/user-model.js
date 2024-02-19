@@ -11,11 +11,7 @@ let UserModelSchema = new Schema({
   hashedPassword: {
     type: String,
     required: true,
-  },
-  token: {
-    type: String,
-    required: false,
-  },
+  }
 });
 
 UserModelSchema.methods.comparePassword = function (password) {
