@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
+import choresRoutes from './routes/chores.js';
+import './model/repository.js';
 
 const app = express();
 
@@ -24,6 +26,8 @@ app.use('/', router).all((_, res) => {
   res.setHeader('content-type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 });
+
+app.use('/api', choresRoutes);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

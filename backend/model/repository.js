@@ -1,4 +1,7 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({
+  path: '/Users/ariskandar/Documents/nus-iss-homie/backend/.env',
+});
 
 //Set up mongoose connection
 import mongoose from 'mongoose';
