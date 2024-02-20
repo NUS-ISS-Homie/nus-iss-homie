@@ -16,8 +16,8 @@ const router = express.Router();
 router.get('/', (_, res) => res.send('Hello World from Homie'));
 
 app.use('/api/user', userRoutes).all((_, res) => {
-    res.setHeader('content-type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
 });
 
 app.listen(8000, () => console.log('Homie listening on port 8000'));
