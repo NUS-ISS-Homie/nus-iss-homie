@@ -39,7 +39,7 @@ export async function createHome(req, res) {
 
 export async function getHome(req, res) {
   try {
-    const { homeId } = req.query;
+    const { homeId } = req.params;
 
     if (!homeId) {
       return res
@@ -47,12 +47,15 @@ export async function getHome(req, res) {
         .json({ message: 'Missing home ID' });
     }
     const home = await _getHome(homeId);
-    if (!home) {
+    if (!home || home.error) {
+      console.log(home);
       return res
         .status(msg.STATUS_CODE_NOT_FOUND)
         .json({ message: msg.ERR_NOT_FOUND(entity) });
     }
-    return res.status(msg.STATUS_CODE_OK).json(home);
+    return res
+      .status(msg.STATUS_CODE_OK)
+      .json({ home, message: msg.SUCCESS_READ(entity) });
   } catch (err) {
     return res.status(msg.STATUS_CODE_SERVER_ERROR).json({ message: err });
   }
@@ -60,7 +63,8 @@ export async function getHome(req, res) {
 
 export async function joinHome(req, res) {
   try {
-    const { homeId, userId } = req.body;
+    const { homeId } = req.params;
+    const { userId } = req.body;
 
     if (!homeId) {
       return res
@@ -93,7 +97,8 @@ export async function joinHome(req, res) {
 
 export async function leaveHome(req, res) {
   try {
-    const { homeId, userId } = req.body;
+    const { homeId } = req.params;
+    const { userId } = req.body;
 
     if (!homeId) {
       return res
@@ -125,7 +130,7 @@ export async function leaveHome(req, res) {
 
 export async function deleteHome(req, res) {
   try {
-    const { homeId } = req.body;
+    const { homeId } = req.params;
 
     if (!homeId) {
       return res

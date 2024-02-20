@@ -5,9 +5,9 @@ import HomeModel from './home-model.js';
 import mongoose from 'mongoose';
 
 let mongoDB =
-    process.env.ENV == 'PROD'
-        ? process.env.DB_CLOUD_URI
-        : process.env.DB_CLOUD_URI_TEST;
+  process.env.ENV == 'PROD'
+    ? process.env.DB_CLOUD_URI
+    : process.env.DB_CLOUD_URI_TEST;
 
 mongoose.connect(mongoDB);
 
@@ -19,37 +19,37 @@ db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
 // CRUD functions
 
 export async function createHomeModel(params) {
-    return await HomeModel(params);
+  return await HomeModel(params);
 }
 
 export async function getHomeModel(homeId) {
-    return await HomeModel.findOne({ _id: params.homeId });
+  return await HomeModel.findOne({ _id: homeId });
 }
 
 export const updateOperation = {
-    Join: 'Join',
-    Remove: 'Remove User'
-}
+  Join: 'Join',
+  Remove: 'Remove User',
+};
 
 export async function updateHomeModel(params) {
-    switch (params.operation) {
-        case (updateOperation.Join):
-            return await HomeModel.findOneAndUpdate(
-                { _id: params.homeId },
-                { $addToSet: { users: params.userId } },
-                { returnDocument: 'after' }
-            );
-        case (updateOperation.Remove):
-            return await HomeModel.findOneAndUpdate(
-                { _id: params.homeId },
-                { $pull: { users: params.userId } },
-                { returnDocument: 'after' }
-            );
-        default:
-            throw new Error("Invalid update operation");
-    }
+  switch (params.operation) {
+    case updateOperation.Join:
+      return await HomeModel.findOneAndUpdate(
+        { _id: params.homeId },
+        { $addToSet: { users: params.userId } },
+        { returnDocument: 'after' }
+      );
+    case updateOperation.Remove:
+      return await HomeModel.findOneAndUpdate(
+        { _id: params.homeId },
+        { $pull: { users: params.userId } },
+        { returnDocument: 'after' }
+      );
+    default:
+      throw new Error('Invalid update operation');
+  }
 }
 
 export async function deleteHomeModel(homeId) {
-    return await HomeModel.deleteOne({ _id: params.homeId });
+  return await HomeModel.deleteOne({ _id: params.homeId });
 }
