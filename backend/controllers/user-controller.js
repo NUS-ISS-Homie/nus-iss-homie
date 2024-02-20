@@ -5,8 +5,10 @@ import {
     ormChangeUsername as _changeUsername,
     ormDeleteUser as _deleteUser,
 } from '../models/user/user-orm.js';
+import * as constants from "../common/messages.js";
 import bcrypt from 'bcrypt';
 
+export const entity = "user";
 export async function createUser(req, res) {
     try {
         const { username, password } = req.body;
@@ -24,26 +26,26 @@ export async function createUser(req, res) {
                     resp.err.code === 11000
                 ) {
                     return res
-                        .status(409)
-                        .json({ message: `User ${username} already exists!` });
+                        .status(constants.STATUS_CODE_DUPLICATE)
+                        .json({ message: constants.FAIL_DUPLICATE });
                 }
                 return res
-                    .status(400)
+                    .status(constants.STATUS_CODE_BAD_REQUEST)
                     .json({ message: 'Could not create a new user!' });
             } else {
                 return res
-                    .status(201)
-                    .json({ message: `Created new user ${username} successfully!` });
+                    .status(constants.STATUS_CODE_CREATED)
+                    .json({ message: constants.SUCCESS_CREATE(entity, username) });
             }
         } else {
             return res
-                .status(400)
-                .json({ message: 'Username and/or Password are missing!' });
+                .status(constants.STATUS_CODE_BAD_REQUEST)
+                .json({ message: constants.FAIL_MISSING_FIELDS });
         }
     } catch (err) {
         return res
-            .status(500)
-            .json({ message: 'Database failure when creating new user!' });
+            .status(constants.STATUS_CODE_SERVER_ERROR)
+            .json({ message: constants.FAIL_DATABASE_ERROR });
     }
 }
 
@@ -54,25 +56,25 @@ export async function signIn(req, res) {
         if (username && password) {
             const user = await _getUser(username);
             if (user.err) {
-                return res.status(400).json({ message: 'Could not sign in!' });
+                return res.status(constants.STATUS_CODE_BAD_REQUEST).json({ message: 'Could not sign in!' });
             }
             const isPasswordCorrect = user.comparePassword(password);
             if (!isPasswordCorrect) {
-                return res.status(401).json({ message: 'Username and/or Password are incorrect!' });
+                return res.status(constants.STATUS_CODE_UNAUTHORIZED).json({ message: constants.FAIL_INCORRECT_FIELDS });
             }
 
-            return res.status(201).json({
+            return res.status(constants.STATUS_CODE_CREATED).json({
                 username: username,
                 user_id: user._id,
             });
         } else {
             return res
-                .status(400)
-                .json({ message: 'Username and/or Password are missing!' });
+                .status(constants.STATUS_CODE_BAD_REQUEST)
+                .json({ message: constants.FAIL_MISSING_FIELDS });
         }
     } catch (err) {
         console.log(err)
-        return res.status(404).json({ message: `User does not exist` });
+        return res.status(constants.STATUS_CODE_NOT_FOUND).json({ message: constants.FAIL_NOT_EXIST(entity) });
     }
 }
 
@@ -88,18 +90,18 @@ export async function changePassword(req, res) {
                 hashedNewPassword
             );
             if (!updated || updated.err) {
-                return res.status(400).json({ message: 'Username and/or Password are incorrect!' });
+                return res.status(constants.STATUS_CODE_BAD_REQUEST).json({ message: constants.FAIL_INCORRECT_FIELDS });
             }
 
             return res
-                .status(200)
-                .json({ message: 'Successfully changed password.' });
+                .status(constants.STATUS_CODE_OK)
+                .json({ message: constants.SUCCESS_UPDATE(entity, "password") });
         }
-        return res.status(400).json({ message: 'Missing field(s)!' });
+        return res.status(constants.STATUS_CODE_BAD_REQUEST).json({ message: constants.FAIL_MISSING_FIELDS });
     } catch (err) {
         return res
-            .status(500)
-            .json({ message: 'Database failure when changing password!' });
+            .status(constants.STATUS_CODE_SERVER_ERROR)
+            .json({ message: constants.FAIL_DATABASE_ERROR });
     }
 }
 
@@ -109,23 +111,23 @@ export async function changeUsername(req, res) {
         if (username && newUsername && password) {
             const updated = await _changeUsername(username, newUsername, password);
             if (!updated) {
-                return res.status(401).json({ message: 'Username and/or Password are incorrect!' });
+                return res.status(constants.STATUS_CODE_UNAUTHORIZED).json({ message: constants.FAIL_INCORRECT_FIELDS });
             } else if (updated.err) {
                 return res
-                    .status(409)
-                    .json({ message: `${username} might not exist or already taken` });
+                    .status(constants.STATUS_CODE_DUPLICATE)
+                    .json({ message: constants.FAIL_DUPLICATE(entity, username) });
             }
             return res
-                .status(200)
-                .json({ message: 'Successfully changed username.' });
+                .status(constants.STATUS_CODE_OK)
+                .json({ message: constants.SUCCESS_UPDATE(entity, "username") });
         }
         return res
-            .status(400)
-            .json({ message: 'Missing field(s)!' });
+            .status(constants.STATUS_CODE_BAD_REQUEST)
+            .json({ message: constants.FAIL_MISSING_FIELDS });
     } catch (err) {
         return res
-            .status(500)
-            .json({ message: 'Database failure when changing username!' });
+            .status(constants.STATUS_CODE_SERVER_ERROR)
+            .json({ message: constants.FAIL_DATABASE_ERROR });
     }
 }
 
@@ -135,16 +137,16 @@ export async function deleteUser(req, res) {
         if (username && password) {
             const isDeleted = await _deleteUser(username, password);
             if (!isDeleted || isDeleted.err) {
-                return res.status(404).json({ message: 'User does not exist or Username/Password is incorrect!' });
+                return res.status(constants.STATUS_CODE_NOT_FOUND).json({ message: constants.FAIL_NOT_EXIST(entity) });
             }
-            return res.status(200).json({ message: 'Successfully deleted user.' });
+            return res.status(constants.STATUS_CODE_OK).json({ message: constants.SUCCESS_DELETE(entity, username) });
         } else {
-            return res.status(400).json({ message: 'Missing field(s)!' });
+            return res.status(constants.STATUS_CODE_BAD_REQUEST).json({ message: constants.FAIL_MISSING_FIELDS });
         }
     } catch (err) {
         return res
-            .status(500)
-            .json({ message: 'Database failure when deleting user!' });
+            .status(constants.STATUS_CODE_SERVER_ERROR)
+            .json({ message: constants.FAIL_DATABASE_ERROR });
     }
 }
 

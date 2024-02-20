@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import assert from 'assert';
 import 'dotenv/config';
 
+import * as constants from "../common/messages.js";
+
 assert(process.env.ENV == 'TEST');
 
 chai.use(chaiHttp);
@@ -32,10 +34,12 @@ const sampleUpdatedUsername = {
   password: 'test',
 };
 
+const entity = "user";
+
 describe('POST api/user/signup', () => {
   it('should create a new user', function (done) {
     const expectedBody = {
-      message: `Created new user ${sampleUser.username} successfully!`,
+      message: constants.SUCCESS_CREATE(entity, sampleUser.username),
     };
 
     chai
@@ -44,7 +48,7 @@ describe('POST api/user/signup', () => {
       .send(sampleUser)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(201);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_CREATED);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -52,7 +56,7 @@ describe('POST api/user/signup', () => {
 
   it('should create a new user 2', function (done) {
     const expectedBody = {
-      message: `Created new user ${sampleSecondUser.username} successfully!`,
+      message: constants.SUCCESS_CREATE(entity, sampleSecondUser.username),
     };
 
     chai
@@ -61,7 +65,7 @@ describe('POST api/user/signup', () => {
       .send(sampleSecondUser)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(201);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_CREATED);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -78,7 +82,7 @@ describe('POST api/user/login', () => {
       .send(sampleUser)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(201);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_CREATED);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -89,7 +93,7 @@ describe('POST api/user/login', () => {
       username: 'wrong_username',
       password: 'test',
     };
-    const expectedBody = { message: 'User does not exist' };
+    const expectedBody = { message: constants.FAIL_NOT_EXIST(entity) };
 
     chai
       .request(app)
@@ -97,7 +101,7 @@ describe('POST api/user/login', () => {
       .send(userDoesNotExistBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(404);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -108,7 +112,7 @@ describe('POST api/user/login', () => {
       username: sampleUser.username,
       password: 'wrong_password',
     };
-    const expectedBody = { message: 'Wrong password' };
+    const expectedBody = { message: constants.FAIL_INCORRECT_FIELDS };
 
     chai
       .request(app)
@@ -116,7 +120,7 @@ describe('POST api/user/login', () => {
       .send(wrongPasswordBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(404);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_UNAUTHORIZED);
         chai.expect(res.body).deep.equal(expectedBody);
       });
     done();
@@ -126,7 +130,7 @@ describe('POST api/user/login', () => {
     const missingFieldsBody = {
       username: 'test',
     };
-    const expectedBody = { message: 'Username and/or Password are missing!' };
+    const expectedBody = { message: constants.FAIL_MISSING_FIELDS };
 
     chai
       .request(app)
@@ -134,7 +138,7 @@ describe('POST api/user/login', () => {
       .send(missingFieldsBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(400);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
         chai.expect(res.body).deep.equal(expectedBody);
       });
     done();
@@ -150,7 +154,7 @@ describe('PUT api/user/change-username', () => {
     };
 
     const expectedBody = {
-      message: `Username and/or Password are incorrect!`,
+      message: constants.FAIL_INCORRECT_FIELDS,
     };
 
     chai
@@ -159,7 +163,7 @@ describe('PUT api/user/change-username', () => {
       .send(sampleUpdatedUsername)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(404);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -173,7 +177,7 @@ describe('PUT api/user/change-username', () => {
     };
 
     const expectedBody = {
-      message: `Username and/or Password are incorrect!`,
+      message: constants.FAIL_INCORRECT_FIELDS,
     };
 
     chai
@@ -182,7 +186,7 @@ describe('PUT api/user/change-username', () => {
       .send(sampleUpdatedUsername)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(404);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_UNAUTHORIZED);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -196,7 +200,7 @@ describe('PUT api/user/change-username', () => {
     };
 
     const expectedBody = {
-      message: `User ${sampleSecondUser.username} already exists`,
+      message: constants.FAIL_DUPLICATE(entity, sampleSecondUser.username),
     };
 
     chai
@@ -205,7 +209,7 @@ describe('PUT api/user/change-username', () => {
       .send(sampleUpdatedUsername)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(409);
+        chai.expect(res).to.have.status(constants.FAIL_DUPLICATE);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -218,7 +222,7 @@ describe('PUT api/user/change-username', () => {
     };
 
     const expectedBody = {
-      message: `Missing field(s)!`,
+      message: constants.FAIL_MISSING_FIELDS,
     };
 
     chai
@@ -227,7 +231,7 @@ describe('PUT api/user/change-username', () => {
       .send(sampleUpdatedUsername)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(400);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -235,7 +239,7 @@ describe('PUT api/user/change-username', () => {
 
   it("should change user's username", function (done) {
     const expectedBody = {
-      message: `Successfully changed username.`,
+      message: constants.SUCCESS_UPDATE(entity, "username"),
     };
 
     chai
@@ -244,7 +248,7 @@ describe('PUT api/user/change-username', () => {
       .send(sampleUpdatedUsername)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(200);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -261,7 +265,7 @@ describe('PUT api/user/change-password', () => {
     };
 
     const expectedBody = {
-      message: `Wrong password!`,
+      message: constants.FAIL_INCORRECT_FIELDS,
     };
 
     chai
@@ -270,7 +274,7 @@ describe('PUT api/user/change-password', () => {
       .send(sampleUpdatedPassword)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(404);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -284,7 +288,7 @@ describe('PUT api/user/change-password', () => {
     };
 
     const expectedBody = {
-      message: `Wrong password!`,
+      message: constants.FAIL_INCORRECT_FIELDS,
     };
 
     chai
@@ -293,7 +297,7 @@ describe('PUT api/user/change-password', () => {
       .send(sampleUpdatedPassword)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(404);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -306,7 +310,7 @@ describe('PUT api/user/change-password', () => {
     };
 
     const expectedBody = {
-      message: `Missing field(s)!`,
+      message: constants.FAIL_MISSING_FIELDS,
     };
 
     chai
@@ -315,7 +319,7 @@ describe('PUT api/user/change-password', () => {
       .send(sampleUpdatedPassword)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(400);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -329,7 +333,7 @@ describe('PUT api/user/change-password', () => {
     };
 
     const expectedBody = {
-      message: `Successfully changed password.`,
+      message: constants.SUCCESS_UPDATE(entity, "password"),
     };
 
     chai
@@ -338,7 +342,7 @@ describe('PUT api/user/change-password', () => {
       .send(sampleUpdatedPassword)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(200);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -352,7 +356,7 @@ describe('DELETE /api/user/delete-user', () => {
     };
 
     const expectedBody = {
-      message: `Missing field(s)!`,
+      message: constants.FAIL_MISSING_FIELDS,
     };
 
     chai
@@ -361,7 +365,7 @@ describe('DELETE /api/user/delete-user', () => {
       .send(sampleBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(400);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -373,7 +377,7 @@ describe('DELETE /api/user/delete-user', () => {
     };
 
     const expectedBody = {
-      message: `Missing field(s)!`,
+      message: constants.FAIL_MISSING_FIELDS,
     };
 
     chai
@@ -382,7 +386,7 @@ describe('DELETE /api/user/delete-user', () => {
       .send(sampleBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(400);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -394,7 +398,7 @@ describe('DELETE /api/user/delete-user', () => {
       password: sampleUpdatedUsername.password
     };
     const expectedBody = {
-      message: `User does not exist!`,
+      message: constants.FAIL_NOT_EXIST(entity),
     };
 
     chai
@@ -403,7 +407,7 @@ describe('DELETE /api/user/delete-user', () => {
       .send(sampleBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(404);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -415,7 +419,7 @@ describe('DELETE /api/user/delete-user', () => {
       password: sampleUpdatedUsername.password
     };
     const expectedBody = {
-      message: `Successfully deleted user.`,
+      message: constants.SUCCESS_DELETE(entity, sampleUpdatedUsername.newUsername),
     };
 
     chai
@@ -424,7 +428,7 @@ describe('DELETE /api/user/delete-user', () => {
       .send(sampleBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(200);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
@@ -437,7 +441,7 @@ describe('DELETE /api/user/delete-user', () => {
 
     };
     const expectedBody = {
-      message: `Successfully deleted user.`,
+      message: constants.SUCCESS_DELETE(entity, sampleSecondUser.username),
     };
 
     chai
@@ -446,7 +450,7 @@ describe('DELETE /api/user/delete-user', () => {
       .send(sampleBody)
       .end((err, res) => {
         err && console.log(err);
-        chai.expect(res).to.have.status(200);
+        chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
         chai.expect(res.body).to.deep.equal(expectedBody);
       });
     done();
