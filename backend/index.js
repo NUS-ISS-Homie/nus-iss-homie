@@ -1,8 +1,8 @@
-import express from 'express'
+import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import homeRouter from './routes/home-routes.js'
+import homeRouter from './routes/home-routes.js';
 import createEventListeners from './controllers/socket-controller.js';
 import 'dotenv/config';
 
@@ -16,28 +16,28 @@ app.options('*', cors());
 const port = process.env.PORT;
 
 app.get('/', (req, res) => {
-    res.send('Hello World from Homie!');
+  res.send('Hello World from Homie!');
 });
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-    cors: {
-        origin: [process.env.ORIGIN || 'http://localhost:3000'],
-    },
+  cors: {
+    origin: [process.env.ORIGIN || 'http://localhost:3000'],
+  },
 });
 
 io.on('connection', (socket) => {
-    console.log(`Connected to ${socket.id}`);
-    createEventListeners(socket, io);
+  console.log(`Connected to ${socket.id}`);
+  createEventListeners(socket, io);
 });
 
 app.use('/api/home', homeRouter).all((_, res) => {
-    res.setHeader('content-type', 'application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
 });
 
 httpServer.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening on port ${port}`);
 });
 
 export default app;

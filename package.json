@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "3.2.5"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "frontend": "cd frontend && npm run start",
+    "i-frontend": "cd frontend && npm i",
+    "backend": "cd backend && npm run dev",
+    "i-backend": "cd backend && npm i",
+    "install-dep": "concurrently 'npm run i-frontend' 'npm run i-backend'",
+    "dev": "concurrently --kill-others 'npm run frontend' 'npm run backend'"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
+  }
+}
