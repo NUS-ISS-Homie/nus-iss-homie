@@ -24,12 +24,6 @@ const SOCKET_OPTIONS = {
 let user1, user2, user3;
 
 describe('Socket connection', function () {
-  before('Connect to MongoDB', function (done) {
-    mongoose.connect(process.env.DB_CLOUD_URI_TEST).then(function () {
-      done();
-    });
-  });
-
   it('should connect user1', function (done) {
     user1 = io.connect(DEV_SERVER_URI, SOCKET_OPTIONS);
     user1.on('connect', done);
@@ -43,6 +37,56 @@ describe('Socket connection', function () {
   it('should connect user3', function (done) {
     user3 = io.connect(DEV_SERVER_URI, SOCKET_OPTIONS);
     user3.on('connect', done);
+  });
+});
+
+describe('[Event] Join Home', function () {
+  let homeId1 = 'home1',
+    homeId2 = 'home2';
+
+  it(`User1 should join ${homeId1}`, function (done) {
+    user1.emit('join-home', homeId1);
+    user1.on('joined-home', done);
+  });
+
+  it(`User2 should join ${homeId1}`, function (done) {
+    user2.emit('join-home', homeId1);
+    user2.on('joined-home', done);
+  });
+
+  it(`User3 should join ${homeId2}`, function (done) {
+    user3.emit('join-home', homeId2);
+    user3.on('joined-home', done);
+  });
+
+  describe('[Event] Send Notification', function () {
+    const notification = { homeId: homeId1, message: 'hello!' };
+
+    it(`should only send notification to ${homeId1}`, function (done) {
+      user1.emit('send-notification', notification);
+      user2.on('notify', (notification) => {
+        chai.expect(notification).to.equal(notification);
+        done();
+      });
+      user3.on('notify', () => assert.fail('should not get here!'));
+    });
+  });
+
+  describe('[Event] Leave Home', function () {
+    it(`User1 should leave ${homeId1}`, function (done) {
+      user1.emit('leave-home');
+      user1.on('left-home', done);
+    });
+
+    it(`User2 should leave ${homeId1}`, function (done) {
+      user2.emit('leave-home');
+      user2.on('left-home', done);
+    });
+
+    it(`User3 should leave ${homeId1}`, function (done) {
+      user3.emit('leave-home');
+      user3.on('left-home', done);
+    });
   });
 });
 
