@@ -34,4 +34,4 @@ jobs:
       - run: npm run test
         env:
           ENV: TEST
-          DB_CLOUD_URI: ${{secrets.DB_CLOUD_URI_TEST}}
+          DB_CLOUD_URI_TEST: ${{secrets.DB_CLOUD_URI_TEST}}
