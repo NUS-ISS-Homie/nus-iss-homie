@@ -3,7 +3,6 @@ import chaiHttp from 'chai-http';
 import chaiShallowDeepEqual from 'chai-shallow-deep-equal';
 import io from 'socket.io-client';
 import app from '../index.js';
-import { DEV_SERVER_URI } from '../constants.js';
 import mongoose from 'mongoose';
 import 'dotenv/config';
 import assert from 'assert';
@@ -15,6 +14,7 @@ chai.use(chaiHttp);
 chai.use(chaiShallowDeepEqual);
 
 // Socket
+const DEV_SERVER_URI = `http://localhost:${process.env.PORT}`;
 
 const SOCKET_OPTIONS = {
   transports: ['websocket'],
@@ -45,30 +45,30 @@ describe('[Event] Join Home', function () {
     homeId2 = 'home2';
 
   it(`User1 should join ${homeId1}`, function (done) {
-    user1.emit('join-home', homeId1);
     user1.on('joined-home', done);
+    user1.emit('join-home', homeId1);
   });
 
   it(`User2 should join ${homeId1}`, function (done) {
-    user2.emit('join-home', homeId1);
     user2.on('joined-home', done);
+    user2.emit('join-home', homeId1);
   });
 
   it(`User3 should join ${homeId2}`, function (done) {
-    user3.emit('join-home', homeId2);
     user3.on('joined-home', done);
+    user3.emit('join-home', homeId2);
   });
 
   describe('[Event] Send Notification', function () {
     const notification = { homeId: homeId1, message: 'hello!' };
 
     it(`should only send notification to ${homeId1}`, function (done) {
-      user1.emit('send-notification', notification);
       user2.on('notify', (notification) => {
         chai.expect(notification).to.equal(notification);
         done();
       });
       user3.on('notify', () => assert.fail('should not get here!'));
+      user1.emit('send-notification', notification);
     });
   });
 
@@ -79,13 +79,13 @@ describe('[Event] Join Home', function () {
     });
 
     it(`User2 should leave ${homeId1}`, function (done) {
-      user2.emit('leave-home');
       user2.on('left-home', done);
+      user2.emit('leave-home');
     });
 
     it(`User3 should leave ${homeId1}`, function (done) {
-      user3.emit('leave-home');
       user3.on('left-home', done);
+      user3.emit('leave-home');
     });
   });
 });

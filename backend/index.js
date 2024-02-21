@@ -20,11 +20,7 @@ app.get('/', (req, res) => {
 });
 
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: [process.env.ORIGIN || 'http://localhost:3000'],
-  },
-});
+const io = new Server(httpServer);
 
 io.on('connection', (socket) => {
   console.log(`Connected to ${socket.id}`);
