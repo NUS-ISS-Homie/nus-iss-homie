@@ -19,7 +19,7 @@ db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
 // CRUD functions
 
 export async function createHomeModel(params) {
-  return await HomeModel(params);
+  return await HomeModel.create(params);
 }
 
 export async function getHomeModel(homeId) {

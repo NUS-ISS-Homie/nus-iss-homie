@@ -8,6 +8,7 @@ import 'dotenv/config';
 import assert from 'assert';
 import * as msg from '../common/messages.js';
 import { entity } from '../controllers/home-controller.js';
+import HomeModel from '../model/home/home-model.js';
 
 assert(process.env.ENV == 'TEST');
 chai.use(chaiHttp);
@@ -108,17 +109,23 @@ describe('Socket disconnect', () => {
 });
 
 // CRUD
-let adminUserId = new mongoose.Types.ObjectId();
-let userId = new mongoose.Types.ObjectId();
-let homeId = null;
 
 describe('CRUD API', () => {
+  const adminUserId = new mongoose.Types.ObjectId();
+  const userId = new mongoose.Types.ObjectId();
+  const homeId = new mongoose.Types.ObjectId();
+
   before('Connect to MongoDB', async () => {
-    mongoose.connect(process.env.DB_CLOUD_URI_TEST);
+    await mongoose.connect(process.env.DB_CLOUD_URI_TEST);
   });
 
-  describe('Admin user creates and reads a new home', () => {
-    it('Admin user creates a new home', (done) => {
+  beforeEach('Clear DB', async () => {
+    await HomeModel.deleteMany();
+    await HomeModel.create({ _id: homeId, adminUser: adminUserId });
+  });
+
+  describe('Admin user creates a new home', () => {
+    it('should create a new home', (done) => {
       const expectedBody = { message: msg.SUCCESS_CREATE(entity) };
 
       chai
@@ -129,12 +136,13 @@ describe('CRUD API', () => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_CREATED);
           chai.expect(res.body).to.shallowDeepEqual(expectedBody);
-          homeId = res.body.home._id;
           done();
         });
     });
+  });
 
-    it('should obtain home data', (done) => {
+  describe('User obtains a home data', () => {
+    it('should obtain an existing home data', (done) => {
       const expectedBody = {
         message: msg.SUCCESS_READ(entity),
         home: { _id: homeId },
@@ -154,15 +162,17 @@ describe('CRUD API', () => {
 
   describe('User joins then leaves an existing home', () => {
     it('should join an existing home', (done) => {
+      const userId1 = new mongoose.Types.ObjectId();
+
       const expectedBody = {
-        home: { users: userId },
+        home: { users: userId1 },
         message: msg.SUCCESS_ACTION('joined', entity),
       };
 
       chai
         .request(app)
         .put(`/api/home/${homeId}/join`)
-        .send({ homeId, userId: userId })
+        .send({ userId: userId1 })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
@@ -177,7 +187,7 @@ describe('CRUD API', () => {
       chai
         .request(app)
         .put(`/api/home/${homeId}/leave`)
-        .send({ homeId, userId: userId })
+        .send({ userId })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
@@ -188,23 +198,22 @@ describe('CRUD API', () => {
     });
   });
 
-  after(() => {
-    describe('Admin user deletes their home', () => {
-      it('should delete an existing home', (done) => {
-        const expectedBody = { message: msg.SUCCESS_DELETE(entity) };
+  describe('Admin user deletes their home', () => {
+    const homeId = new mongoose.Types.ObjectId();
 
-        chai
-          .request(app)
-          .delete(`/api/home/${homeId}`)
-          .send({ adminUser: adminUserId })
-          .end((err, res) => {
-            err && console.log(err);
-            chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
-            chai.expect(res.body).to.shallowDeepEqual(expectedBody);
-            homeId = res.body.homeId;
-            done();
-          });
-      });
+    it('should delete an existing home', (done) => {
+      const expectedBody = { message: msg.SUCCESS_DELETE(entity) };
+
+      chai
+        .request(app)
+        .delete(`/api/home/${homeId}`)
+        .send({ adminUser: adminUserId })
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
+          chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+          done();
+        });
     });
   });
 });
