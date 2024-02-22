@@ -8,11 +8,11 @@ app.use(express.json());
 app.use(cors()); // config cors so that front-end can use
 app.options('*', cors());
 import {
-    changePassword,
-    changeUsername,
-    createUser,
-    deleteUser,
-    signIn,
+  changePassword,
+  changeUsername,
+  createUser,
+  deleteUser,
+  signIn,
 } from '../controllers/user-controller.js';
 
 const router = express.Router();

@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import assert from 'assert';
 import 'dotenv/config';
 
-import * as constants from "../common/messages.js";
+import * as constants from '../common/messages.js';
 
 assert(process.env.ENV == 'TEST');
 
@@ -34,7 +34,7 @@ const sampleUpdatedUsername = {
   password: 'test',
 };
 
-const entity = "user";
+const entity = 'user';
 
 describe('POST api/user/signup', () => {
   it('should create a new user', function (done) {
@@ -148,7 +148,7 @@ describe('POST api/user/login', () => {
 describe('PUT api/user/change-username', () => {
   it("should NOT change user's username (user does not exist)", function (done) {
     const sampleUpdatedUsername = {
-      username: "username_not_exist",
+      username: 'username_not_exist',
       newUsername: 'newTest',
       password: sampleUser.password,
     };
@@ -239,7 +239,7 @@ describe('PUT api/user/change-username', () => {
 
   it("should change user's username", function (done) {
     const expectedBody = {
-      message: constants.SUCCESS_UPDATE(entity, "username"),
+      message: constants.SUCCESS_UPDATE(entity, 'username'),
     };
 
     chai
@@ -254,7 +254,6 @@ describe('PUT api/user/change-username', () => {
     done();
   });
 });
-
 
 describe('PUT api/user/change-password', () => {
   it("should NOT change user's password (username does not exist)", function (done) {
@@ -333,7 +332,7 @@ describe('PUT api/user/change-password', () => {
     };
 
     const expectedBody = {
-      message: constants.SUCCESS_UPDATE(entity, "password"),
+      message: constants.SUCCESS_UPDATE(entity, 'password'),
     };
 
     chai
@@ -352,7 +351,7 @@ describe('PUT api/user/change-password', () => {
 describe('DELETE /api/user/delete-user', () => {
   it('should NOT delete user (missing username)', function (done) {
     const sampleBody = {
-      password: sampleUpdatedUsername.password
+      password: sampleUpdatedUsername.password,
     };
 
     const expectedBody = {
@@ -395,7 +394,7 @@ describe('DELETE /api/user/delete-user', () => {
   it('should NOT delete user (wrong username)', function (done) {
     const sampleBody = {
       username: 'wrong_username',
-      password: sampleUpdatedUsername.password
+      password: sampleUpdatedUsername.password,
     };
     const expectedBody = {
       message: constants.FAIL_NOT_EXIST(entity),
@@ -416,10 +415,13 @@ describe('DELETE /api/user/delete-user', () => {
   it('should delete user 1', function (done) {
     const sampleBody = {
       username: sampleUpdatedUsername.newUsername,
-      password: sampleUpdatedUsername.password
+      password: sampleUpdatedUsername.password,
     };
     const expectedBody = {
-      message: constants.SUCCESS_DELETE(entity, sampleUpdatedUsername.newUsername),
+      message: constants.SUCCESS_DELETE(
+        entity,
+        sampleUpdatedUsername.newUsername
+      ),
     };
 
     chai
@@ -437,8 +439,7 @@ describe('DELETE /api/user/delete-user', () => {
   it('should delete user 2', function (done) {
     const sampleBody = {
       username: sampleSecondUser.username,
-      password: sampleSecondUser.password
-
+      password: sampleSecondUser.password,
     };
     const expectedBody = {
       message: constants.SUCCESS_DELETE(entity, sampleSecondUser.username),
