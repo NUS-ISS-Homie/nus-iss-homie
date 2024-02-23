@@ -43,7 +43,6 @@ export async function ormChangePassword(
       oldPassword,
       newHashedPassword,
     });
-    console.log(updatedUser);
     return updatedUser;
   } catch (err) {
     return { err };

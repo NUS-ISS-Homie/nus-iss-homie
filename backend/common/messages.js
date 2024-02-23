@@ -18,6 +18,7 @@ export const SUCCESS_DELETE = (entity, field = '') =>
 export const SUCCESS_ACTION = (action, entity) =>
   `Successfully ${action} ${entity}`;
 
+export const FAIL_UNAUTHORIZED = 'User unauthorised to make request';
 export const FAIL_MISSING_FIELDS = 'Missing field(s)';
 export const FAIL_INCORRECT_FIELDS = 'Incorrect field(s)';
 export const FAIL_DATABASE_ERROR = 'Database failure';

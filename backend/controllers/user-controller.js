@@ -9,6 +9,12 @@ import * as constants from '../common/messages.js';
 import bcrypt from 'bcrypt';
 
 export const entity = 'user';
+
+function isDuplicateError(err) {
+  const duplicateError = { name: 'MongoServerError', code: 11000 };
+  return err.name === duplicateError.name && err.code === duplicateError.code;
+}
+
 export async function createUser(req, res) {
   try {
     const { username, password } = req.body;
@@ -17,8 +23,6 @@ export async function createUser(req, res) {
     if (username && password) {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
       const resp = await _createUser(username, hashedPassword);
-      console.log('response controller: ');
-      console.log(resp);
       if (resp.err) {
         if (
           resp.err.name &&
@@ -52,22 +56,29 @@ export async function createUser(req, res) {
 export async function signIn(req, res) {
   try {
     const { username, password } = req.body;
-    console.log(username);
+
     if (username && password) {
       const user = await _getUser(username);
+      if (!user) {
+        return res
+          .status(constants.STATUS_CODE_NOT_FOUND)
+          .json({ message: constants.FAIL_NOT_EXIST(entity) });
+      }
+
       if (user.err) {
         return res
           .status(constants.STATUS_CODE_BAD_REQUEST)
           .json({ message: 'Could not sign in!' });
       }
+
       const isPasswordCorrect = user.comparePassword(password);
       if (!isPasswordCorrect) {
         return res
           .status(constants.STATUS_CODE_UNAUTHORIZED)
-          .json({ message: constants.FAIL_INCORRECT_FIELDS });
+          .json({ message: constants.FAIL_UNAUTHORIZED });
       }
 
-      return res.status(constants.STATUS_CODE_CREATED).json({
+      return res.status(constants.STATUS_CODE_OK).json({
         username: username,
         user_id: user._id,
       });
@@ -78,9 +89,7 @@ export async function signIn(req, res) {
     }
   } catch (err) {
     console.log(err);
-    return res
-      .status(constants.STATUS_CODE_NOT_FOUND)
-      .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    return res.status(constants.STATUS_CODE_SERVER_ERROR).json(err);
   }
 }
 
@@ -88,13 +97,30 @@ export async function changePassword(req, res) {
   try {
     const { username, oldPassword, newPassword } = req.body;
     if (username && oldPassword && newPassword) {
+      const user = await _getUser(username);
+
+      if (!user) {
+        return res
+          .status(constants.STATUS_CODE_BAD_REQUEST)
+          .json({ message: constants.FAIL_INCORRECT_FIELDS });
+      }
+
       let saltRounds = parseInt(process.env.SALT_ROUNDS);
       const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      const isPasswordCorrect = user.comparePassword(oldPassword);
+      if (!isPasswordCorrect) {
+        return res
+          .status(constants.STATUS_CODE_UNAUTHORIZED)
+          .json({ message: constants.FAIL_UNAUTHORIZED });
+      }
+
       const updated = await _changePassword(
         username,
         oldPassword,
         hashedNewPassword
       );
+
       if (!updated || updated.err) {
         return res
           .status(constants.STATUS_CODE_BAD_REQUEST)
@@ -119,16 +145,35 @@ export async function changeUsername(req, res) {
   try {
     const { username, newUsername, password } = req.body;
     if (username && newUsername && password) {
-      const updated = await _changeUsername(username, newUsername, password);
-      if (!updated) {
+      const user = await _getUser(username);
+
+      if (!user) {
+        return res
+          .status(constants.STATUS_CODE_BAD_REQUEST)
+          .json({ message: constants.FAIL_INCORRECT_FIELDS });
+      }
+
+      const isPasswordCorrect = user.comparePassword(password);
+      if (!isPasswordCorrect) {
         return res
           .status(constants.STATUS_CODE_UNAUTHORIZED)
           .json({ message: constants.FAIL_INCORRECT_FIELDS });
-      } else if (updated.err) {
-        return res
-          .status(constants.STATUS_CODE_DUPLICATE)
-          .json({ message: constants.FAIL_DUPLICATE(entity, username) });
       }
+
+      const updated = await _changeUsername(username, newUsername, password);
+
+      if (updated.err) {
+        if (isDuplicateError(updated.err)) {
+          return res
+            .status(constants.STATUS_CODE_DUPLICATE)
+            .json({ message: constants.FAIL_DUPLICATE(entity, username) });
+        }
+
+        return res
+          .status(constants.STATUS_CODE_SERVER_ERROR)
+          .json({ message: constants.FAIL_DATABASE_ERROR });
+      }
+
       return res
         .status(constants.STATUS_CODE_OK)
         .json({ message: constants.SUCCESS_UPDATE(entity, 'username') });

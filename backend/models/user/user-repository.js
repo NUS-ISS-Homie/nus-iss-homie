@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 let mongoDB =
   process.env.ENV == 'PROD'
     ? process.env.DB_CLOUD_URI
-    : process.env.DB_LOCAL_URI;
+    : process.env.DB_CLOUD_URI_TEST;
 
 mongoose.connect(mongoDB, { useNewUrlParser: true });
 
@@ -46,7 +46,6 @@ export async function changePassword(params) {
 }
 
 export async function changeUsername(params) {
-  console.log(params);
   const user = await UserModel.findOne({ username: params.username });
   if (!user) {
     throw new Error('Database Error');
