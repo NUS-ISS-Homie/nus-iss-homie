@@ -34,16 +34,14 @@ describe('User API CRUD', () => {
 
   beforeEach('Clear DB', async () => {
     await UserModel.deleteMany();
-    const u1 = await UserModel.create({
+    await UserModel.create({
       username: user1.username,
       hashedPassword: await bcrypt.hash(user1.password, saltRounds),
     });
-    const u2 = await UserModel.create({
+    await UserModel.create({
       username: user2.username,
       hashedPassword: await bcrypt.hash(user2.password, saltRounds),
     });
-    console.log(u1.username, u2.username);
-    return u1 && u2;
   });
 
   describe('POST api/user/signup', () => {
@@ -339,113 +337,75 @@ describe('User API CRUD', () => {
     });
   });
 
-  // describe('DELETE /api/user/delete-user', () => {
-  //   it('should NOT delete user (missing username)', function (done) {
-  //     const sampleBody = {
-  //       password: sampleUpdatedUsername.password,
-  //     };
+  describe('DELETE /api/user/delete-user', () => {
+    it('should NOT delete user (missing username)', function (done) {
+      const sampleBody = { password: user1.password };
 
-  //     const expectedBody = {
-  //       message: constants.FAIL_MISSING_FIELDS,
-  //     };
+      const expected = { message: constants.FAIL_MISSING_FIELDS };
 
-  //     chai
-  //       .request(app)
-  //       .delete(`/api/user/delete-user`)
-  //       .send(sampleBody)
-  //       .end((err, res) => {
-  //         err && console.log(err);
-  //         chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
-  //         chai.expect(res.body).to.deep.equal(expectedBody);
-  //         done();
-  //       });
-  //   });
+      chai
+        .request(app)
+        .delete(`/api/user/delete-user`)
+        .send(sampleBody)
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
+          chai.expect(res.body).to.deep.equal(expected);
+          done();
+        });
+    });
 
-  //   it('should NOT delete user (missing password)', function (done) {
-  //     const sampleBody = {
-  //       username: sampleUpdatedUsername.newUsername,
-  //     };
+    it('should NOT delete user (missing password)', function (done) {
+      const sampleBody = { username: user1.username };
 
-  //     const expectedBody = {
-  //       message: constants.FAIL_MISSING_FIELDS,
-  //     };
+      const expected = { message: constants.FAIL_MISSING_FIELDS };
 
-  //     chai
-  //       .request(app)
-  //       .delete(`/api/user/delete-user`)
-  //       .send(sampleBody)
-  //       .end((err, res) => {
-  //         err && console.log(err);
-  //         chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
-  //         chai.expect(res.body).to.deep.equal(expectedBody);
-  //         done();
-  //       });
-  //   });
+      chai
+        .request(app)
+        .delete(`/api/user/delete-user`)
+        .send(sampleBody)
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
+          chai.expect(res.body).to.deep.equal(expected);
+          done();
+        });
+    });
 
-  //   it('should NOT delete user (wrong username)', function (done) {
-  //     const sampleBody = {
-  //       username: 'wrong_username',
-  //       password: sampleUpdatedUsername.password,
-  //     };
-  //     const expectedBody = {
-  //       message: constants.FAIL_NOT_EXIST(entity),
-  //     };
+    it('should NOT delete user (wrong username)', function (done) {
+      const sampleBody = {
+        username: 'wrong_username',
+        password: user1.password,
+      };
+      const expected = { message: constants.FAIL_NOT_EXIST(entity) };
 
-  //     chai
-  //       .request(app)
-  //       .delete(`/api/user/delete-user`)
-  //       .send(sampleBody)
-  //       .end((err, res) => {
-  //         err && console.log(err);
-  //         chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
-  //         chai.expect(res.body).to.deep.equal(expectedBody);
-  //         done();
-  //       });
-  //   });
+      chai
+        .request(app)
+        .delete(`/api/user/delete-user`)
+        .send(sampleBody)
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
+          chai.expect(res.body).to.deep.equal(expected);
+          done();
+        });
+    });
 
-  //   it('should delete user 1', function (done) {
-  //     const sampleBody = {
-  //       username: sampleUpdatedUsername.newUsername,
-  //       password: sampleUpdatedUsername.password,
-  //     };
-  //     const expectedBody = {
-  //       message: constants.SUCCESS_DELETE(
-  //         entity,
-  //         sampleUpdatedUsername.newUsername
-  //       ),
-  //     };
+    it('should delete user', function (done) {
+      const expected = {
+        message: constants.SUCCESS_DELETE(entity, user1.username),
+      };
 
-  //     chai
-  //       .request(app)
-  //       .delete(`/api/user/delete-user`)
-  //       .send(sampleBody)
-  //       .end((err, res) => {
-  //         err && console.log(err);
-  //         chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
-  //         chai.expect(res.body).to.deep.equal(expectedBody);
-  //         done();
-  //       });
-  //   });
-
-  //   it('should delete user 2', function (done) {
-  //     const sampleBody = {
-  //       username: sampleSecondUser.username,
-  //       password: sampleSecondUser.password,
-  //     };
-  //     const expectedBody = {
-  //       message: constants.SUCCESS_DELETE(entity, sampleSecondUser.username),
-  //     };
-
-  //     chai
-  //       .request(app)
-  //       .delete(`/api/user/delete-user`)
-  //       .send(sampleBody)
-  //       .end((err, res) => {
-  //         err && console.log(err);
-  //         chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
-  //         chai.expect(res.body).to.deep.equal(expectedBody);
-  //         done();
-  //       });
-  //   });
-  // });
+      chai
+        .request(app)
+        .delete(`/api/user/delete-user`)
+        .send(user1)
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
+          chai.expect(res.body).to.deep.equal(expected);
+          done();
+        });
+    });
+  });
 });
