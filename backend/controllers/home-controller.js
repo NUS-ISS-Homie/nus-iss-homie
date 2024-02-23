@@ -4,7 +4,7 @@ import {
   ormJoinHome as _joinHome,
   ormLeaveHome as _leaveHome,
   ormDeleteHome as _deleteHome,
-} from '../model/home/home-orm.js';
+} from '../models/home/home-orm.js';
 import * as msg from '../common/messages.js';
 
 export const entity = 'home';

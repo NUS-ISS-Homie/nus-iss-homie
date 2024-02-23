@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      max-parallel: 1
       matrix:
         node-version: [16.x, 18.x, 20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
@@ -36,3 +37,4 @@ jobs:
           ENV: TEST
           DB_CLOUD_URI_TEST: ${{secrets.DB_CLOUD_URI_TEST}}
           PORT: 8000
+          SALT_ROUNDS: 10

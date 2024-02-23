@@ -8,7 +8,7 @@ import 'dotenv/config';
 import assert from 'assert';
 import * as msg from '../common/messages.js';
 import { entity } from '../controllers/home-controller.js';
-import HomeModel from '../model/home/home-model.js';
+import HomeModel from '../models/home/home-model.js';
 
 assert(process.env.ENV == 'TEST');
 chai.use(chaiHttp);

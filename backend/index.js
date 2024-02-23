@@ -1,13 +1,14 @@
-import express from 'express';
 import cors from 'cors';
+import 'dotenv/config';
+import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+
 import homeRouter from './routes/home-routes.js';
+import userRouter from './routes/user-routes.js';
 import createEventListeners from './controllers/socket-controller.js';
-import 'dotenv/config';
 
 const app = express();
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors()); // config cors so that front-end can use
@@ -28,6 +29,11 @@ io.on('connection', (socket) => {
 });
 
 app.use('/api/home', homeRouter).all((_, res) => {
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+});
+
+app.use('/api/user', userRouter).all((_, res) => {
   res.setHeader('content-type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 });
