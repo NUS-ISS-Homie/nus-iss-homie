@@ -153,6 +153,13 @@ export async function changeUsername(req, res) {
           .json({ message: constants.FAIL_INCORRECT_FIELDS });
       }
 
+      const newUser = await _getUser(newUsername);
+      if (newUser) {
+        return res
+          .status(constants.STATUS_CODE_DUPLICATE)
+          .json({ message: constants.FAIL_DUPLICATE(entity, username) });
+      }
+
       const isPasswordCorrect = user.comparePassword(password);
       if (!isPasswordCorrect) {
         return res

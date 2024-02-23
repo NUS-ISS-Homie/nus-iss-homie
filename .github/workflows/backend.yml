@@ -35,3 +35,4 @@ jobs:
         env:
           ENV: TEST
           DB_CLOUD_URI_TEST: ${{secrets.DB_CLOUD_URI_TEST}}
+          SALT_ROUNDS: 10

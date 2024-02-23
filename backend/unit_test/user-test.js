@@ -30,20 +30,20 @@ describe('User API CRUD', () => {
 
   before('Connect to MongoDB', async () => {
     await mongoose.connect(process.env.DB_CLOUD_URI_TEST);
-    const db = mongoose.connection;
-    db.collections['usermodels'].drop().then(console.log('Reset User DB'));
   });
 
   beforeEach('Clear DB', async () => {
     await UserModel.deleteMany();
-    await UserModel.create({
+    const u1 = await UserModel.create({
       username: user1.username,
       hashedPassword: await bcrypt.hash(user1.password, saltRounds),
     });
-    await UserModel.create({
+    const u2 = await UserModel.create({
       username: user2.username,
       hashedPassword: await bcrypt.hash(user2.password, saltRounds),
     });
+    console.log(u1.username, u2.username);
+    return u1 && u2;
   });
 
   describe('POST api/user/signup', () => {
