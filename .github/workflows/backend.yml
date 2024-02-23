@@ -5,16 +5,16 @@ name: backend CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
+      max-parallel: 1
       matrix:
         node-version: [16.x, 18.x, 20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
@@ -24,15 +24,16 @@ jobs:
         working-directory: 'backend'
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm run test
-      env:
-        ENV: TEST
-        DB_CLOUD_URI: ${{secrets.DB_CLOUD_URI_TEST}}
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm run test
+        env:
+          ENV: TEST
+          DB_CLOUD_URI_TEST: ${{secrets.DB_CLOUD_URI_TEST}}
+          SALT_ROUNDS: 10
