@@ -30,6 +30,8 @@ describe('User API CRUD', () => {
 
   before('Connect to MongoDB', async () => {
     await mongoose.connect(process.env.DB_CLOUD_URI_TEST);
+    const db = mongoose.connection;
+    db.collections['usermodels'].drop().then(console.log('Reset User DB'));
   });
 
   beforeEach('Clear DB', async () => {
