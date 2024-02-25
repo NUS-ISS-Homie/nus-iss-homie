@@ -8,6 +8,7 @@ app.use(cors()); // config cors so that front-end can use
 app.options('*', cors());
 
 import userRoutes from './routes/user-routes.js';
+import expenseRoutes from './routes/expense-routes.js';
 
 // const userRouter = express.Router();
 const router = express.Router();
@@ -16,6 +17,11 @@ const router = express.Router();
 router.get('/', (_, res) => res.send('Hello World from Homie'));
 
 app.use('/api/user', userRoutes).all((_, res) => {
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+});
+
+app.use('/api/expense', expenseRoutes).all((_, res) => {
   res.setHeader('content-type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 });
