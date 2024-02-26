@@ -71,7 +71,7 @@ describe('User API CRUD', () => {
 
       chai
         .request(app)
-        .get(`/api/user/login`)
+        .post(`/api/user/login`)
         .send(user1)
         .end((err, res) => {
           err && console.log(err);
@@ -90,7 +90,7 @@ describe('User API CRUD', () => {
 
       chai
         .request(app)
-        .get(`/api/user/login`)
+        .post(`/api/user/login`)
         .send(nonExistentUser)
         .end((err, res) => {
           err && console.log(err);
@@ -110,7 +110,7 @@ describe('User API CRUD', () => {
 
       chai
         .request(app)
-        .get(`/api/user/login`)
+        .post(`/api/user/login`)
         .send(wrongPasswordBody)
         .end((err, res) => {
           err && console.log(err);
@@ -126,7 +126,7 @@ describe('User API CRUD', () => {
 
       chai
         .request(app)
-        .get(`/api/user/login`)
+        .post(`/api/user/login`)
         .send(missingFieldsBody)
         .end((err, res) => {
           err && console.log(err);
