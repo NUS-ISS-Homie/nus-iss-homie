@@ -31,7 +31,7 @@ export async function createUser(req, res) {
         ) {
           return res
             .status(constants.STATUS_CODE_DUPLICATE)
-            .json({ message: constants.FAIL_DUPLICATE });
+            .json({ message: constants.FAIL_DUPLICATE(entity, username) });
         }
         return res
           .status(constants.STATUS_CODE_BAD_REQUEST)
@@ -56,7 +56,7 @@ export async function createUser(req, res) {
 export async function signIn(req, res) {
   try {
     const { username, password } = req.body;
-
+    console.log(req.body);
     if (username && password) {
       const user = await _getUser(username);
       if (!user) {
@@ -77,7 +77,6 @@ export async function signIn(req, res) {
           .status(constants.STATUS_CODE_UNAUTHORIZED)
           .json({ message: constants.FAIL_UNAUTHORIZED });
       }
-
       return res.status(constants.STATUS_CODE_OK).json({
         username: username,
         user_id: user._id,
