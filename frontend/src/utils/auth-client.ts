@@ -42,9 +42,7 @@ import {
       const headers = {
         'Content-Type': 'application/json',
       };
-      return requests.postWithHeaders(URL_USER_SVC, USER_CHANGE_USERNAME, body, {
-        headers: headers,
-      });
+      return requests.put(URL_USER_SVC, USER_CHANGE_USERNAME, body);
     },
   
     changePassword: (body: {
@@ -55,9 +53,7 @@ import {
       const headers = {
         'Content-Type': 'application/json',
       };
-      return requests.postWithHeaders(URL_USER_SVC, USER_CHANGE_PASSWORD, body, {
-        headers: headers,
-      });
+      return requests.put(URL_USER_SVC, USER_CHANGE_PASSWORD, body);
     },
   
     deleteUser: (data: {

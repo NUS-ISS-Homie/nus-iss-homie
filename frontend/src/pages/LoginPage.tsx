@@ -17,7 +17,7 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AuthClient } from '../utils/auth-client';
 import { useNavigate } from 'react-router-dom';
-import { STATUS_CREATED } from '../constants';
+import { STATUS_OK } from '../constants';
 import { useAuth } from '../context/UserContext';
 
 enum LoginStatus {
@@ -52,9 +52,10 @@ function LoginPage() {
         }
 
         setLoading(true);
+        console.log(body);
         AuthClient.login(body)
             .then(({data: { username, user_id, message }, status}) => {
-                if (status !== STATUS_CREATED) throw new Error(message);
+                if (status !== STATUS_OK) throw new Error(message);
                 authClient.setUser({ username: username, user_id: user_id });
                 setLoginStatus(LoginStatus.SUCCESS);
               })
