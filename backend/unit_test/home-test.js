@@ -111,8 +111,8 @@ describe('Socket disconnect', () => {
 // CRUD
 
 describe('CRUD API', () => {
-  const adminUserId = new mongoose.Types.ObjectId();
-  const userId = new mongoose.Types.ObjectId();
+  const adminusername = 'adminUser';
+  const username = 'user1';
   const homeId = new mongoose.Types.ObjectId();
 
   before('Connect to MongoDB', async () => {
@@ -121,7 +121,7 @@ describe('CRUD API', () => {
 
   beforeEach('Clear DB', async () => {
     await HomeModel.deleteMany();
-    await HomeModel.create({ _id: homeId, adminUser: adminUserId });
+    await HomeModel.create({ _id: homeId, adminUser: adminusername });
   });
 
   describe('Admin user creates a new home', () => {
@@ -131,7 +131,7 @@ describe('CRUD API', () => {
       chai
         .request(app)
         .post(`/api/home`)
-        .send({ adminUser: adminUserId })
+        .send({ adminUser: adminusername })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_CREATED);
@@ -162,17 +162,17 @@ describe('CRUD API', () => {
 
   describe('User joins then leaves an existing home', () => {
     it('should join an existing home', (done) => {
-      const userId1 = new mongoose.Types.ObjectId();
+      const username1 = new mongoose.Types.ObjectId();
 
       const expectedBody = {
-        home: { users: userId1 },
+        home: { users: username1 },
         message: msg.SUCCESS_ACTION('joined', entity),
       };
 
       chai
         .request(app)
         .put(`/api/home/${homeId}/join`)
-        .send({ userId: userId1 })
+        .send({ username: username1 })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
@@ -187,12 +187,12 @@ describe('CRUD API', () => {
       chai
         .request(app)
         .put(`/api/home/${homeId}/leave`)
-        .send({ userId })
+        .send({ username })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
           chai.expect(res.body).to.shallowDeepEqual(expectedBody);
-          chai.expect(res.body.home.users).to.not.contain(userId);
+          chai.expect(res.body.home.users).to.not.contain(username);
           done();
         });
     });
@@ -207,7 +207,7 @@ describe('CRUD API', () => {
       chai
         .request(app)
         .delete(`/api/home/${homeId}`)
-        .send({ adminUser: adminUserId })
+        .send({ adminUser: adminusername })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_OK);

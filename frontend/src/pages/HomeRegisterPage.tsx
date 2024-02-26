@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);
-  const userId = '507f1f77bcf86cd799439011';
+  const adminUser = 'adminUser';
   const navigate = useNavigate();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -28,7 +28,7 @@ function HomeRegisterPage() {
     }
 
     // TODO: get current userId
-    APIHome.createHome(userId);
+    APIHome.createHome(adminUser);
 
     // TODO: send invites to invitees
 

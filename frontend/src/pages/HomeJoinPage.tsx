@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
-  const userId = '507f1f77bcf86cd799439011';
+  const username = 'user1';
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -24,7 +24,7 @@ function HomeJoinPage() {
     if (!homeId) return;
 
     // TODO: get current userId
-    APIHome.joinHome(homeId.toString(), userId);
+    APIHome.joinHome(homeId.toString(), username);
 
     navigate('/');
   };

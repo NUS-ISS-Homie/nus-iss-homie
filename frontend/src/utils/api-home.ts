@@ -13,16 +13,16 @@ const APIHome = {
 
   joinHome: (
     homeId: string,
-    userId: string
+    username: string
   ): Promise<API.Response<HomeModel>> => {
-    return requests.put(URL_HOME_SVC, `/${homeId}/join`, { userId });
+    return requests.put(URL_HOME_SVC, `/${homeId}/join`, { username });
   },
 
   leaveHome: (
     homeId: string,
-    userId: string
+    username: string
   ): Promise<API.Response<HomeModel>> => {
-    return requests.put(URL_HOME_SVC, `/${homeId}/leave`, { userId });
+    return requests.put(URL_HOME_SVC, `/${homeId}/leave`, { username });
   },
 
   deleteHome: (homeId: string): Promise<API.Response<HomeModel>> => {
