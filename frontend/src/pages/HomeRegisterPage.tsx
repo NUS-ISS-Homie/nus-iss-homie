@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 
 function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);
+  const userId = '507f1f77bcf86cd799439011';
   const navigate = useNavigate();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -27,7 +28,7 @@ function HomeRegisterPage() {
     }
 
     // TODO: get current userId
-    APIHome.createHome('507f1f77bcf86cd799439011');
+    APIHome.createHome(userId);
 
     // TODO: send invites to invitees
 
@@ -37,8 +38,8 @@ function HomeRegisterPage() {
   const TenantsField = (props: { t: number; username: string | null }) => {
     const { t, username } = props;
     return (
-      <Grid item display='flex'>
-        <Grid xs={12}>
+      <Grid display='flex'>
+        <Grid item xs={12}>
           <TextField
             InputProps={{
               startAdornment: (
@@ -105,9 +106,7 @@ function HomeRegisterPage() {
           Register Home
         </Typography>
         <Box
-          sx={{
-            mt: 3,
-          }}
+          sx={{ mt: 3 }}
           component='form'
           autoComplete={'off'}
           onSubmit={handleSubmit}

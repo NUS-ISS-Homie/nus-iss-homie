@@ -6,6 +6,7 @@ import './App.css';
 // import { useSockets } from './context/SocketContext';
 import HomeRegisterPage from './pages/HomeRegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import HomeJoinPage from './pages/HomeJoinPage';
 
 function App() {
   // const { homeSocket: socket } = useSockets();
@@ -14,6 +15,7 @@ function App() {
   const guestRoutes = (
     <Routes>
       <Route path='/signup' element={<HomeRegisterPage />}></Route>
+      <Route path='/join' element={<HomeJoinPage />}></Route>
       <Route path='/' element={<DashboardPage />}></Route>
     </Routes>
   );
