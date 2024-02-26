@@ -1,4 +1,4 @@
-const URI_HOME_SVC = 'http://localhost:8000';
-const PREFIX_HOME_SVC = '';
+const URI_BACKEND = 'http://localhost:8000';
+const PREFIX_HOME_SVC = '/api/home';
 
-export const URL_HOME_SVC = URI_HOME_SVC + PREFIX_HOME_SVC;
+export const URL_HOME_SVC = URI_BACKEND + PREFIX_HOME_SVC;
