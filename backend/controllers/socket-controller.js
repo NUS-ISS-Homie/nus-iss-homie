@@ -4,6 +4,7 @@ const onDisconnectEvent = (socket) => {
 
 const onJoinHomeEvent = (io, socket, homeId) => {
   // subscribes to home for notifications
+  console.log('Join req received');
   socket.join(homeId);
   io.to(socket.id).emit('joined-home');
   socket.on('send-notification', (notification) =>
