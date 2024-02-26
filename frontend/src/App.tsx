@@ -1,29 +1,29 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Box, CssBaseline } from '@mui/material';
+
 import './App.css';
-import { useSockets } from './context/SocketContext';
+// import { useSockets } from './context/SocketContext';
+import HomeRegisterPage from './pages/HomeRegisterPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
-  const { homeSocket: socket } = useSockets();
-
+  // const { homeSocket: socket } = useSockets();
   // socket.on('connected', () => console.log("SOCKET CONNECTED"));
+
+  const guestRoutes = (
+    <Routes>
+      <Route path='/signup' element={<HomeRegisterPage />}></Route>
+      <Route path='/' element={<DashboardPage />}></Route>
+    </Routes>
+  );
 
   return (
     <div className='App'>
-      <header className='App-header'>
-        <img src={logo} className='App-logo' alt='logo' />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className='App-link'
-          href='https://reactjs.org'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          Learn React
-        </a>
-      </header>
+      <CssBaseline />
+      <Box>
+        <Router>{guestRoutes}</Router>
+      </Box>
     </div>
   );
 }
