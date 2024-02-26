@@ -1,8 +1,13 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { useSockets } from './context/SocketContext';
 
 function App() {
+  const { homeSocket: socket } = useSockets();
+
+  // socket.on('connected', () => console.log("SOCKET CONNECTED"));
+
   return (
     <div className='App'>
       <header className='App-header'>

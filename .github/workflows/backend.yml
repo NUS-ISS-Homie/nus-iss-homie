@@ -36,4 +36,5 @@ jobs:
         env:
           ENV: TEST
           DB_CLOUD_URI_TEST: ${{secrets.DB_CLOUD_URI_TEST}}
+          PORT: 8000
           SALT_ROUNDS: 10

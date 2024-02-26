@@ -15,9 +15,5 @@
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
-  },
-  "dependencies": {
-    "mongo": "^0.1.0",
-    "mongoose": "^8.1.3"
   }
 }
