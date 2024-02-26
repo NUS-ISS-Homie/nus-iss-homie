@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/', (_, res) => res.send('Hello World from user-service'));
 
 router.post('/signup', createUser);
-router.get('/login', signIn);
+router.post('/login', signIn);
 router.put('/change-password', changePassword);
 router.put('/change-username', changeUsername);
 router.delete('/delete-user', deleteUser);
