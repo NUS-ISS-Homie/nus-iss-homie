@@ -13,11 +13,14 @@ import React, { useState } from 'react';
 import { AddCircle, RemoveCircle } from '@mui/icons-material';
 import APIHome from '../utils/api-home';
 import { useNavigate } from 'react-router-dom';
+import { useSnackbar } from '../context/SnackbarContext';
+import { STATUS_CODE_CREATED } from '../common/messages';
 
 function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);
   const adminUser = 'adminUser';
   const navigate = useNavigate();
+  const snackbar = useSnackbar();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -28,11 +31,16 @@ function HomeRegisterPage() {
     }
 
     // TODO: get current userId
-    APIHome.createHome(adminUser);
+    APIHome.createHome(adminUser)
+      .then(({ data: { home, message }, status }) => {
+        if (status !== STATUS_CODE_CREATED) throw new Error(message);
 
-    // TODO: send invites to invitees
+        // TODO: send invites to invitees
 
-    navigate('/');
+        snackbar.setSuccess(message);
+        navigate('/');
+      })
+      .catch((err) => snackbar.setError(err));
   };
 
   const TenantsField = (props: { t: number; username: string | null }) => {
@@ -49,7 +57,6 @@ function HomeRegisterPage() {
               ),
             }}
             placeholder={`Tenant ${t}`}
-            required
             fullWidth
             defaultValue={username ? username : null}
             id={`tenant${t}`}

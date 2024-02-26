@@ -4,13 +4,26 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import { theme } from './styles';
+import { ThemeProvider } from '@mui/material';
+import { SnackbarProvider } from './context/SnackbarContext';
+import { SocketProvider } from './context/SocketContext';
+
+// @ts-ignore
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <SnackbarProvider>
+    <ThemeProvider theme={theme}>
+      {/* <UserProvider> */}
+      <SocketProvider>
+        <App />
+      </SocketProvider>
+      {/* </UserProvider> */}
+    </ThemeProvider>
+  </SnackbarProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

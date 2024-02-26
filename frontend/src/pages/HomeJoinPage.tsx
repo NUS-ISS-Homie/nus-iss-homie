@@ -11,9 +11,14 @@ import {
 import React from 'react';
 import APIHome from '../utils/api-home';
 import { useNavigate } from 'react-router-dom';
+import { STATUS_CODE_OK } from '../common/messages';
+import { useSnackbar } from '../context/SnackbarContext';
+import { useSockets } from '../context/SocketContext';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
+  const snackbar = useSnackbar();
+  const { joinHome } = useSockets();
   const username = 'user1';
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -24,7 +29,16 @@ function HomeJoinPage() {
     if (!homeId) return;
 
     // TODO: get current userId
-    APIHome.joinHome(homeId.toString(), username);
+    APIHome.joinHome(homeId.toString(), username)
+      .then(({ data: { home, message }, status }) => {
+        if (status !== STATUS_CODE_OK) throw new Error(message);
+
+        // TODO: send invites to invitees
+
+        joinHome(home._id);
+        navigate('/');
+      })
+      .catch((err) => snackbar.setError(err));
 
     navigate('/');
   };
