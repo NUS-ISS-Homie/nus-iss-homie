@@ -2,23 +2,22 @@ import React, { createContext, useContext } from 'react';
 import sockets from './Sockets';
 
 const SocketContext = createContext({
-    ...sockets,
-    joinHome: (home: string, onFail: VoidFunction) => { },
+  ...sockets,
+  joinHome: (home: string, onFail: VoidFunction) => {},
 });
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-    const joinHome = async (home: string, onFail: VoidFunction) => {
+  const joinHome = async (home: string, onFail: VoidFunction) => {
+    const { homeSocket } = sockets;
 
-        const { homeSocket } = sockets;
+    homeSocket.emit('join-home', { room: home });
+  };
 
-        homeSocket.emit('join-home', { room: home });
-    };
-
-    return (
-        <SocketContext.Provider value={{ ...sockets, joinHome: joinHome }}>
-            {children}
-        </SocketContext.Provider>
-    );
+  return (
+    <SocketContext.Provider value={{ ...sockets, joinHome: joinHome }}>
+      {children}
+    </SocketContext.Provider>
+  );
 }
 
 const useSockets = () => useContext(SocketContext);

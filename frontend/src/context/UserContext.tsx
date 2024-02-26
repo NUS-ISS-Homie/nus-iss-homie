@@ -1,17 +1,14 @@
 import React, { createContext, useState, useContext } from 'react';
 import { User } from '../@types/UserContext';
 import * as authClient from '../utils/auth-client';
-import {
-  LOCAL_STORAGE_USERNAME_KEY,
-} from '../configs';
-import { STATUS_OK,STATUS_BAD_REQUEST } from '../constants';
+import { LOCAL_STORAGE_USERNAME_KEY } from '../configs';
+import { STATUS_OK, STATUS_BAD_REQUEST } from '../constants';
 import { useSnackbar } from './SnackbarContext';
 
 export const defaultUser: User = {
   username: null,
   user_id: null,
 };
-
 
 export const getUsername = () => {
   const username = window.localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY);

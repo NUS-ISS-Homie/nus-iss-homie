@@ -22,7 +22,7 @@ function App() {
   const guestRoutes = (
     <Routes>
       <Route path='/' element={<Navigate replace to='/signup' />}></Route>
-      <Route path='/signup' element={<SignUpPage/>} />
+      <Route path='/signup' element={<SignUpPage />} />
       <Route path='/login' element={<LoginPage />} />
       <Route path='*' element={<Navigate replace to='/login' />} />
     </Routes>
@@ -32,9 +32,7 @@ function App() {
     <div className='App'>
       <CssBaseline />
       <Box>
-        <Router>
-          {guestRoutes}
-        </Router>
+        <Router>{guestRoutes}</Router>
       </Box>
     </div>
   );
