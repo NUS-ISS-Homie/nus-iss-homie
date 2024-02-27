@@ -36,13 +36,13 @@ export async function updateHomeModel(params) {
     case updateOperation.Join:
       return await HomeModel.findOneAndUpdate(
         { _id: params.homeId },
-        { $addToSet: { users: params.userId } },
+        { $addToSet: { users: params.username } },
         { returnDocument: 'after' }
       );
     case updateOperation.Remove:
       return await HomeModel.findOneAndUpdate(
         { _id: params.homeId },
-        { $pull: { users: params.userId } },
+        { $pull: { users: params.username } },
         { returnDocument: 'after' }
       );
     default:
@@ -51,5 +51,5 @@ export async function updateHomeModel(params) {
 }
 
 export async function deleteHomeModel(homeId) {
-  return await HomeModel.deleteOne({ _id: params.homeId });
+  return await HomeModel.deleteOne({ _id: homeId });
 }

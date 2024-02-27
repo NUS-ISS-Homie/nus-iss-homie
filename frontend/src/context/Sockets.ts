@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client';
-import { URL_HOME_SVC } from '../configs';
+import { URI_BACKEND } from '../configs';
 
 const sockets = {
-  homeSocket: io(URL_HOME_SVC),
+  homeSocket: io(URI_BACKEND),
 };
 
 export default sockets;
