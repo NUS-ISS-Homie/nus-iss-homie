@@ -8,6 +8,7 @@ import { theme } from './styles';
 import { ThemeProvider } from '@mui/material';
 import { SnackbarProvider } from './context/SnackbarContext';
 import { SocketProvider } from './context/SocketContext';
+import { UserProvider } from './context/UserContext';
 
 // @ts-ignore
 
@@ -17,11 +18,11 @@ const root = ReactDOM.createRoot(
 root.render(
   <SnackbarProvider>
     <ThemeProvider theme={theme}>
-      {/* <UserProvider> */}
-      <SocketProvider>
-        <App />
-      </SocketProvider>
-      {/* </UserProvider> */}
+      <UserProvider>
+        <SocketProvider>
+          <App />
+        </SocketProvider>
+      </UserProvider>
     </ThemeProvider>
   </SnackbarProvider>
 );

@@ -14,17 +14,26 @@ import DashboardPage from './pages/DashboardPage';
 import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import { useUser } from './context/UserContext';
+import Navbar from './components/Navbar';
 
 function App() {
   // const { homeSocket: socket } = useSockets();
   // socket.on('connected', () => console.log("SOCKET CONNECTED"));
 
-  const guestRoutes = (
+  const user = useUser();
+
+  const registeredRoutes = (
     <Routes>
+      <Route path='/' element={<DashboardPage />}></Route>
+      <Route path='*' element={<Navigate replace to='/login' />} />
       <Route path='/join' element={<HomeJoinPage />}></Route>
       <Route path='/registerHome' element={<HomeRegisterPage />}></Route>
-      <Route path='/' element={<DashboardPage />}></Route>
-      <Route path='/' element={<Navigate replace to='/signup' />}></Route>
+    </Routes>
+  );
+
+  const guestRoutes = (
+    <Routes>
       <Route path='/signup' element={<SignUpPage />} />
       <Route path='/login' element={<LoginPage />} />
       <Route path='*' element={<Navigate replace to='/login' />} />
@@ -35,7 +44,10 @@ function App() {
     <div className='App'>
       <CssBaseline />
       <Box>
-        <Router>{guestRoutes}</Router>
+        <Router>
+          {user.username && <Navbar />}
+          {user.username ? registeredRoutes : guestRoutes}
+        </Router>
       </Box>
     </div>
   );
