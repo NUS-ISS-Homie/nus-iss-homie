@@ -22,6 +22,7 @@ function App() {
   const guestRoutes = (
     <Routes>
       <Route path='/join' element={<HomeJoinPage />}></Route>
+      <Route path='/registerHome' element={<HomeRegisterPage />}></Route>
       <Route path='/' element={<DashboardPage />}></Route>
       <Route path='/' element={<Navigate replace to='/signup' />}></Route>
       <Route path='/signup' element={<SignUpPage />} />
