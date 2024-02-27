@@ -30,21 +30,25 @@ export const requests = {
       .get(url, headers)
       .then(responseBody)
       .catch((err) => responseBody(err.response)),
+
   post: (base_url: string, url: string, body: {}) =>
     instance(base_url)
       .post(url, body)
       .then(responseBody)
       .catch((err) => responseBody(err.response)),
+
   postWithHeaders: (base_url: string, url: string, body: {}, headers: {}) =>
     instance(base_url)
       .post(url, body, headers)
       .then(responseBody)
       .catch((err) => responseBody(err.response)),
+
   put: (base_url: string, url: string, body: {}) =>
     instance(base_url)
       .put(url, body)
       .then(responseBody)
       .catch((err) => responseBody(err.response)),
+
   delete: (base_url: string, url: string, body: {}) =>
     instance(base_url)
       .delete(url, body)

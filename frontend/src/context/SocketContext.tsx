@@ -1,16 +1,21 @@
 import React, { createContext, useContext } from 'react';
 import sockets from './Sockets';
+import { useSnackbar } from './SnackbarContext';
 
 const SocketContext = createContext({
   ...sockets,
-  joinHome: (home: string, onFail: VoidFunction) => {},
+  joinHome: (homeId: string, onFail?: VoidFunction) => {},
 });
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const joinHome = async (home: string, onFail: VoidFunction) => {
+  const snackbar = useSnackbar();
+  const joinHome = (homeId: string, onFail?: VoidFunction) => {
+    console.log('join home request');
     const { homeSocket } = sockets;
-
-    homeSocket.emit('join-home', { room: home });
+    homeSocket.on('joined-home', () => {
+      snackbar.setSuccess('Successfully joined home socket');
+    });
+    homeSocket.emit('join-home', homeId);
   };
 
   return (

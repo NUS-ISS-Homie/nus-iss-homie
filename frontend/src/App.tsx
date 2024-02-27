@@ -1,8 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { useSockets } from './context/SocketContext';
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -10,18 +6,34 @@ import {
   Navigate,
 } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
-import { useUser } from './context/UserContext';
-import LoginPage from './pages/LoginPage';
+
+import './App.css';
+// import { useSockets } from './context/SocketContext';
+import HomeRegisterPage from './pages/HomeRegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
+import LoginPage from './pages/LoginPage';
+import { useUser } from './context/UserContext';
+import Navbar from './components/Navbar';
 
 function App() {
-  const user = useUser();
-  const { homeSocket: socket } = useSockets();
+  // const { homeSocket: socket } = useSockets();
   // socket.on('connected', () => console.log("SOCKET CONNECTED"));
+
+  const user = useUser();
+
+  const registeredRoutes = (
+    <Routes>
+      <Route path='/' element={<DashboardPage />}></Route>
+      <Route path='*' element={<Navigate replace to='/login' />} />
+      <Route path='/join' element={<HomeJoinPage />}></Route>
+      <Route path='/registerHome' element={<HomeRegisterPage />}></Route>
+    </Routes>
+  );
 
   const guestRoutes = (
     <Routes>
-      <Route path='/' element={<Navigate replace to='/signup' />}></Route>
       <Route path='/signup' element={<SignUpPage />} />
       <Route path='/login' element={<LoginPage />} />
       <Route path='*' element={<Navigate replace to='/login' />} />
@@ -32,7 +44,10 @@ function App() {
     <div className='App'>
       <CssBaseline />
       <Box>
-        <Router>{guestRoutes}</Router>
+        <Router>
+          {user.username && <Navbar />}
+          {user.username ? registeredRoutes : guestRoutes}
+        </Router>
       </Box>
     </div>
   );

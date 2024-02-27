@@ -28,7 +28,7 @@ const UserContext = createContext({
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>({ username: '', user_id: '' });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const snackbar = useSnackbar();
 

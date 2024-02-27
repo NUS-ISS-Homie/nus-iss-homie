@@ -25,11 +25,11 @@ export async function ormGetHome(homeId) {
   }
 }
 
-export async function ormJoinHome(homeId, userId) {
+export async function ormJoinHome(homeId, username) {
   try {
     const updatedHome = await updateHomeModel({
       homeId,
-      userId,
+      username,
       operation: updateOperation.Join,
     });
     return updatedHome;
@@ -38,11 +38,11 @@ export async function ormJoinHome(homeId, userId) {
   }
 }
 
-export async function ormLeaveHome(homeId, userId) {
+export async function ormLeaveHome(homeId, username) {
   try {
     const updatedHome = await updateHomeModel({
       homeId,
-      userId,
+      username,
       operation: updateOperation.Remove,
     });
     return updatedHome;

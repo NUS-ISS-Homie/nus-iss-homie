@@ -64,7 +64,7 @@ export async function getHome(req, res) {
 export async function joinHome(req, res) {
   try {
     const { homeId } = req.params;
-    const { userId } = req.body;
+    const { username } = req.body;
 
     if (!homeId) {
       return res
@@ -72,13 +72,13 @@ export async function joinHome(req, res) {
         .json({ message: msg.ERR_MISSING_PARAMS('home ID') });
     }
 
-    if (!userId) {
+    if (!username) {
       return res
         .status(msg.STATUS_CODE_BAD_REQUEST)
         .json({ message: msg.ERR_MISSING_PARAMS('user ID') });
     }
 
-    const home = await _joinHome(homeId, userId);
+    const home = await _joinHome(homeId, username);
     if (!home || home.error) {
       console.log(home);
       return res
@@ -98,7 +98,7 @@ export async function joinHome(req, res) {
 export async function leaveHome(req, res) {
   try {
     const { homeId } = req.params;
-    const { userId } = req.body;
+    const { username } = req.body;
 
     if (!homeId) {
       return res
@@ -106,13 +106,13 @@ export async function leaveHome(req, res) {
         .json({ message: msg.ERR_MISSING_PARAMS('home ID') });
     }
 
-    if (!userId) {
+    if (!username) {
       return res
         .status(msg.STATUS_CODE_BAD_REQUEST)
         .json({ message: msg.ERR_MISSING_PARAMS('user ID') });
     }
 
-    const home = await _leaveHome(homeId, userId);
+    const home = await _leaveHome(homeId, username);
     if (!home || home.err) {
       return res
         .status(msg.STATUS_CODE_SERVER_ERROR)

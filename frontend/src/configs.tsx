@@ -1,13 +1,9 @@
-const URI_HOME_SVC = 'http://localhost:8000';
-const PREFIX_HOME_SVC = '';
-
-export const URL_HOME_SVC = URI_HOME_SVC + PREFIX_HOME_SVC;
-
-const URI_USER_SVC = process.env.URI_USER_SVC || 'http://localhost:8000';
-
+export const URI_BACKEND = 'http://localhost:8000';
+const PREFIX_HOME_SVC = '/api/home';
 const PREFIX_USER_SVC = '/api/user';
 
-export const URL_USER_SVC = URI_USER_SVC + PREFIX_USER_SVC;
+export const URL_HOME_SVC = URI_BACKEND + PREFIX_HOME_SVC;
+export const URL_USER_SVC = URI_BACKEND + PREFIX_USER_SVC;
 
 export const USER_SIGNUP = '/signup';
 export const USER_LOGIN = '/login';
