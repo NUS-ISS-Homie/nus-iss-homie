@@ -69,6 +69,7 @@ describe('Expense API CRUD', () => {
         });
     });
   });
+
   describe('POST /api/expense/create', () => {
     it('should return a 400 Bad Request for incomplete or invalid data', (done) => {
       const invalidExpenseData = {}; // Invalid data with missing fields
