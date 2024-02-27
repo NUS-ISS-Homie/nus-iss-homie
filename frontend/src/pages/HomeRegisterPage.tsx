@@ -15,12 +15,13 @@ import APIHome from '../utils/api-home';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../context/SnackbarContext';
 import { STATUS_CODE_CREATED } from '../common/messages';
+import { useUser } from '../context/UserContext';
 
 function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);
-  const adminUser = 'adminUser';
   const navigate = useNavigate();
   const snackbar = useSnackbar();
+  const user = useUser();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,8 +31,12 @@ function HomeRegisterPage() {
       invitees.push(data.get(`tenant${i + 1}`));
     }
 
-    // TODO: get current userId
-    APIHome.createHome(adminUser)
+    if (!user.username) {
+      navigate('/');
+      return;
+    }
+
+    APIHome.createHome(user.username)
       .then(({ data: { home, message }, status }) => {
         if (status !== STATUS_CODE_CREATED) throw new Error(message);
 

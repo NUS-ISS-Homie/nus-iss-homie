@@ -14,12 +14,13 @@ import { useNavigate } from 'react-router-dom';
 import { STATUS_CODE_OK } from '../common/messages';
 import { useSnackbar } from '../context/SnackbarContext';
 import { useSockets } from '../context/SocketContext';
+import { useUser } from '../context/UserContext';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const { joinHome } = useSockets();
-  const username = 'user1';
+  const { username } = useUser();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,6 +28,11 @@ function HomeJoinPage() {
     const homeId = data.get('homeId');
 
     if (!homeId) return;
+
+    if (!username) {
+      navigate('/');
+      return;
+    }
 
     // TODO: get current userId
     APIHome.joinHome(homeId.toString(), username)

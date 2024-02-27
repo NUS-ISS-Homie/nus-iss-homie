@@ -60,6 +60,7 @@ function LoginPage() {
         if (status !== STATUS_OK) throw new Error(message);
         authClient.setUser({ username: username, user_id: user_id });
         setLoginStatus(LoginStatus.SUCCESS);
+        navigate('/');
       })
       .catch((err) => {
         setLoginStatus(LoginStatus.FAILED);
