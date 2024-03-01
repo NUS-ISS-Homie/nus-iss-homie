@@ -69,6 +69,7 @@ describe('Expense API CRUD', () => {
         });
     });
   });
+
   describe('POST /api/expense/create', () => {
     it('should return a 400 Bad Request for incomplete or invalid data', (done) => {
       const invalidExpenseData = {}; // Invalid data with missing fields
@@ -87,7 +88,7 @@ describe('Expense API CRUD', () => {
     });
   });
 
-  // Add more test cases for other CRUD operations (GET, PUT, DELETE) as needed
+  // Add more test cases for other CRUD operations (GET, PUT, DELETE) as neededs
   describe('GET /api/expense/:id', () => {
     it('should retrieve a specific expense by ID', async () => {
       const expense = await ExpenseModel.findOne({ title: 'Expense 1' });
