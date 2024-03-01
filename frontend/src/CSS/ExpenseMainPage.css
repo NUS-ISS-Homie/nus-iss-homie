@@ -1,0 +1,100 @@
+/* ExpenseMainPage.css */
+
+.expense-main {
+  text-align: center;
+}
+
+.expense-table {
+  margin: 0 auto; /* Centers the table */
+  border-collapse: collapse; /* Collapses the borders */
+  width: 80%; /* Set the width of the table */
+}
+
+.expense-table th,
+.expense-table td {
+  border: 1px solid #ddd; /* Add border to cells */
+  padding: 8px; /* Add padding to cells */
+}
+
+.expense-table th {
+  background-color: #f2f2f2; /* Add background color to header cells */
+}
+
+.expense-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2; /* Add background color to even rows */
+}
+
+.expense-table tbody tr:hover {
+  background-color: #ddd; /* Add background color on hover */
+}
+
+.expense-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Center the buttons vertically */
+  gap: 10px; /* Add padding between buttons */
+}
+
+.expense-buttons button {
+  padding: 10px 20px; /* Add padding to buttons */
+  background-color: #007bff; /* Button background color */
+  color: white; /* Button text color */
+  border: none; /* Remove button border */
+  border-radius: 5px; /* Add button border radius */
+  cursor: pointer; /* Show pointer on hover */
+}
+
+.expense-buttons button:hover {
+  background-color: #0056b3; /* Change background color on hover */
+}
+
+/* Additional styling can be added as per requirement */
+.add-expense-container {
+  margin-bottom: 20px; /* Add margin bottom to create space between the button and the table */
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.popup h2 {
+  margin-bottom: 20px;
+}
+
+.popup form div {
+  margin-bottom: 10px;
+}
+
+.popup form div label {
+  margin-right: 10px;
+}
+
+.popup form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.popup form .button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
