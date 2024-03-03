@@ -189,9 +189,9 @@ export async function changeUsername(req, res) {
 
 export async function deleteUser(req, res) {
   try {
-    const { username, password } = req.body;
-    if (username && password) {
-      const isDeleted = await _deleteUser(username, password);
+    const { username } = req.body;
+    if (username) {
+      const isDeleted = await _deleteUser(username);
       if (!isDeleted || isDeleted.err) {
         return res
           .status(constants.STATUS_CODE_NOT_FOUND)
