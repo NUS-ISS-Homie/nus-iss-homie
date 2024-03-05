@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import {
   ormCreateExpense as _createExpense,
   ormGetExpense as _getExpense,
+  ormGetAllExpense as _getAllExpenses,
   ormUpdateExpense as _updateExpense,
   ormDeleteExpense as _deleteExpense,
 } from '../models/expense/expense-orm.js';
@@ -38,6 +39,35 @@ export async function createExpense(req, res) {
       .json({ message: constants.FAIL_DATABASE_ERROR });
   }
 }
+
+export async function getAllExpenses(req, res) {
+  try {
+    const expenses = await _getAllExpenses(); // Call the function to fetch all expenses from the database
+    if (!expenses || expenses.length === 0) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: 'No expenses found' });
+    }
+    return res.status(constants.STATUS_CODE_OK).json({ expenses });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
+// export async function getAllExpenses(req, res) {
+//   try {
+//     const expenses = await _getAllExpenses(); // Call the function to fetch all expenses from the database
+//     return res.status(constants.STATUS_CODE_OK).json({ expenses });
+//   } catch (err) {
+//     console.error(err);
+//     return res
+//       .status(constants.STATUS_CODE_SERVER_ERROR)
+//       .json({ message: constants.FAIL_DATABASE_ERROR });
+//   }
+// }
 
 export async function getExpense(req, res) {
   try {

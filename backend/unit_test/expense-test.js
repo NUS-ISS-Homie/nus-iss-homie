@@ -88,6 +88,19 @@ describe('Expense API CRUD', () => {
     });
   });
 
+  describe('GET /api/expense', () => {
+    it('should retrieve all expenses', async () => {
+      // Make a request to fetch all expenses
+      const res = await chai.request(app).get(`/api/expense`);
+
+      // Assertions
+      chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
+      chai.expect(res.body.expenses).to.be.an('array');
+      chai.expect(res.body.expenses).to.have.length.greaterThan(0); // Ensure at least one expense is returned
+      // You can add more specific assertions based on your expected data structure
+    });
+  });
+
   // Add more test cases for other CRUD operations (GET, PUT, DELETE) as needed
   describe('GET /api/expense/:id', () => {
     it('should retrieve a specific expense by ID', async () => {
