@@ -1,24 +1,54 @@
 import React from 'react';
-import logo from './logo.svg';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import { Box, CssBaseline } from '@mui/material';
+
 import './App.css';
+// import { useSockets } from './context/SocketContext';
+import HomeRegisterPage from './pages/HomeRegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import HomeJoinPage from './pages/HomeJoinPage';
+import SignUpPage from './pages/SignUpPage';
+import LoginPage from './pages/LoginPage';
+import { useUser } from './context/UserContext';
+import Navbar from './components/Navbar';
 
 function App() {
+  // const { homeSocket: socket } = useSockets();
+  // socket.on('connected', () => console.log("SOCKET CONNECTED"));
+
+  const user = useUser();
+
+  const registeredRoutes = (
+    <Routes>
+      <Route path='/' element={<DashboardPage />}></Route>
+      <Route path='*' element={<Navigate replace to='/login' />} />
+      <Route path='/join' element={<HomeJoinPage />}></Route>
+      <Route path='/registerHome' element={<HomeRegisterPage />}></Route>
+    </Routes>
+  );
+
+  const guestRoutes = (
+    <Routes>
+      <Route path='/signup' element={<SignUpPage />} />
+      <Route path='/login' element={<LoginPage />} />
+      <Route path='*' element={<Navigate replace to='/login' />} />
+    </Routes>
+  );
+
   return (
     <div className='App'>
-      <header className='App-header'>
-        <img src={logo} className='App-logo' alt='logo' />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className='App-link'
-          href='https://reactjs.org'
-          target='_blank'
-          rel='noopener noreferrer'
-        >
-          Learn React
-        </a>
-      </header>
+      <CssBaseline />
+      <Box>
+        <Router>
+          {user.username && <Navbar />}
+          {user.username ? registeredRoutes : guestRoutes}
+        </Router>
+      </Box>
     </div>
   );
 }
