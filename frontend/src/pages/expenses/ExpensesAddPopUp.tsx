@@ -26,7 +26,10 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -37,6 +40,7 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
       category: '',
       username: user.username ?? '',
     });
+    window.location.reload(); // Refresh the page
   };
 
   return (
@@ -44,7 +48,7 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
       <div className='popup'>
         <h2>Create Expense</h2>
         <form onSubmit={handleSubmit}>
-          <div>
+          <div className='form-group'>
             <label htmlFor='title'>Title</label>
             <input
               type='text'
@@ -55,7 +59,7 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
               required
             />
           </div>
-          <div>
+          <div className='form-group'>
             <label htmlFor='amount'>Amount</label>
             <input
               type='number'
@@ -66,18 +70,39 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
               required
             />
           </div>
-          <div>
+          <div className='form-group'>
             <label htmlFor='category'>Category</label>
-            <input
-              type='text'
+            <select
               id='category'
               name='category'
               value={formData.category}
-              onChange={handleChange}
+              onChange={handleCategoryChange}
               required
-            />
+            >
+              {/* Options go here */}
+              <option value='' disabled>
+                Select category
+              </option>
+              <option value='Food & Dining'>Food & Dining</option>
+              <option value='Transportation'>Transportation</option>
+              <option value='Housing'>Housing</option>
+              <option value='Utilities'>Utilities</option>
+              <option value='Entertainment'>Entertainment</option>
+              <option value='Health & Fitness'>Health & Fitness</option>
+              <option value='Clothing & Accessories'>
+                Clothing & Accessories
+              </option>
+              <option value='Personal Care'>Personal Care</option>
+              <option value='Education'>Education</option>
+              <option value='Gifts & Donations'>Gifts & Donations</option>
+              <option value='Travel'>Travel</option>
+              <option value='Insurance'>Insurance</option>
+              <option value='Investments'>Investments</option>
+              <option value='Taxes'>Taxes</option>
+              <option value='Miscellaneous'>Miscellaneous</option>
+            </select>
           </div>
-          <div>
+          <div className='form-group'>
             <label htmlFor='username'>Username</label>
             <input
               type='text'
@@ -104,5 +129,4 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
     </div>
   );
 };
-
 export default CreatePopup;
