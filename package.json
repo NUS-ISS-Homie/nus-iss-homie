@@ -1,7 +1,9 @@
 {
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
+    "mocha": "^10.3.0",
     "prettier": "3.2.5"
   },
   "scripts": {
