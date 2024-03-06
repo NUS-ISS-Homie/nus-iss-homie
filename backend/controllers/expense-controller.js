@@ -1,5 +1,5 @@
 import * as constants from '../common/messages.js';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import {
   ormCreateExpense as _createExpense,
   ormGetExpense as _getExpense,

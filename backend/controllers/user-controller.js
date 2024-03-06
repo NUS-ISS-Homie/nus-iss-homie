@@ -6,7 +6,7 @@ import {
   ormDeleteUser as _deleteUser,
 } from '../models/user/user-orm.js';
 import * as constants from '../common/messages.js';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 
 export const entity = 'user';
 
@@ -21,7 +21,7 @@ export async function createUser(req, res) {
     let saltRounds = parseInt(process.env.SALT_ROUNDS);
 
     if (username && password) {
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const hashedPassword = await bcryptjs.hash(password, saltRounds);
       const resp = await _createUser(username, hashedPassword);
       if (resp.err) {
         if (
@@ -105,7 +105,7 @@ export async function changePassword(req, res) {
       }
 
       let saltRounds = parseInt(process.env.SALT_ROUNDS);
-      const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+      const hashedNewPassword = await bcryptjs.hash(newPassword, saltRounds);
 
       const isPasswordCorrect = user.comparePassword(oldPassword);
       if (!isPasswordCorrect) {
