@@ -107,7 +107,7 @@ describe('Expense API CRUD', () => {
       const expense = await ExpenseModel.findOne({ title: 'Expense 1' });
 
       const res = await chai.request(app).get(`/api/expense/${expense._id}`);
-      console.log('res: ', res.body);
+      // console.log('res: ', res.body);
       chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
       chai.expect(res.body.expense.title).to.equal('Expense 1');
       chai.expect(res.body.expense.amount).to.equal(50.0);
@@ -145,7 +145,7 @@ describe('Expense API CRUD', () => {
         .request(app)
         .put(`/api/expense/${expense._id}`)
         .send(updatedExpense);
-      console.log('res: ', res.body);
+      // console.log('res: ', res.body);
 
       chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
       chai
