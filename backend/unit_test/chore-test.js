@@ -19,7 +19,7 @@ chai.use(chaiShallowDeepEqual);
 
 describe('Chore API CRUD', () => {
   before('Connect to MongoDB', async () => {
-    await mongoose.connect(process.env.DB_CLOUD_URI);
+    await mongoose.connect(process.env.DB_CLOUD_URI_TEST);
   });
 
   beforeEach('Clear DB and insert test data', async () => {
