@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Typography } from '@mui/material';
+import { useUser } from '../context/UserContext';
 
 function DashboardPage() {
   const navigate = useNavigate();
+  const user = useUser();
   return (
     <div>
       Homie Dashboard
