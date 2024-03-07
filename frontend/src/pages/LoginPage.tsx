@@ -18,7 +18,7 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AuthClient } from '../utils/auth-client';
 import { useNavigate } from 'react-router-dom';
 import { STATUS_OK } from '../constants';
-import { useAuth } from '../context/UserContext';
+import { saveUsername, useAuth } from '../context/UserContext';
 
 enum LoginStatus {
   SUCCESS = 1,
@@ -59,8 +59,9 @@ function LoginPage() {
       .then(({ data: { username, user_id, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
         authClient.setUser({ username: username, user_id: user_id });
+        saveUsername(username);
         setLoginStatus(LoginStatus.SUCCESS);
-        navigate('/');
+        navigate('/home');
       })
       .catch((err) => {
         setLoginStatus(LoginStatus.FAILED);

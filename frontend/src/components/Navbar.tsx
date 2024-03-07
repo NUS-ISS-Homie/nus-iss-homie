@@ -5,16 +5,56 @@ import {
   IconButton,
   Stack,
   Typography,
+  Menu,
+  MenuItem,
   useTheme,
 } from '@mui/material';
 import { SchoolSharp, SettingsSharp } from '@mui/icons-material';
-import { useUser } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth, useUser } from '../context/UserContext';
+import ConfirmationDialog from './modal/ConfirmationDialog';
+import ChangeUsernameDialog from './modal/ChangeUsernameDialog';
+import ChangePasswordDialog from './modal/ChangePasswordDialog';
 
 function Navbar() {
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [changeUnameDialogOpen, setChangeUnameDialogOpen] = useState(false);
+  const [changePasswordDialogOpen, setChangePasswordDialogOpen] = useState(false);
+
   const user = useUser();
+  const authClient = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
+
+
+  const handleOpenSettingsMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleChangeUsername = () => {
+    setAnchorEl(null);
+    setChangeUnameDialogOpen(true);
+  };
+
+  const handleChangePassword = () => {
+    setAnchorEl(null);
+    setChangePasswordDialogOpen(true);
+  };
+
+  const handleDeleteAccount = () => {
+    setAnchorEl(null);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleDeleteUser = () => {
+    authClient.deleteUser();
+  };
+
+  const handleLogout = () => {
+    authClient.logout();
+    navigate('/');
+  };
 
   return (
     <AppBar
@@ -43,12 +83,12 @@ function Navbar() {
 
         <Stack direction='row' spacing={2}>
           <Typography variant='h6'>{user.username}</Typography>
-          {/* <IconButton onClick={handleOpenSettingsMenu} color='inherit'>
+          <IconButton onClick={handleOpenSettingsMenu} color='inherit'>
             <SettingsSharp />
-          </IconButton> */}
+          </IconButton>
         </Stack>
 
-        {/* <Menu
+        <Menu
           id='menu-appbar'
           anchorEl={anchorEl}
           anchorOrigin={{
@@ -69,16 +109,16 @@ function Navbar() {
             Delete account
           </MenuItem>
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
-        </Menu> */}
+        </Menu>
       </Toolbar>
 
-      {/* <ConfirmationDialog
+      <ConfirmationDialog
         dialogOpen={confirmDialogOpen}
         setDialogOpen={setConfirmDialogOpen}
         message={'Confirm the deletion of your account?'}
         onConfirmAction={handleDeleteUser}
-      />
-
+      /> 
+      
       <ChangeUsernameDialog
         dialogOpen={changeUnameDialogOpen}
         setDialogOpen={setChangeUnameDialogOpen}
@@ -87,7 +127,7 @@ function Navbar() {
       <ChangePasswordDialog
         dialogOpen={changePasswordDialogOpen}
         setDialogOpen={setChangePasswordDialogOpen}
-      /> */}
+      />
     </AppBar>
   );
 }

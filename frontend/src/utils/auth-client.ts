@@ -4,7 +4,6 @@ import {
   USER_CHANGE_USERNAME,
   USER_DELETE_USER,
   USER_LOGIN,
-  USER_LOGOUT,
   USER_SIGNUP,
 } from '../configs';
 import { requests, API } from './api-request';
@@ -27,12 +26,6 @@ export const AuthClient = {
       message: string;
     }>
   > => requests.post(URL_USER_SVC, USER_LOGIN, body),
-
-  logout: (body: {
-    username: string;
-  }): Promise<API.Response<{ message: string }>> => {
-    return requests.post(URL_USER_SVC, USER_LOGOUT, body);
-  },
 
   changeUsername: (body: {
     username: string;
