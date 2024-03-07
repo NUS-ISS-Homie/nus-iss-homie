@@ -8,7 +8,7 @@ import {
 
 export async function ormCreateHome(adminUser) {
   try {
-    const newHome = await createHomeModel({ users: [adminUser] });
+    const newHome = await createHomeModel({ adminUser: [adminUser] });
     await newHome.save();
     return newHome;
   } catch (err) {
