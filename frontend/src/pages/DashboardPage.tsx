@@ -11,6 +11,7 @@ function DashboardPage() {
       Homie Dashboard
       <Button onClick={() => navigate('/registerHome')}>Register Home</Button>
       <Button onClick={() => navigate('/join')}>Join Home</Button>
+      <Button onClick={() => navigate('/expense')}>Expenses</Button>
     </div>
   );
 }

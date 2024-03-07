@@ -145,7 +145,7 @@ describe('CRUD API', () => {
     it('should obtain an existing home data', (done) => {
       const expectedBody = {
         message: msg.SUCCESS_READ(entity),
-        home: { _id: homeId },
+        home: { _id: homeId.toString() },
       };
 
       chai
@@ -162,7 +162,7 @@ describe('CRUD API', () => {
 
   describe('User joins then leaves an existing home', () => {
     it('should join an existing home', (done) => {
-      const username1 = new mongoose.Types.ObjectId();
+      const username1 = 'username1';
 
       const expectedBody = {
         home: { users: username1 },

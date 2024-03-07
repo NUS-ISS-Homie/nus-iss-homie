@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 
 var Schema = mongoose.Schema;
 let UserModelSchema = new Schema({
@@ -15,7 +15,7 @@ let UserModelSchema = new Schema({
 });
 
 UserModelSchema.methods.comparePassword = function (password) {
-  return bcrypt.compareSync(password, this.hashedPassword);
+  return bcryptjs.compareSync(password, this.hashedPassword);
 };
 
 export default mongoose.model('UserModel', UserModelSchema);

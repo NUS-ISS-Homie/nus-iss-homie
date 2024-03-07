@@ -18,6 +18,18 @@ export async function ormCreateExpense(object, amount, category, username) {
 }
 
 // READ FUNCTION
+export async function ormGetAllExpense() {
+  try {
+    const expenses = await ExpenseModel.find(); // Fetch all expenses from the database
+    return expenses;
+  } catch (err) {
+    console.error(err);
+    console.error('ERROR: Could not get expenses from DB.');
+    return { error: err };
+  }
+}
+
+// READ FUNCTION
 export async function ormGetExpense(expenseId) {
   try {
     console.log('expenseId ' + expenseId);

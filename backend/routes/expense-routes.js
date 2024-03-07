@@ -4,12 +4,13 @@ import {
   getExpense,
   updateExpense,
   deleteExpense,
+  getAllExpenses, // Add this import
 } from '../controllers/expense-controller.js';
 
 const router = express.Router();
 
 // Controller will contain all the Expense-defined Routes
-router.get('/', (_, res) => res.send('Hello World from expense-service'));
+router.get('/', getAllExpenses); // Modify this route to get all expenses
 
 router.post('/create', createExpense);
 router.get('/:expenseId', getExpense);
