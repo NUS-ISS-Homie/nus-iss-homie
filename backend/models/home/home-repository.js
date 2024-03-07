@@ -14,8 +14,9 @@ mongoose.connect(mongoDB);
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
-if (process.env.ENV != 'PROD')
+if (process.env.ENV != 'PROD') {
   db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
+}
 
 // CRUD functions
 
