@@ -20,13 +20,13 @@ function Navbar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [changeUnameDialogOpen, setChangeUnameDialogOpen] = useState(false);
-  const [changePasswordDialogOpen, setChangePasswordDialogOpen] = useState(false);
+  const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
+    useState(false);
 
   const user = useUser();
   const authClient = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
-
 
   const handleOpenSettingsMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -117,8 +117,8 @@ function Navbar() {
         setDialogOpen={setConfirmDialogOpen}
         message={'Confirm the deletion of your account?'}
         onConfirmAction={handleDeleteUser}
-      /> 
-      
+      />
+
       <ChangeUsernameDialog
         dialogOpen={changeUnameDialogOpen}
         setDialogOpen={setChangeUnameDialogOpen}

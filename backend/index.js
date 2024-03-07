@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import homeRoutes from './routes/home-routes.js';
 import userRoutes from './routes/user-routes.js';
 import expenseRoutes from './routes/expense-routes.js';
+import choreRoutes from './routes/chore-routes.js';
 import createEventListeners from './controllers/socket-controller.js';
 
 const app = express();
@@ -42,6 +43,11 @@ app.use('/api/user', userRoutes).all((_, res) => {
 });
 
 app.use('/api/expense', expenseRoutes).all((_, res) => {
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+});
+
+app.use('/api/chore', choreRoutes).all((_, res) => {
   res.setHeader('content-type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 });

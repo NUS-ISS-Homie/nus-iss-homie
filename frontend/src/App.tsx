@@ -14,6 +14,7 @@ import DashboardPage from './pages/DashboardPage';
 import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import ExpenseMainPage from './pages/expenses/ExpenseMainPage';
 import { useUser, getUsername } from './context/UserContext';
 import Navbar from './components/Navbar';
 
@@ -30,6 +31,7 @@ function App() {
       <Route path='/home' element={<DashboardPage />}></Route>
       <Route path='/join' element={<HomeJoinPage />}></Route>
       <Route path='/registerHome' element={<HomeRegisterPage />}></Route>
+      <Route path='/expense' element={<ExpenseMainPage />}></Route>
       <Route path='*' element={<Navigate replace to='/home' />} />
     </Routes>
   );

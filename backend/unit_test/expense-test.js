@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiShallowDeepEqual from 'chai-shallow-deep-equal';
@@ -88,13 +88,26 @@ describe('Expense API CRUD', () => {
     });
   });
 
-  // Add more test cases for other CRUD operations (GET, PUT, DELETE) as neededs
+  describe('GET /api/expense', () => {
+    it('should retrieve all expenses', async () => {
+      // Make a request to fetch all expenses
+      const res = await chai.request(app).get(`/api/expense`);
+
+      // Assertions
+      chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
+      chai.expect(res.body.expenses).to.be.an('array');
+      chai.expect(res.body.expenses).to.have.length.greaterThan(0); // Ensure at least one expense is returned
+      // You can add more specific assertions based on your expected data structure
+    });
+  });
+
+  // Add more test cases for other CRUD operations (GET, PUT, DELETE) as needed
   describe('GET /api/expense/:id', () => {
     it('should retrieve a specific expense by ID', async () => {
       const expense = await ExpenseModel.findOne({ title: 'Expense 1' });
 
       const res = await chai.request(app).get(`/api/expense/${expense._id}`);
-      console.log('res: ', res.body);
+      // console.log('res: ', res.body);
       chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
       chai.expect(res.body.expense.title).to.equal('Expense 1');
       chai.expect(res.body.expense.amount).to.equal(50.0);
@@ -132,7 +145,7 @@ describe('Expense API CRUD', () => {
         .request(app)
         .put(`/api/expense/${expense._id}`)
         .send(updatedExpense);
-      console.log('res: ', res.body);
+      // console.log('res: ', res.body);
 
       chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
       chai

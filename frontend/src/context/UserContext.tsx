@@ -19,9 +19,9 @@ export const removeUser = () => {
   window.localStorage.removeItem(LOCAL_STORAGE_USERNAME_KEY);
 };
 
-export const saveUsername = (username : string) => {
+export const saveUsername = (username: string) => {
   window.localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, username);
-}
+};
 
 const UserContext = createContext({
   user: defaultUser,

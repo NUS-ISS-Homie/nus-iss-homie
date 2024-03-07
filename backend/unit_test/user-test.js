@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiShallowDeepEqual from 'chai-shallow-deep-equal';
@@ -36,11 +36,11 @@ describe('User API CRUD', () => {
     await UserModel.deleteMany();
     await UserModel.create({
       username: user1.username,
-      hashedPassword: await bcrypt.hash(user1.password, saltRounds),
+      hashedPassword: await bcryptjs.hash(user1.password, saltRounds),
     });
     await UserModel.create({
       username: user2.username,
-      hashedPassword: await bcrypt.hash(user2.password, saltRounds),
+      hashedPassword: await bcryptjs.hash(user2.password, saltRounds),
     });
   });
 
@@ -339,7 +339,7 @@ describe('User API CRUD', () => {
 
   describe('DELETE /api/user/delete-user', () => {
     it('should NOT delete user (missing username)', function (done) {
-      const sampleBody = { };
+      const sampleBody = {};
 
       const expected = { message: constants.FAIL_MISSING_FIELDS };
 
