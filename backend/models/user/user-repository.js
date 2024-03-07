@@ -67,11 +67,6 @@ export async function deleteUser(params) {
   if (!user) {
     throw new Error('Database Error');
   }
-
-  if (user.comparePassword(params.password)) {
-    const deleted = await UserModel.deleteOne({ username: params.username });
-    return deleted.acknowledged;
-  } else {
-    return false;
-  }
+  const deleted = await UserModel.deleteOne({ username: params.username });
+  return deleted.acknowledged;
 }

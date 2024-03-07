@@ -339,24 +339,7 @@ describe('User API CRUD', () => {
 
   describe('DELETE /api/user/delete-user', () => {
     it('should NOT delete user (missing username)', function (done) {
-      const sampleBody = { password: user1.password };
-
-      const expected = { message: constants.FAIL_MISSING_FIELDS };
-
-      chai
-        .request(app)
-        .delete(`/api/user/delete-user`)
-        .send(sampleBody)
-        .end((err, res) => {
-          err && console.log(err);
-          chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
-          chai.expect(res.body).to.deep.equal(expected);
-          done();
-        });
-    });
-
-    it('should NOT delete user (missing password)', function (done) {
-      const sampleBody = { username: user1.username };
+      const sampleBody = {};
 
       const expected = { message: constants.FAIL_MISSING_FIELDS };
 
@@ -375,7 +358,6 @@ describe('User API CRUD', () => {
     it('should NOT delete user (wrong username)', function (done) {
       const sampleBody = {
         username: 'wrong_username',
-        password: user1.password,
       };
       const expected = { message: constants.FAIL_NOT_EXIST(entity) };
 
@@ -395,11 +377,14 @@ describe('User API CRUD', () => {
       const expected = {
         message: constants.SUCCESS_DELETE(entity, user1.username),
       };
+      const sampleBody = {
+        username: user1.username,
+      };
 
       chai
         .request(app)
         .delete(`/api/user/delete-user`)
-        .send(user1)
+        .send(sampleBody)
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(constants.STATUS_CODE_OK);

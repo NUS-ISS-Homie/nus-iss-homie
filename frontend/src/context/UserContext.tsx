@@ -19,6 +19,10 @@ export const removeUser = () => {
   window.localStorage.removeItem(LOCAL_STORAGE_USERNAME_KEY);
 };
 
+export const saveUsername = (username: string) => {
+  window.localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, username);
+};
+
 const UserContext = createContext({
   user: defaultUser,
   setUser: (user: User) => {},
@@ -35,20 +39,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setLoading(true);
     const { username } = getUsername();
-    authClient.AuthClient.logout({ username })
-      .then((resp) => {
-        if (resp.status === STATUS_BAD_REQUEST)
-          throw new Error('Username or password is missing!');
-
-        setUser({ username: '', user_id: '' });
-        removeUser();
-      })
-      .catch((err) => {
-        snackbar.setError(err.toString());
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    setUser({ username: '', user_id: '' });
+    removeUser();
+    setLoading(false);
   };
 
   const deleteUser = () => {
