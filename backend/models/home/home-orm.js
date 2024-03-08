@@ -4,11 +4,15 @@ import {
   updateOperation,
   updateHomeModel,
   deleteHomeModel,
+  getHomeModelByUsername,
 } from './home-repository.js';
 
 export async function ormCreateHome(adminUser) {
   try {
-    const newHome = await createHomeModel({ adminUser: [adminUser] });
+    const newHome = await createHomeModel({
+      adminUser: adminUser,
+      users: [],
+    });
     await newHome.save();
     return newHome;
   } catch (err) {
@@ -18,8 +22,17 @@ export async function ormCreateHome(adminUser) {
 
 export async function ormGetHome(homeId) {
   try {
-    const newHome = await getHomeModel(homeId);
-    return newHome;
+    const home = await getHomeModel(homeId);
+    return home;
+  } catch (err) {
+    return { error: true, message: err };
+  }
+}
+
+export async function ormGetHomeByUsername(username) {
+  try {
+    const home = await getHomeModelByUsername(username);
+    return home;
   } catch (err) {
     return { error: true, message: err };
   }

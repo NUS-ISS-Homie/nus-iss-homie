@@ -1,6 +1,7 @@
 import {
   ormCreateHome as _createHome,
   ormGetHome as _getHome,
+  ormGetHomeByUsername as _getHomeByUsername,
   ormJoinHome as _joinHome,
   ormLeaveHome as _leaveHome,
   ormDeleteHome as _deleteHome,
@@ -22,10 +23,10 @@ export async function createHome(req, res) {
 
     const home = await _createHome(adminUser);
     if (!home || home.error) {
-      console.log(res);
+      console.log('ERROR!', home);
       return res
         .status(msg.STATUS_CODE_SERVER_ERROR)
-        .json({ message: res.message });
+        .json({ message: home.error.message });
     }
 
     return res
@@ -41,22 +42,28 @@ export async function createHome(req, res) {
 export async function getHome(req, res) {
   try {
     const { homeId } = req.params;
+    const { username } = req.body;
 
-    if (!homeId) {
+    if (!homeId && !username) {
       return res
         .status(msg.STATUS_CODE_BAD_REQUEST)
         .json({ message: msg.FAIL_MISSING_FIELDS });
     }
-    const home = await _getHome(homeId);
-    if (!home || home.error) {
-      console.log(home);
+
+    const resp = homeId
+      ? await _getHome(homeId)
+      : await _getHomeByUsername(username);
+
+    if (!resp || resp.error) {
+      console.log(resp);
       return res
         .status(msg.STATUS_CODE_NOT_FOUND)
         .json({ message: msg.FAIL_NOT_EXIST(entity) });
     }
+
     return res
       .status(msg.STATUS_CODE_OK)
-      .json({ home, message: msg.SUCCESS_READ(entity) });
+      .json({ home: resp, message: msg.SUCCESS_READ(entity) });
   } catch (err) {
     return res.status(msg.STATUS_CODE_SERVER_ERROR).json({ message: err });
   }
@@ -73,9 +80,15 @@ export async function joinHome(req, res) {
         .json({ message: msg.FAIL_MISSING_FIELDS });
     }
 
-    const home = await _joinHome(homeId, username);
+    const home = await _getHome(homeId);
     if (!home || home.error) {
-      console.log(home);
+      return res
+        .status(msg.STATUS_CODE_NOT_FOUND)
+        .json({ message: msg.FAIL_NOT_EXIST(entity) });
+    }
+
+    const resp = await _joinHome(homeId, username);
+    if (!resp || resp.error) {
       return res
         .status(msg.STATUS_CODE_BAD_REQUEST)
         .json({ message: msg.FAIL_MISSING_FIELDS });
@@ -83,7 +96,7 @@ export async function joinHome(req, res) {
 
     return res
       .status(msg.STATUS_CODE_OK)
-      .json({ home, message: msg.SUCCESS_ACTION('joined', entity) });
+      .json({ home: resp, message: msg.SUCCESS_ACTION('joined', entity) });
   } catch (err) {
     console.log('Error home: ' + err);
     return res.status(msg.STATUS_CODE_SERVER_ERROR).json({ message: err });
@@ -92,23 +105,22 @@ export async function joinHome(req, res) {
 
 export async function leaveHome(req, res) {
   try {
-    const { homeId } = req.params;
     const { username } = req.body;
 
-    if (!homeId || !username) {
+    if (!username) {
       return res
         .status(msg.STATUS_CODE_BAD_REQUEST)
         .json({ message: msg.FAIL_MISSING_FIELDS });
     }
 
-    const home = await _getHome(homeId);
-    if (!home.users.includes(username)) {
+    const home = await _getHomeByUsername(username);
+    if (!home) {
       return res
         .status(msg.STATUS_CODE_BAD_REQUEST)
         .json({ message: FAIL_NOT_TENANT });
     }
 
-    const updatedHome = await _leaveHome(homeId, username);
+    const updatedHome = await _leaveHome(home._id, username);
     if (!updatedHome || updatedHome.err) {
       return res
         .status(msg.STATUS_CODE_SERVER_ERROR)
@@ -126,31 +138,23 @@ export async function leaveHome(req, res) {
 
 export async function deleteHome(req, res) {
   try {
-    const { homeId } = req.params;
     const { username } = req.body;
 
-    if (!homeId) {
+    if (!username) {
       return res
         .status(msg.STATUS_CODE_BAD_REQUEST)
         .json({ message: msg.FAIL_MISSING_FIELDS });
     }
 
-    // Check if home exists
-    const home = await _getHome(homeId);
-    if (!home) {
-      return res
-        .status(msg.STATUS_CODE_NOT_FOUND)
-        .json({ message: msg.FAIL_NOT_EXIST(entity) });
-    }
-
-    // Check if user is admin
-    if (home.adminUser != username) {
+    // Check if home exists and if user is admin
+    const home = await _getHomeByUsername(username);
+    if (!home || home.adminUser != username) {
       return res
         .status(msg.STATUS_CODE_UNAUTHORIZED)
         .json({ message: msg.FAIL_UNAUTHORIZED });
     }
 
-    const resp = await _deleteHome(homeId);
+    const resp = await _deleteHome(home._id);
     if (!resp || resp.err) {
       return res
         .status(msg.STATUS_CODE_SERVER_ERROR)

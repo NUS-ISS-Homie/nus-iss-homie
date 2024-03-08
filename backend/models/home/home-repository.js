@@ -25,7 +25,13 @@ export async function createHomeModel(params) {
 }
 
 export async function getHomeModel(homeId) {
-  return await HomeModel.findOne({ _id: homeId });
+  return await HomeModel.findById(homeId);
+}
+
+export async function getHomeModelByUsername(username) {
+  return await HomeModel.findOne({
+    $or: [{ adminUser: username }, { users: username }],
+  });
 }
 
 export const updateOperation = {

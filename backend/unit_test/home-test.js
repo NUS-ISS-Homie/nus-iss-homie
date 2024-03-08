@@ -127,15 +127,16 @@ describe('CRUD API', () => {
 
   describe('POST api/home', () => {
     it('should create a new home', (done) => {
+      const newAdmin = 'newAdmin';
       const expectedBody = {
         message: msg.SUCCESS_CREATE(entity),
-        home: { _id: homeId.toString(), adminUser: adminUsername },
+        home: { adminUser: newAdmin },
       };
 
       chai
         .request(app)
-        .post(`/api/home`)
-        .send({ adminUser: adminUsername })
+        .post('/api/home')
+        .send({ adminUser: newAdmin })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_CREATED);
@@ -149,7 +150,42 @@ describe('CRUD API', () => {
 
       chai
         .request(app)
-        .post(`/api/home`)
+        .post('/api/home')
+        .send()
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(msg.STATUS_CODE_BAD_REQUEST);
+          chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+          done();
+        });
+    });
+  });
+
+  describe('GET api/home (by username)', () => {
+    it('should obtain an existing home data', (done) => {
+      const expectedBody = {
+        message: msg.SUCCESS_READ(entity),
+        home: { _id: homeId.toString() },
+      };
+
+      chai
+        .request(app)
+        .get('/api/home')
+        .send({ username: adminUsername })
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
+          chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+          done();
+        });
+    });
+
+    it('should not obtain an existing home data (missing username)', (done) => {
+      const expectedBody = { message: msg.FAIL_MISSING_FIELDS };
+
+      chai
+        .request(app)
+        .get(`/api/home`)
         .send()
         .end((err, res) => {
           err && console.log(err);
@@ -215,7 +251,7 @@ describe('CRUD API', () => {
         });
     });
 
-    it('should not join an existing home (inexistent home)', (done) => {
+    it('should not join home (inexistent home)', (done) => {
       const username1 = 'username1';
       const randomId = new mongoose.Types.ObjectId();
       const expectedBody = { message: msg.FAIL_NOT_EXIST(entity) };
@@ -226,21 +262,21 @@ describe('CRUD API', () => {
         .send({ username: username1 })
         .end((err, res) => {
           err && console.log(err);
-          chai.expect(res).to.have.status(msg.STATUS_CODE_BAD_REQUEST);
+          chai.expect(res).to.have.status(msg.STATUS_CODE_NOT_FOUND);
           chai.expect(res.body).to.shallowDeepEqual(expectedBody);
           done();
         });
     });
   });
 
-  describe('PUT api/home/:homeId/leave', () => {
+  describe('PUT api/home/leave', () => {
     it('should leave an existing home', (done) => {
       const expectedBody = { message: msg.SUCCESS_ACTION('left', entity) };
 
       chai
         .request(app)
-        .put(`/api/home/${homeId}/leave`)
-        .send({ username })
+        .put('/api/home/leave')
+        .send({ username: adminUsername })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
@@ -255,7 +291,7 @@ describe('CRUD API', () => {
 
       chai
         .request(app)
-        .put(`/api/home/${homeId}/leave`)
+        .put('/api/home/leave')
         .send()
         .end((err, res) => {
           err && console.log(err);
@@ -271,7 +307,7 @@ describe('CRUD API', () => {
 
       chai
         .request(app)
-        .put(`/api/home/${homeId}/leave`)
+        .put('/api/home/leave')
         .send({ username: username1 })
         .end((err, res) => {
           err && console.log(err);
@@ -282,7 +318,7 @@ describe('CRUD API', () => {
     });
   });
 
-  describe('DELETE api/home/:homeId', () => {
+  describe('DELETE api/home', () => {
     const homeId = new mongoose.Types.ObjectId();
 
     it('should delete an existing home', (done) => {
@@ -290,7 +326,7 @@ describe('CRUD API', () => {
 
       chai
         .request(app)
-        .delete(`/api/home/${homeId}`)
+        .delete(`/api/home`)
         .send({ username: adminUsername })
         .end((err, res) => {
           err && console.log(err);
@@ -300,13 +336,14 @@ describe('CRUD API', () => {
         });
     });
 
-    it('should not delete an existing home (username is not an admin)', (done) => {
+    it('should not delete an existing home (username is not a tenant)', (done) => {
       const expectedBody = { message: msg.FAIL_UNAUTHORIZED };
+      const oddUser = 'oddUser';
 
       chai
         .request(app)
-        .delete(`/api/home/${homeId}`)
-        .send({ username: user1 })
+        .delete(`/api/home`)
+        .send({ username: oddUser })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_UNAUTHORIZED);
