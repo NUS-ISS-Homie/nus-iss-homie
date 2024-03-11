@@ -14,7 +14,9 @@ mongoose.connect(mongoDB);
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
-db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
+if (process.env.ENV != 'PROD') {
+  db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
+}
 
 // CRUD functions
 
@@ -23,7 +25,13 @@ export async function createHomeModel(params) {
 }
 
 export async function getHomeModel(homeId) {
-  return await HomeModel.findOne({ _id: homeId });
+  return await HomeModel.findById(homeId);
+}
+
+export async function getHomeModelByUsername(username) {
+  return await HomeModel.findOne({
+    $or: [{ adminUser: username }, { users: username }],
+  });
 }
 
 export const updateOperation = {

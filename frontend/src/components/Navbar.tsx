@@ -8,8 +8,12 @@ import {
   Menu,
   MenuItem,
   useTheme,
+  Button,
 } from '@mui/material';
-import { SchoolSharp, SettingsSharp } from '@mui/icons-material';
+import {
+  HomeRounded as Home,
+  SettingsRounded as Settings,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../context/UserContext';
 import ConfirmationDialog from './modal/ConfirmationDialog';
@@ -74,17 +78,21 @@ function Navbar() {
           aria-label='menu'
           onClick={() => navigate('/home')}
         >
-          <SchoolSharp />
+          <Home />
         </IconButton>
 
-        <Typography variant='h6' component='div' sx={{ flexGrow: 1 }}>
+        <Button
+          variant='text'
+          sx={{ flexGrow: 1 }}
+          onClick={() => navigate('/')}
+        >
           Homie
-        </Typography>
+        </Button>
 
         <Stack direction='row' spacing={2}>
           <Typography variant='h6'>{user.username}</Typography>
           <IconButton onClick={handleOpenSettingsMenu} color='inherit'>
-            <SettingsSharp />
+            <Settings />
           </IconButton>
         </Stack>
 
