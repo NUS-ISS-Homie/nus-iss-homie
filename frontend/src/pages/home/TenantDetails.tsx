@@ -1,29 +1,67 @@
 import React, { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Avatar, Box, Grid, Typography } from '@mui/material';
 import { useHome } from '../../context/HomeContext';
 import { useUser } from '../../context/UserContext';
+import { boxShadow } from '../../styles';
 
-function Tenant(props: { tenant: string }) {
+enum Role {
+  Admin = 'Admin',
+  Member = 'Member',
+}
+
+interface Tenant {
+  username: string;
+  role: Role;
+}
+
+function Tenant(props: { tenant: Tenant }) {
   const { tenant } = props;
 
   return (
-    <div>
-      <Typography variant='h6'>{tenant}</Typography>
-    </div>
+    <Box
+      boxShadow={boxShadow}
+      bgcolor='#f3f7fa'
+      textAlign='left'
+      padding='1rem'
+      borderRadius='8px'
+      display='flex'
+      alignItems='center'
+      justifyContent='center'
+    >
+      <Avatar
+        sx={{
+          bgcolor: tenant.role == Role.Admin ? 'primary.main' : 'secondary',
+        }}
+      >
+        {tenant.username[0]}
+      </Avatar>
+      <Box marginLeft='1rem'>
+        <Typography variant='h6'>{tenant.username}</Typography>
+        <Typography variant='subtitle1' color='grey'>
+          {tenant.role}
+        </Typography>
+      </Box>
+    </Box>
   );
 }
 
 function TenantDetails() {
-  const user = useUser();
   const home = useHome();
-  const [tenants, setTenants] = useState(user ? [user.username] : []);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
 
   useEffect(() => {
-    if (!home._id) return;
-    setTenants([user.username, ...home.users]);
-  }, [home, user.username]);
+    if (!home.adminUser) return;
+    const tenants = [];
+    tenants.push({ username: home.adminUser, role: Role.Admin });
+    home.users.forEach((u) => tenants.push({ username: u, role: Role.Member }));
+    setTenants(tenants);
+  }, []);
 
-  return <div>{tenants.map((t, i) => t && <Tenant tenant={t} key={i} />)}</div>;
+  return (
+    <Grid container columnGap={2} justifyContent='center' alignItems='center'>
+      {tenants.map((t, i) => t && <Tenant tenant={t} key={i} />)}
+    </Grid>
+  );
 }
 
 export default TenantDetails;
