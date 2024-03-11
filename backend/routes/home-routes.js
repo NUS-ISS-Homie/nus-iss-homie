@@ -11,7 +11,7 @@ const router = express.Router();
 
 // Controller will contain all user-defined routes
 router.post('/', createHome);
-router.get('/', getHome);
+router.put('/', getHome);
 router.delete('/', deleteHome);
 router.put('/leave', leaveHome);
 

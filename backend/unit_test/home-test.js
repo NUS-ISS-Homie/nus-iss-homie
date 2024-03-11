@@ -170,7 +170,7 @@ describe('CRUD API', () => {
 
       chai
         .request(app)
-        .get('/api/home')
+        .put('/api/home')
         .send({ username: adminUsername })
         .end((err, res) => {
           err && console.log(err);
@@ -185,7 +185,7 @@ describe('CRUD API', () => {
 
       chai
         .request(app)
-        .get(`/api/home`)
+        .put(`/api/home`)
         .send()
         .end((err, res) => {
           err && console.log(err);
