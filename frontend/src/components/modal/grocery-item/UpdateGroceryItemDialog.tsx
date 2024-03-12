@@ -21,6 +21,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { GroceryItem } from '../../../@types/GroceryItemContext';
+import { useUser } from '../../../context/UserContext';
 
 const Unit: string[] = ['pc', 'kg', 'lb', 'L'];
 
@@ -70,10 +71,13 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
     // };
 
     const snackBar = useSnackbar();
+    const user = useUser();
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
+        const user_id = user.user_id;
+
         const name = data.get('name');
         const purchasedDate = data.get('purchasedDate');
         const expiryDate = data.get('expiryDate');
@@ -81,11 +85,12 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
         const unit = data.get('unit');
         const category = data.get('category');
 
-        if (!name || !purchasedDate || !expiryDate || !quantity || !unit || !category) {
+        if (!user_id || !name || !purchasedDate || !expiryDate || !quantity || !unit || !category) {
             return;
         }
 
         const body = {
+            user: user_id,
             name: name.toString(),
             purchasedDate: new Date(purchasedDate.toString()),
             expiryDate: new Date(expiryDate.toString()),

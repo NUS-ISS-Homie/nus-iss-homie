@@ -9,13 +9,14 @@ import GroceryItemCard from './GroceryItemCard';
 function GroceryListPage() {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [createItemDialogOpen, setCreateItemDialogOpen] = useState(false);
-    const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
-    const [isLoading, setLoading] = useState(false);
     const theme = createTheme();
 
     const groceryItems = [
         {
-            user_id: "ohohoho",
+            user: {
+                user_id: 'hoho',
+                username: 'hoho'
+            },
             name: "Milk",
             purchasedDate: new Date(),
             expiryDate: new Date(),
@@ -24,7 +25,10 @@ function GroceryListPage() {
             category: 'Dairy/Egg'
         },
         {
-            user_id: "hihihi",
+            user: {
+                user_id: 'hihi',
+                username: 'hihi'
+            },
             name: "Nugget",
             purchasedDate: new Date(),
             expiryDate: new Date(),
@@ -34,7 +38,7 @@ function GroceryListPage() {
         }
     ]
 
-    // TODO : Call API to get a list of all grocery items of the house / user ?
+    // TODO : Call API to get a list of all grocery items of the house
 
     const handleOpenCreateItem = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);

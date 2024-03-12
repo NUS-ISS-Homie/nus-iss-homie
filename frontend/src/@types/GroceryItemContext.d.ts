@@ -1,5 +1,7 @@
+import { User } from "./UserContext"
+
 export interface GroceryItem {
-    user_id: string,
+    user: User,
     name: string,
     purchasedDate: Date,
     expiryDate: Date,

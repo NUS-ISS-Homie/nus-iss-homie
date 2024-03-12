@@ -50,6 +50,7 @@ function GroceryItemCard(props: ItemProps) {
     return (
         <Card>
             <CardContent>
+                <Typography><b>User : </b>{item.user.username}</Typography>
                 <Typography><b>Item Name : </b>{item.name}</Typography>
                 <Typography><b>Purchase Date : </b>{item.purchasedDate.toDateString()}</Typography>
                 <Typography><b>Expiry Date : </b>{item.expiryDate.toDateString()}</Typography>

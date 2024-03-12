@@ -66,6 +66,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         const user_id = user.user_id;
+        
         const name = data.get('name');
         const purchasedDate = data.get('purchasedDate');
         const expiryDate = data.get('expiryDate');
@@ -78,7 +79,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
         }
 
         const body = {
-            user_id: user_id.toString(),
+            user: user_id.toString(),
             name: name.toString(),
             purchasedDate: new Date(purchasedDate.toString()),
             expiryDate: new Date(expiryDate.toString()),
