@@ -8,6 +8,7 @@ import homeRoutes from './routes/home-routes.js';
 import userRoutes from './routes/user-routes.js';
 import expenseRoutes from './routes/expense-routes.js';
 import choreRoutes from './routes/chore-routes.js';
+import groceryItemRoutes from './routes/grocery-item-routes.js';
 import createEventListeners from './controllers/socket-controller.js';
 
 const app = express();
@@ -48,6 +49,11 @@ app.use('/api/expense', expenseRoutes).all((_, res) => {
 });
 
 app.use('/api/chore', choreRoutes).all((_, res) => {
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+});
+
+app.use('/api/grocery-item', groceryItemRoutes).all((_, res) => {
   res.setHeader('content-type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 });
