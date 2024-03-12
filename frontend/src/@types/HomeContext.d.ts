@@ -1,7 +1,9 @@
+import { User } from './UserContext';
+
 export interface Home {
   _id: string | null;
-  users: string[];
-  adminUser: string | null;
+  users: User[];
+  adminUser: User | null;
 }
 
 export interface HomeResponse {

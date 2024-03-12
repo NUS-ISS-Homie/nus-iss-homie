@@ -18,7 +18,7 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AuthClient } from '../utils/auth-client';
 import { useNavigate } from 'react-router-dom';
 import { STATUS_NOT_FOUND, STATUS_OK } from '../constants';
-import { saveUsername, useAuth } from '../context/UserContext';
+import { saveUserToLocalStorage, useAuth } from '../context/UserContext';
 import {
   defaultHome,
   saveHomeInStorage,
@@ -66,9 +66,9 @@ function LoginPage() {
       .then(({ data: { username, user_id, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
         authClient.setUser({ username, user_id });
-        saveUsername(username);
+        saveUserToLocalStorage({ username, user_id });
 
-        APIHome.getHomeByUsername(username).then(
+        APIHome.getHomeByUserId(user_id).then(
           ({ data: { home, message }, status }) => {
             switch (status) {
               case STATUS_OK:

@@ -22,7 +22,7 @@ function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  const user = useUser();
+  const { user_id } = useUser();
   const homeClient = useAuth();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -33,12 +33,12 @@ function HomeRegisterPage() {
       invitees.push(data.get(`tenant${i + 1}`));
     }
 
-    if (!user.username) {
+    if (!user_id) {
       navigate('/');
       return;
     }
 
-    APIHome.createHome(user.username)
+    APIHome.createHome(user_id)
       .then(({ data: { home, message }, status }) => {
         if (status !== STATUS_CREATED) throw new Error(message);
         homeClient.setHome(home);

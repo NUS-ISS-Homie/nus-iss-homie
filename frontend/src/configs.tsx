@@ -7,6 +7,10 @@ export const URL_HOME_SVC = URI_BACKEND + PREFIX_HOME_SVC;
 export const URL_USER_SVC = URI_BACKEND + PREFIX_USER_SVC;
 export const URL_GROCERY_ITEM_SVC = URI_BACKEND + PREFIX_GROCERY_ITEM_SVC;
 
+const PREFIX_NOTIF_SVC = '/api/notification';
+export const URL_NOTIF_SVC = URI_BACKEND + PREFIX_NOTIF_SVC;
+
+
 export const USER_SIGNUP = '/signup';
 export const USER_LOGIN = '/login';
 export const USER_LOGOUT = '/logout';
@@ -21,5 +25,5 @@ export const URL_USER_CHANGE_PASSWORD = URL_USER_SVC + USER_CHANGE_PASSWORD;
 export const URL_USER_CHANGE_USERNAME = URL_USER_SVC + USER_CHANGE_USERNAME;
 export const URL_USER_DELETE_USER = URL_USER_SVC + USER_DELETE_USER;
 
-export const LOCAL_STORAGE_USERNAME_KEY = 'username';
+export const LOCAL_STORAGE_USER_KEY = 'user';
 export const LOCAL_STORAGE_HOME_KEY = 'home';
