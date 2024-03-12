@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Avatar, Box, Grid, Typography } from '@mui/material';
 import { useHome } from '../../context/HomeContext';
-import { useUser } from '../../context/UserContext';
 import { boxShadow } from '../../styles';
 
 enum Role {
@@ -52,8 +51,14 @@ function TenantDetails() {
   useEffect(() => {
     if (!home.adminUser) return;
     const tenants = [];
-    tenants.push({ username: home.adminUser, role: Role.Admin });
-    home.users.forEach((u) => tenants.push({ username: u, role: Role.Member }));
+    console.log(home);
+    home.adminUser.username &&
+      tenants.push({ username: home.adminUser.username, role: Role.Admin });
+    home.users.forEach(
+      ({ username }) =>
+        username && tenants.push({ username, role: Role.Member })
+    );
+    console.log(tenants);
     setTenants(tenants);
   }, []);
 

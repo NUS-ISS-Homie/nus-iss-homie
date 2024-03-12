@@ -21,7 +21,8 @@ if (process.env.ENV != 'PROD') {
 // CRUD functions
 
 export async function createHomeModel(params) {
-  return await HomeModel.create(params);
+  const home = await HomeModel.create(params);
+  return getHomeModel(home._id);
 }
 
 export async function getHomeModel(homeId) {
