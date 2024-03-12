@@ -1,4 +1,7 @@
+<<<<<<< Updated upstream
 import React from 'react';
+=======
+>>>>>>> Stashed changes
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,6 +9,7 @@ import {
   Navigate,
 } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
+<<<<<<< Updated upstream
 
 import './App.css';
 // import { useSockets } from './context/SocketContext';
@@ -39,6 +43,20 @@ function App() {
     <Routes>
       <Route path='/' element={<Navigate replace to='/signup' />}></Route>
       <Route path='/signup' element={<SignUpPage />} />
+=======
+import { useUser } from './context/UserContext';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignUpPage';
+import SignUpPage from './pages/SignUpPage';
+
+function App() {
+  const user = useUser();
+
+  const guestRoutes = (
+    <Routes>
+      <Route path='/' element={<Navigate replace to='/signup' />}></Route>
+      <Route path='/signup' element={<SignUpPage/>} />
+>>>>>>> Stashed changes
       <Route path='/login' element={<LoginPage />} />
       <Route path='*' element={<Navigate replace to='/login' />} />
     </Routes>
@@ -49,8 +67,12 @@ function App() {
       <CssBaseline />
       <Box>
         <Router>
+<<<<<<< Updated upstream
           {user.username && <Navbar />}
           {user.username ? registeredRoutes : guestRoutes}
+=======
+          {guestRoutes}
+>>>>>>> Stashed changes
         </Router>
       </Box>
     </div>
