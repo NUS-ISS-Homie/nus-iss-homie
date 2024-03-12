@@ -23,15 +23,19 @@ if (process.env.ENV != 'PROD') {
 // CRD functions
 
 export async function createNotificationModel(params) {
-  return await NotificationModel.create(params);
+  return await NotificationModel.create({ ...params });
 }
 
 export async function getNotificationModel(notificationId) {
-  return await NotificationModel.findById(notificationId);
+  return await NotificationModel.findById(notificationId)
+    .populate({ path: 'sender', select: 'username' })
+    .populate({ path: 'recipients', select: 'username' });
 }
 
 export async function getNotificationModelsByRecipient(recipient) {
-  return await NotificationModel.find({ recipients: recipient });
+  return await NotificationModel.find({ recipients: recipient })
+    .populate({ path: 'sender', select: 'username' })
+    .populate({ path: 'recipients', select: 'username' });
 }
 
 export async function deleteNotificationForRecipient(
@@ -49,7 +53,9 @@ export async function deleteNotificationForRecipient(
   if (updated.recipients.length == 0) {
     return deleteNotificationModel(notificationId);
   }
-  return updated;
+  return updated
+    .populate({ path: 'sender', select: 'username' })
+    .populate({ path: 'recipients', select: 'username' });
 }
 
 async function deleteNotificationModel(notificationId) {

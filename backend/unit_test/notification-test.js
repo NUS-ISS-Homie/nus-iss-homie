@@ -8,6 +8,7 @@ import assert from 'assert';
 import * as msg from '../common/messages.js';
 import { entity } from '../controllers/notification-controller.js';
 import NotificationModel from '../models/notification/notification-model.js';
+import UserModel from '../models/user/user-model.js';
 
 assert(process.env.ENV == 'TEST');
 chai.use(chaiHttp);
@@ -16,14 +17,20 @@ chai.use(chaiShallowDeepEqual);
 // CRUD
 
 describe('CRUD API Notification', () => {
-  const notificationId = new mongoose.Types.ObjectId();
-  const sender = new mongoose.Types.ObjectId();
-  const recipient = new mongoose.Types.ObjectId();
+  const notificationId = new mongoose.Types.ObjectId().toString();
+  const sender = {
+    _id: new mongoose.Types.ObjectId().toString(),
+    username: 'sender',
+  };
+  const recipient = {
+    _id: new mongoose.Types.ObjectId().toString(),
+    username: 'recipient',
+  };
   const notification = {
     _id: notificationId.toString(),
-    sender: sender.toString(),
-    recipients: [recipient.toString()],
-    message: 'Hello!',
+    sender: sender._id.toString(),
+    recipients: [recipient._id.toString()],
+    message: { title: 'Notification Title', content: 'Hello!' },
   };
 
   before('Connect to MongoDB', async () => {
@@ -31,6 +38,12 @@ describe('CRUD API Notification', () => {
   });
 
   beforeEach('Clear DB', async () => {
+    // Create Users
+    await UserModel.deleteMany();
+    await UserModel.create({ ...sender, hashedPassword: 'password' });
+    await UserModel.create({ ...recipient, hashedPassword: 'password' });
+
+    // Create Notification
     await NotificationModel.deleteMany();
     await NotificationModel.create(notification);
   });
@@ -40,7 +53,7 @@ describe('CRUD API Notification', () => {
       const newNotification = {
         sender: new mongoose.Types.ObjectId().toString(),
         recipients: [new mongoose.Types.ObjectId().toString()],
-        message: 'This is new!',
+        message: { title: 'Notification Title', content: 'Hello!' },
       };
 
       const expectedBody = {
@@ -64,7 +77,6 @@ describe('CRUD API Notification', () => {
       const newNotification = {
         sender: new mongoose.Types.ObjectId(),
         // recipient: new mongoose.Types.ObjectId(),
-        recipient_type: 'user',
         message: 'Missing field!',
       };
       const expectedBody = { message: msg.FAIL_MISSING_FIELDS };
@@ -86,12 +98,12 @@ describe('CRUD API Notification', () => {
     it('should obtain an existing notification data', (done) => {
       const expectedBody = {
         message: msg.SUCCESS_READ(entity),
-        notification: [notification],
+        notification: [{ ...notification, sender, recipients: [recipient] }],
       };
 
       chai
         .request(app)
-        .get(`/api/notification/user/${recipient}`)
+        .get(`/api/notification/user/${recipient._id}`)
         .send()
         .end((err, res) => {
           err && console.log(err);
@@ -128,7 +140,7 @@ describe('CRUD API Notification', () => {
       chai
         .request(app)
         .delete(`/api/notification/${notificationId}`)
-        .send({ userId: recipient })
+        .send({ userId: recipient._id })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
@@ -158,7 +170,7 @@ describe('CRUD API Notification', () => {
       chai
         .request(app)
         .delete(`/api/notification/${notificationId}`)
-        .send({ userId: sender })
+        .send({ userId: sender._id })
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(msg.STATUS_CODE_UNAUTHORIZED);

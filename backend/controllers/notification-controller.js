@@ -103,7 +103,10 @@ export async function deleteNotificationForRecipient(req, res) {
 
     // Check if notification exists and if user is recipient
     const notification = await _getNotification(notificationId);
-    if (!notification || !notification.recipients.includes(userId)) {
+    if (
+      !notification ||
+      !notification.recipients.map((r) => r._id.toString()).includes(userId)
+    ) {
       return res
         .status(msg.STATUS_CODE_UNAUTHORIZED)
         .json({ message: msg.FAIL_UNAUTHORIZED });
