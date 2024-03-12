@@ -28,25 +28,25 @@ export async function createGroceryItem(params) {
 }
 
 // READ FUNCTION
-export async function getGroceryItem(user_id, name) {
+export async function getGroceryItem(grocery_item_id) {
     const item = await GroceryItemModel.findOne({
-        user: user_id,
-        name: name
+        _id: grocery_item_id
     }).populate('user').exec();
     return item;
 }
 
 // UPDATE FUNCTION
 export async function updateGroceryItem(params) {
-    const item = await GroceryItemModel.findOne({ user: params.user_id, name: params.name });
+    const item = await GroceryItemModel.findOne({ _id: params.grocery_item_id });
     if (!item) {
         throw new Error('Database Error');
     }
 
     const updated = await GroceryItemModel.updateOne(
-        { user: params.user_id, name: params.name },
+        { _id: params.grocery_item_id },
         {
             $set: {
+                name: params.name,
                 purchasedDate: params.purchasedDate,
                 expiryDate: params.purchasedDate,
                 category: params.category,
@@ -61,8 +61,7 @@ export async function updateGroceryItem(params) {
 // DELETE FUNCTION
 export async function deleteGroceryItem(params) {
     const item = await GroceryItemModel.findOne({
-        user: params.user_id,
-        name: params.name
+        _id: grocery_item_id
     });
 
     if (!item) {
@@ -70,8 +69,7 @@ export async function deleteGroceryItem(params) {
     }
 
     const deleted = await GroceryItemModel.deleteOne({
-        user: params.user_id,
-        name: params.name
+        _id: grocery_item_id
     });
     return deleted.acknowledged;
 }

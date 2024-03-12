@@ -52,9 +52,9 @@ export async function createGroceryItem(req, res) {
 
 export async function getGroceryItem(req, res) {
     try {
-        const { user_id, name } = req.body;
-        if (name) {
-            const item = await _getGroceryItem(user_id, name);
+        const { groceryItemId } = req.params;
+        if (groceryItemId) {
+            const item = await _getGroceryItem(groceryItemId);
             if (!item) {
                 return res
                     .status(constants.STATUS_CODE_NOT_FOUND)
@@ -80,9 +80,10 @@ export async function getGroceryItem(req, res) {
 
 export async function updatedGroceryItem(req, res) {
     try {
+        const { groceryItemId } = req.params;
         const { user_id, name, purchasedDate, expiryDate, quantity, unit, category } = req.body;
-        if (name) {
-            const item = await _getGroceryItem(user_id, name);
+        if (groceryItemId) {
+            const item = await _getGroceryItem(groceryItemId);
 
             if (!item) {
                 return res
@@ -91,6 +92,7 @@ export async function updatedGroceryItem(req, res) {
             }
 
             const updated = await _updateGroceryItem(
+                groceryItemId, user_id,
                 name, purchasedDate, expiryDate, quantity, unit, category
             );
 
@@ -116,9 +118,9 @@ export async function updatedGroceryItem(req, res) {
 
 export async function deleteGroceryItem(req, res) {
     try {
-        const { user_id, name } = req.body;
-        if (user_id && name) {
-            const isDeleted = await _deleteGroceryItem(user_id, name);
+        const { groceryItemId } = req.params;
+        if (groceryItemId) {
+            const isDeleted = await _deleteGroceryItem(groceryItemId);
             if (!isDeleted || isDeleted.err) {
                 return res
                     .status(constants.STATUS_CODE_NOT_FOUND)

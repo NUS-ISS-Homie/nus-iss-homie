@@ -19,9 +19,9 @@ export async function ormCreateGroceryItem(user_id, name, purchasedDate, expiryD
 }
 
 // READ FUNCTION
-export async function ormGetGroceryItem(user_id, name) {
+export async function ormGetGroceryItem(grocery_item_id) {
     try {
-        const item = await getGroceryItem(user_id, name);
+        const item = await getGroceryItem(grocery_item_id);
         return item;
     } catch (err) {
         console.log(
@@ -32,9 +32,10 @@ export async function ormGetGroceryItem(user_id, name) {
 }
 
 // UPDATE FUNCTION
-export async function ormUpdateGroceryItem(user_id, name, purchasedDate, expiryDate, quantity, unit, category) {
+export async function ormUpdateGroceryItem(grocery_item_id, user_id, name, purchasedDate, expiryDate, quantity, unit, category) {
     try {
         const updatedGroceryItem = await updateGroceryItem({
+            grocery_item_id,
             user_id,
             name,
             purchasedDate,
@@ -43,16 +44,16 @@ export async function ormUpdateGroceryItem(user_id, name, purchasedDate, expiryD
             unit,
             category
         });
-        return updateGroceryItem;
+        return updatedGroceryItem;
     } catch (err) {
         return { err };
     }
 }
 
 // DELETE FUNCTION
-export async function ormDeleteGroceryItem(user_id, name) {
+export async function ormDeleteGroceryItem(grocery_item_id) {
     try {
-        const isDeleted = await deleteGroceryItem({ user_id, name });
+        const isDeleted = await deleteGroceryItem({ grocery_item_id });
         return isDeleted;
     } catch (err) {
         return { err };
