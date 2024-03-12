@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, CardActions, CardContent, IconButton, Typography } from "@mui/material";
+import { Card, CardActions, CardContent, IconButton, Typography, Grid } from "@mui/material";
 import { GroceryItem } from "../@types/GroceryItemContext";
 import { Box } from "@mui/system";
 import EditIcon from '@mui/icons-material/Edit';
@@ -50,21 +50,21 @@ function GroceryItemCard(props: ItemProps) {
     return (
         <Card>
             <CardContent>
-                <Typography>{item.name}</Typography>
-                <Typography>{item.purchasedDate.toDateString()}</Typography>
-                <Typography>{item.expiryDate.toDateString()}</Typography>
-                <Typography>{item.quantity} {item.unit}</Typography>
-                <Typography>{item.category}</Typography>
+                <Typography><b>Item Name : </b>{item.name}</Typography>
+                <Typography><b>Purchase Date : </b>{item.purchasedDate.toDateString()}</Typography>
+                <Typography><b>Expiry Date : </b>{item.expiryDate.toDateString()}</Typography>
+                <Typography><b>Quantity : </b>{item.quantity} {item.unit}</Typography>
+                <Typography><b>Category : </b>{item.category}</Typography>
             </CardContent>
             <CardActions>
-                <>
+                <Grid container justifyContent="flex-end">
                     <IconButton onClick={handleOpenUpdateItem} color='inherit'>
                         <EditIcon />
                     </IconButton>
                     <IconButton onClick={handleOpenDeleteItem} color='inherit'>
                         <DeleteIcon />
                     </IconButton>
-                </>
+                </Grid>
             </CardActions>
 
             <ConfirmationDialog
