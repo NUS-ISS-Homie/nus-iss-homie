@@ -14,6 +14,7 @@ import DashboardPage from './pages/home/DashboardPage';
 import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import GroceryListPage from './pages/GroceryListPage';
 import ExpenseMainPage from './pages/expenses/ExpenseMainPage';
 import { useUser, getUsername } from './context/UserContext';
 import Navbar from './components/Navbar';
@@ -40,6 +41,7 @@ function App() {
       <Route path='/' element={<Navigate replace to='/signup' />}></Route>
       <Route path='/signup' element={<SignUpPage />} />
       <Route path='/login' element={<LoginPage />} />
+      <Route path='/grocery-list' element={<GroceryListPage />} />
       <Route path='*' element={<Navigate replace to='/login' />} />
     </Routes>
   );
