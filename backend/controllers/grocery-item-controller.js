@@ -18,7 +18,6 @@ function isCompleteField(body) {
     return user_id, name && purchasedDate && expiryDate && quantity && unit && category;
 }
 
-
 export async function createGroceryItem(req, res) {
     try {
         const { user_id, name, purchasedDate, expiryDate, quantity, unit, category } = req.body;

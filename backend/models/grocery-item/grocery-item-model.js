@@ -1,12 +1,10 @@
 import mongoose from 'mongoose';
-import bcryptjs from 'bcryptjs';
 
 var Schema = mongoose.Schema;
 let GroceryItemModelSchema = new Schema({
-    user_id: {
-        type: String,
-        required: true,
-        unique: true
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'UserModel'
     },
     name: {
         type: String,
@@ -35,5 +33,5 @@ let GroceryItemModelSchema = new Schema({
     }
 });
 
-GroceryItemModelSchema.index({ user_id: 1, name: 1 }, { unique: true });
+GroceryItemModelSchema.index({ user: 1, name: 1 }, { unique: true });
 export default mongoose.model('GroceryItemModel', GroceryItemModelSchema);
