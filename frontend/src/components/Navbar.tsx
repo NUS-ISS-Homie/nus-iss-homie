@@ -10,15 +10,13 @@ import {
   useTheme,
   Button,
 } from '@mui/material';
-import {
-  HomeRounded as Home,
-  SettingsRounded as Settings,
-} from '@mui/icons-material';
+import { MailRounded, SettingsRounded as Settings } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../context/UserContext';
 import ConfirmationDialog from './modal/ConfirmationDialog';
 import ChangeUsernameDialog from './modal/ChangeUsernameDialog';
 import ChangePasswordDialog from './modal/ChangePasswordDialog';
+import NotificationsDialog from './modal/notification/NotificationsDialog';
 
 function Navbar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -26,6 +24,7 @@ function Navbar() {
   const [changeUnameDialogOpen, setChangeUnameDialogOpen] = useState(false);
   const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
     useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const user = useUser();
   const authClient = useAuth();
@@ -76,9 +75,9 @@ function Navbar() {
           edge='start'
           color='inherit'
           aria-label='menu'
-          onClick={() => navigate('/home')}
+          onClick={() => setNotificationsOpen(true)}
         >
-          <Home />
+          <MailRounded />
         </IconButton>
 
         <Button
@@ -135,6 +134,12 @@ function Navbar() {
       <ChangePasswordDialog
         dialogOpen={changePasswordDialogOpen}
         setDialogOpen={setChangePasswordDialogOpen}
+      />
+
+      <NotificationsDialog
+        dialogOpen={notificationsOpen}
+        setDialogOpen={setNotificationsOpen}
+        onConfirmAction={() => setNotificationsOpen(false)}
       />
     </AppBar>
   );
