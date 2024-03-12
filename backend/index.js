@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 
 import homeRoutes from './routes/home-routes.js';
+import notificationRoutes from './routes/notification-routes.js';
 import userRoutes from './routes/user-routes.js';
 import expenseRoutes from './routes/expense-routes.js';
 import choreRoutes from './routes/chore-routes.js';
@@ -33,6 +34,11 @@ io.on('connection', (socket) => {
 });
 
 app.use('/api/home', homeRoutes).all((_, res) => {
+  res.setHeader('content-type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+});
+
+app.use('/api/notification', notificationRoutes).all((_, res) => {
   res.setHeader('content-type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 });
