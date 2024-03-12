@@ -14,14 +14,16 @@ import { AddCircle, RemoveCircle } from '@mui/icons-material';
 import APIHome from '../utils/api-home';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../context/SnackbarContext';
-import { STATUS_CODE_CREATED } from '../common/messages';
+import { useAuth } from '../context/HomeContext';
 import { useUser } from '../context/UserContext';
+import { STATUS_CREATED } from '../constants';
 
 function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const user = useUser();
+  const homeClient = useAuth();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,10 +40,10 @@ function HomeRegisterPage() {
 
     APIHome.createHome(user.username)
       .then(({ data: { home, message }, status }) => {
-        if (status !== STATUS_CODE_CREATED) throw new Error(message);
+        if (status !== STATUS_CREATED) throw new Error(message);
+        homeClient.setHome(home);
 
         // TODO: send invites to invitees
-
         snackbar.setSuccess(message);
         navigate('/');
       })
@@ -126,7 +128,7 @@ function HomeRegisterPage() {
           <Grid container spacing={2}>
             {tenants.map((username, t) => {
               t = t + 1;
-              return <TenantsField t={t} username={username} />;
+              return <TenantsField t={t} username={username} key={t} />;
             })}
           </Grid>
 

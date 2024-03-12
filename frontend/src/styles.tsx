@@ -42,3 +42,5 @@ export const theme = createTheme({
     code: { fontFamily: 'Roboto Mono' },
   },
 });
+
+export const boxShadow = 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;';

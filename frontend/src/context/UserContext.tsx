@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User } from '../@types/UserContext';
 import * as authClient from '../utils/auth-client';
 import { LOCAL_STORAGE_USERNAME_KEY } from '../configs';
@@ -63,6 +63,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    const { username } = getUsername();
+    username && setUser({ username, user_id: '' });
+  }, []);
 
   if (loading) {
     return <div>Loading ...</div>;

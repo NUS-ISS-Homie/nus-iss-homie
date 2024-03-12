@@ -17,8 +17,14 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AuthClient } from '../utils/auth-client';
 import { useNavigate } from 'react-router-dom';
-import { STATUS_OK } from '../constants';
+import { STATUS_NOT_FOUND, STATUS_OK } from '../constants';
 import { saveUsername, useAuth } from '../context/UserContext';
+import {
+  defaultHome,
+  saveHomeInStorage,
+  useAuth as useHomeAuth,
+} from '../context/HomeContext';
+import APIHome from '../utils/api-home';
 
 enum LoginStatus {
   SUCCESS = 1,
@@ -37,6 +43,7 @@ function LoginPage() {
 
   const navigate = useNavigate();
   const authClient = useAuth();
+  const homeClient = useHomeAuth();
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,8 +65,25 @@ function LoginPage() {
     AuthClient.login(body)
       .then(({ data: { username, user_id, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
-        authClient.setUser({ username: username, user_id: user_id });
+        authClient.setUser({ username, user_id });
         saveUsername(username);
+
+        APIHome.getHomeByUsername(username).then(
+          ({ data: { home, message }, status }) => {
+            switch (status) {
+              case STATUS_OK:
+                homeClient.setHome(home);
+                home && saveHomeInStorage(home);
+                break;
+              case STATUS_NOT_FOUND:
+                homeClient.setHome(defaultHome);
+                break;
+              default:
+                throw new Error('Error in retrieving Home');
+            }
+          }
+        );
+
         setLoginStatus(LoginStatus.SUCCESS);
         navigate('/home');
       })

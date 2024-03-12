@@ -11,10 +11,10 @@ import {
 import React from 'react';
 import APIHome from '../utils/api-home';
 import { useNavigate } from 'react-router-dom';
-import { STATUS_CODE_OK } from '../common/messages';
 import { useSnackbar } from '../context/SnackbarContext';
 import { useSockets } from '../context/SocketContext';
 import { useUser } from '../context/UserContext';
+import { STATUS_OK } from '../constants';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
@@ -37,10 +37,10 @@ function HomeJoinPage() {
     // TODO: get current userId
     APIHome.joinHome(homeId.toString(), username)
       .then(({ data: { home, message }, status }) => {
-        if (status !== STATUS_CODE_OK) throw new Error(message);
+        if (status !== STATUS_OK) throw new Error(message);
+        if (!home || !home._id) return;
 
         // TODO: send invites to invitees
-
         joinHome(home._id);
         navigate('/');
       })
