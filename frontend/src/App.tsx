@@ -10,19 +10,18 @@ import { Box, CssBaseline } from '@mui/material';
 import './App.css';
 // import { useSockets } from './context/SocketContext';
 import HomeRegisterPage from './pages/HomeRegisterPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardPage from './pages/home/DashboardPage';
 import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import ExpenseMainPage from './pages/expenses/ExpenseMainPage';
-import { useUser, getUsername } from './context/UserContext';
+import { useUser } from './context/UserContext';
 import Navbar from './components/Navbar';
 
 function App() {
   // const { homeSocket: socket } = useSockets();
   // socket.on('connected', () => console.log("SOCKET CONNECTED"));
 
-  const username = getUsername();
   const user = useUser();
 
   const registeredRoutes = (
@@ -50,7 +49,7 @@ function App() {
       <CssBaseline />
       <Box>
         <Router>
-          {user.user_id && <Navbar />}
+          {user.username && <Navbar />}
           {user.username ? registeredRoutes : guestRoutes}
         </Router>
       </Box>

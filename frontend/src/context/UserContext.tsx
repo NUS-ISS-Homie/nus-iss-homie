@@ -1,7 +1,7 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User } from '../@types/UserContext';
 import * as authClient from '../utils/auth-client';
-import { LOCAL_STORAGE_USERNAME_KEY } from '../configs';
+import { LOCAL_STORAGE_USER_KEY } from '../configs';
 import { STATUS_OK, STATUS_BAD_REQUEST } from '../constants';
 import { useSnackbar } from './SnackbarContext';
 
@@ -10,17 +10,17 @@ export const defaultUser: User = {
   user_id: null,
 };
 
-export const getUsername = () => {
-  const username = window.localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY);
-  return { username: username || '' };
+export const getUserFromLocalStorage = () => {
+  const userStr = window.localStorage.getItem(LOCAL_STORAGE_USER_KEY);
+  return userStr && JSON.parse(userStr);
 };
 
 export const removeUser = () => {
-  window.localStorage.removeItem(LOCAL_STORAGE_USERNAME_KEY);
+  window.localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
 };
 
-export const saveUsername = (username: string) => {
-  window.localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, username);
+export const saveUserToLocalStorage = (user: User) => {
+  window.localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
 };
 
 const UserContext = createContext({
@@ -38,7 +38,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setLoading(true);
-    const { username } = getUsername();
+    const { username } = getUserFromLocalStorage();
     setUser({ username: '', user_id: '' });
     removeUser();
     setLoading(false);
@@ -46,7 +46,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const deleteUser = () => {
     setLoading(true);
-    const { username } = getUsername();
+    const { username } = getUserFromLocalStorage();
     authClient.AuthClient.deleteUser({ username })
       .then((resp) => {
         if (resp.status !== STATUS_OK)
@@ -63,6 +63,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    const user = getUserFromLocalStorage();
+    user && setUser(user);
+  }, []);
 
   if (loading) {
     return <div>Loading ...</div>;

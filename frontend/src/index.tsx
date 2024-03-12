@@ -9,6 +9,7 @@ import { ThemeProvider } from '@mui/material';
 import { SnackbarProvider } from './context/SnackbarContext';
 import { SocketProvider } from './context/SocketContext';
 import { UserProvider } from './context/UserContext';
+import { HomeProvider } from './context/HomeContext';
 
 // @ts-ignore
 
@@ -19,9 +20,11 @@ root.render(
   <SnackbarProvider>
     <ThemeProvider theme={theme}>
       <UserProvider>
-        <SocketProvider>
-          <App />
-        </SocketProvider>
+        <HomeProvider>
+          <SocketProvider>
+            <App />
+          </SocketProvider>
+        </HomeProvider>
       </UserProvider>
     </ThemeProvider>
   </SnackbarProvider>

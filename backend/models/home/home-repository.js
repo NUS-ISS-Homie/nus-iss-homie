@@ -14,16 +14,29 @@ mongoose.connect(mongoDB);
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
-db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
+if (process.env.ENV != 'PROD') {
+  db.collections['homemodels'].drop().then(() => console.log('Reset Home DB'));
+}
 
 // CRUD functions
 
 export async function createHomeModel(params) {
-  return await HomeModel.create(params);
+  const home = await HomeModel.create(params);
+  return getHomeModel(home._id);
 }
 
 export async function getHomeModel(homeId) {
-  return await HomeModel.findOne({ _id: homeId });
+  return await HomeModel.findById(homeId)
+    .populate({ path: 'adminUser', select: 'username' })
+    .populate({ path: 'users', select: 'username' });
+}
+
+export async function getHomeModelByUserId(userId) {
+  return await HomeModel.findOne({
+    $or: [{ adminUser: userId }, { users: userId }],
+  })
+    .populate({ path: 'adminUser', select: 'username' })
+    .populate({ path: 'users', select: 'username' });
 }
 
 export const updateOperation = {
@@ -34,17 +47,21 @@ export const updateOperation = {
 export async function updateHomeModel(params) {
   switch (params.operation) {
     case updateOperation.Join:
-      return await HomeModel.findOneAndUpdate(
-        { _id: params.homeId },
-        { $addToSet: { users: params.username } },
-        { returnDocument: 'after' }
-      );
+      return await HomeModel.findByIdAndUpdate(
+        params.homeId,
+        { $addToSet: { users: params.userId } },
+        { new: true }
+      )
+        .populate({ path: 'adminUser', select: 'username' })
+        .populate({ path: 'users', select: 'username' });
     case updateOperation.Remove:
-      return await HomeModel.findOneAndUpdate(
-        { _id: params.homeId },
-        { $pull: { users: params.username } },
-        { returnDocument: 'after' }
-      );
+      return await HomeModel.findByIdAndUpdate(
+        params.homeId,
+        { $pull: { users: params.userId } },
+        { new: true }
+      )
+        .populate({ path: 'adminUser', select: 'username' })
+        .populate({ path: 'users', select: 'username' });
     default:
       throw new Error('Invalid update operation');
   }
