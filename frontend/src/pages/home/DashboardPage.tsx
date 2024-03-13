@@ -21,6 +21,7 @@ function DashboardPage() {
     <>
       <TenantDetails />
       <Button onClick={() => navigate('/expense')}>Expenses</Button>
+      <Button onClick={() => navigate('/chore')}>Chores</Button>
     </>
   );
 

@@ -15,6 +15,7 @@ import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import ExpenseMainPage from './pages/expenses/ExpenseMainPage';
+import ChoreMainPage from './pages/chores/ChoreMainPage';
 import { useUser, getUsername } from './context/UserContext';
 import Navbar from './components/Navbar';
 
@@ -31,6 +32,7 @@ function App() {
       <Route path='/join' element={<HomeJoinPage />}></Route>
       <Route path='/registerHome' element={<HomeRegisterPage />}></Route>
       <Route path='/expense' element={<ExpenseMainPage />}></Route>
+      <Route path='/chore' element={<ChoreMainPage />}></Route>
       <Route path='*' element={<Navigate replace to='/home' />} />
     </Routes>
   );
