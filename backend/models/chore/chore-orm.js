@@ -1,5 +1,17 @@
 import ChoreModel from './chore-model.js'; // Import Mongoose model for chore
 
+// READ FUNCTION
+export async function ormGetAllChores() {
+  try {
+    const chores = await ChoreModel.find(); // Fetch all chores from the database
+    return chores;
+  } catch (err) {
+    console.error(err);
+    console.error('ERROR: Could not get chores from DB.');
+    return { error: err };
+  }
+}
+
 // CREATE FUNCTION
 export async function ormCreateChore(chore) {
   try {
