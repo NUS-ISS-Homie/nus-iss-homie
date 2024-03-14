@@ -13,6 +13,7 @@ import {
 import { MailRounded, SettingsRounded as Settings } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../context/UserContext';
+import { useAuth as useHomeAuth } from '../context/HomeContext';
 import ConfirmationDialog from './modal/ConfirmationDialog';
 import ChangeUsernameDialog from './modal/ChangeUsernameDialog';
 import ChangePasswordDialog from './modal/ChangePasswordDialog';
@@ -28,6 +29,7 @@ function Navbar() {
 
   const user = useUser();
   const authClient = useAuth();
+  const homeClient = useHomeAuth();
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -56,6 +58,7 @@ function Navbar() {
 
   const handleLogout = () => {
     authClient.logout();
+    homeClient.setHome(null);
     navigate('/');
   };
 

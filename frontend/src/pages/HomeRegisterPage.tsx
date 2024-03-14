@@ -17,6 +17,7 @@ import { useSnackbar } from '../context/SnackbarContext';
 import { useAuth } from '../context/HomeContext';
 import { useUser } from '../context/UserContext';
 import { STATUS_CREATED } from '../constants';
+import { useSockets } from '../context/SocketContext';
 
 function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);
@@ -42,7 +43,6 @@ function HomeRegisterPage() {
       .then(({ data: { home, message }, status }) => {
         if (status !== STATUS_CREATED) throw new Error(message);
         homeClient.setHome(home);
-
         // TODO: send invites to invitees
         snackbar.setSuccess(message);
         navigate('/');

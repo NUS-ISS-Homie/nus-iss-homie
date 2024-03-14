@@ -1,6 +1,7 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import sockets from './Sockets';
 import { useSnackbar } from './SnackbarContext';
+import APINotification from '../utils/api-notification';
 
 const SocketContext = createContext({
   ...sockets,

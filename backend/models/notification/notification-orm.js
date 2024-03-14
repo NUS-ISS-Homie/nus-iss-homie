@@ -38,7 +38,7 @@ export async function ormDeleteNotificationForRecipient(
   recipient
 ) {
   try {
-    await deleteNotificationModelForRecipient(notificationId, recipient);
+    await deleteNotificationForRecipient(notificationId, recipient);
     return {
       error: false,
       message: 'Notification deletion for recipient successful!',

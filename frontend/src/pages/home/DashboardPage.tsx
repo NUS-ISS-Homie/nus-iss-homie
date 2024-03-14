@@ -8,7 +8,7 @@ import { useHome } from '../../context/HomeContext';
 function DashboardPage() {
   const navigate = useNavigate();
   const { username } = useUser();
-  const { _id } = useHome();
+  const home = useHome();
 
   const guestDashboard = (
     <>
@@ -24,7 +24,7 @@ function DashboardPage() {
     </>
   );
 
-  return <div>{_id ? dashboard : guestDashboard}</div>;
+  return <div>{home ? dashboard : guestDashboard}</div>;
 }
 
 export default DashboardPage;

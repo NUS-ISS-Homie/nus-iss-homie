@@ -20,11 +20,11 @@ import { useNavigate } from 'react-router-dom';
 import { STATUS_NOT_FOUND, STATUS_OK } from '../constants';
 import { saveUserToLocalStorage, useAuth } from '../context/UserContext';
 import {
-  defaultHome,
   saveHomeInStorage,
   useAuth as useHomeAuth,
 } from '../context/HomeContext';
 import APIHome from '../utils/api-home';
+import { useSnackbar } from '../context/SnackbarContext';
 
 enum LoginStatus {
   SUCCESS = 1,
@@ -44,6 +44,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const authClient = useAuth();
   const homeClient = useHomeAuth();
+  const snackbar = useSnackbar();
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -73,13 +74,12 @@ function LoginPage() {
             switch (status) {
               case STATUS_OK:
                 homeClient.setHome(home);
-                home && saveHomeInStorage(home);
                 break;
               case STATUS_NOT_FOUND:
-                homeClient.setHome(defaultHome);
+                homeClient.setHome(null);
                 break;
               default:
-                throw new Error('Error in retrieving Home');
+                throw new Error(message);
             }
           }
         );
@@ -88,6 +88,7 @@ function LoginPage() {
         navigate('/home');
       })
       .catch((err) => {
+        snackbar.setError(err.message);
         setLoginStatus(LoginStatus.FAILED);
         setLoginFailMessage(err);
       })

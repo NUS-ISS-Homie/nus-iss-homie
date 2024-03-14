@@ -49,16 +49,14 @@ function TenantDetails() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
 
   useEffect(() => {
-    if (!home.adminUser) return;
+    if (!home) return;
+    console.log('HOME', home);
     const tenants = [];
-    console.log(home);
-    home.adminUser.username &&
-      tenants.push({ username: home.adminUser.username, role: Role.Admin });
-    home.users.forEach(
-      ({ username }) =>
-        username && tenants.push({ username, role: Role.Member })
+    tenants.push({ username: home.adminUser.username, role: Role.Admin });
+    home.users.forEach(({ username }) =>
+      tenants.push({ username, role: Role.Member })
     );
-    console.log(tenants);
+    console.log('tenants:', tenants);
     setTenants(tenants);
   }, []);
 

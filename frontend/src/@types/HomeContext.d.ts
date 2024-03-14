@@ -1,9 +1,12 @@
-import { User } from './UserContext';
+interface User {
+  _id: string;
+  username: string;
+}
 
 export interface Home {
-  _id: string | null;
+  _id: string;
   users: User[];
-  adminUser: User | null;
+  adminUser: User;
 }
 
 export interface HomeResponse {
