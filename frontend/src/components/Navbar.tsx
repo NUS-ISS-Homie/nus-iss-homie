@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -7,7 +7,6 @@ import {
   Typography,
   Menu,
   MenuItem,
-  useTheme,
   Button,
   Badge,
 } from '@mui/material';
@@ -29,7 +28,7 @@ function Navbar() {
     useState(false);
 
   // Notification States
-  const [badgeVisible, setBadgeVisible] = useState(false);
+  const [badgeInvisible, setBadgeInvisible] = useState(true);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const user = useUser();
@@ -73,9 +72,9 @@ function Navbar() {
     navigate('/');
   };
 
-  useEffect(() => {
-    homeSocket.on('notify', () => setBadgeVisible(true));
-  }, [homeSocket]);
+  homeSocket.on('notify', () => {
+    setBadgeInvisible(false);
+  });
 
   return (
     <AppBar
@@ -95,7 +94,7 @@ function Navbar() {
           aria-label='menu'
           onClick={() => setNotificationsOpen(true)}
         >
-          <Badge variant='dot' invisible={badgeVisible}>
+          <Badge color='error' variant='dot' invisible={badgeInvisible}>
             <MailRounded />
           </Badge>
         </IconButton>
@@ -159,7 +158,7 @@ function Navbar() {
       <NotificationsDialog
         dialogOpen={notificationsOpen}
         setDialogOpen={setNotificationsOpen}
-        markRead={() => setBadgeVisible(false)}
+        markRead={() => setBadgeInvisible(true)}
       />
     </AppBar>
   );
