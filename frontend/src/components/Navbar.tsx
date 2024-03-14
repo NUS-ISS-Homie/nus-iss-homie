@@ -18,6 +18,7 @@ import ConfirmationDialog from './modal/ConfirmationDialog';
 import ChangeUsernameDialog from './modal/ChangeUsernameDialog';
 import ChangePasswordDialog from './modal/ChangePasswordDialog';
 import NotificationsDialog from './modal/notification/NotificationsDialog';
+import { useSockets } from '../context/SocketContext';
 
 function Navbar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -30,6 +31,7 @@ function Navbar() {
   const user = useUser();
   const authClient = useAuth();
   const homeClient = useHomeAuth();
+  const { homeSocket } = useSockets();
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -59,6 +61,7 @@ function Navbar() {
   const handleLogout = () => {
     authClient.logout();
     homeClient.setHome(null);
+    homeSocket.disconnect();
     navigate('/');
   };
 

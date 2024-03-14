@@ -17,7 +17,6 @@ import { useSnackbar } from '../context/SnackbarContext';
 import { useAuth } from '../context/HomeContext';
 import { useUser } from '../context/UserContext';
 import { STATUS_CREATED } from '../constants';
-import { useSockets } from '../context/SocketContext';
 
 function HomeRegisterPage() {
   const [tenants, setTenants] = useState(['']);

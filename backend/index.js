@@ -9,7 +9,11 @@ import notificationRoutes from './routes/notification-routes.js';
 import userRoutes from './routes/user-routes.js';
 import expenseRoutes from './routes/expense-routes.js';
 import choreRoutes from './routes/chore-routes.js';
-import createEventListeners from './controllers/socket-controller.js';
+import {
+  sessionStore,
+  createEventListeners,
+} from './controllers/socket-controller.js';
+import { randomUUID } from 'crypto';
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -28,8 +32,36 @@ const io = new Server(httpServer, {
   cors: { origin: 'http://localhost:3000' },
 });
 
+io.use((socket, next) => {
+  const sessionId = socket.handshake.auth.sessionId;
+  if (sessionId) {
+    const session = sessionStore.find(sessionId);
+    if (session) {
+      socket.sessionId = sessionId;
+      socket.userId = session.userId;
+      return next();
+    }
+  }
+
+  const userId = socket.handshake.auth.userId;
+  if (!userId) {
+    return next(new Error('Invalid User ID'));
+  }
+
+  // Create new session
+  socket.sessionId = randomUUID();
+  socket.userId = userId;
+  next();
+});
+
 io.on('connection', (socket) => {
   console.log(`Connected to ${socket.id}`);
+  console.log('SOCKET USER ID: ', socket.userId);
+
+  socket.join(socket.userId);
+
+  socket.emit('session', { sessionId: socket.sessionId });
+
   createEventListeners(socket, io);
 });
 

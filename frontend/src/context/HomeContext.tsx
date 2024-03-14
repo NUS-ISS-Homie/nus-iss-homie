@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Home } from '../@types/HomeContext';
 import { LOCAL_STORAGE_HOME_KEY } from '../configs';
-import { STATUS_OK, STATUS_BAD_REQUEST } from '../constants';
+import { STATUS_OK } from '../constants';
 import { useSnackbar } from './SnackbarContext';
 import APIHome from '../utils/api-home';
 import { useSockets } from './SocketContext';
@@ -11,34 +11,26 @@ const getHome = () => {
   return homeStr ? JSON.parse(homeStr) : null;
 };
 
-export const removeHomeFromStorage = () => {
+const removeHomeFromStorage = () => {
   window.localStorage.removeItem(LOCAL_STORAGE_HOME_KEY);
 };
 
-export const saveHomeInStorage = (home: Home) => {
+const saveHomeInStorage = (home: Home) => {
   window.localStorage.setItem(LOCAL_STORAGE_HOME_KEY, JSON.stringify(home));
 };
 
-interface HomeContext {
+interface IHomeContext {
   home: Home | null;
   setHome: (home: Home | null) => void;
   deleteHome: VoidFunction;
-  acceptJoinRequest: (
-    sender: string,
-    socketId: string,
-    callback?: VoidFunction
-  ) => void;
+  acceptJoinRequest: (sender: string, callback?: VoidFunction) => void;
 }
 
-const HomeContext = createContext<HomeContext>({
+const HomeContext = createContext<IHomeContext>({
   home: null,
   setHome: (home: Home | null) => {},
   deleteHome: () => {},
-  acceptJoinRequest: (
-    sender: string,
-    socketId: string,
-    callback?: VoidFunction
-  ) => {},
+  acceptJoinRequest: (sender: string, callback?: VoidFunction) => {},
 });
 
 export function HomeProvider({ children }: { children: React.ReactNode }) {
@@ -63,18 +55,18 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   };
 
-  const acceptJoinRequest = (
-    sender: string,
-    socketId: string,
-    callback?: VoidFunction
-  ) => {
+  const acceptJoinRequest = (sender: string, callback?: VoidFunction) => {
     if (!home) return;
     APIHome.joinHome(home._id.toString(), sender)
       .then(({ data: { home, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
         if (!home || !home._id) return;
         setHome(home);
-        homeSocket.emit('accept-join-req', { homeId: home._id, socketId });
+        console.log('AUTH:', homeSocket.auth);
+        homeSocket.emit('accept-join-req', {
+          homeId: home._id,
+          userId: sender,
+        });
         callback && callback();
       })
       .catch((err: Error) => snackbar.setError(err.message));
@@ -94,13 +86,13 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       value={{
         home: home,
         setHome: (home) => {
-          setHome(home);
           if (!home) {
             removeHomeFromStorage();
           } else {
             saveHomeInStorage(home);
             joinHome(home._id);
           }
+          setHome(home);
         },
         deleteHome,
         acceptJoinRequest,

@@ -19,9 +19,6 @@ import { useUser } from './context/UserContext';
 import Navbar from './components/Navbar';
 
 function App() {
-  // const { homeSocket: socket } = useSockets();
-  // socket.on('connected', () => console.log("SOCKET CONNECTED"));
-
   const user = useUser();
 
   const registeredRoutes = (

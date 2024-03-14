@@ -9,9 +9,8 @@ import {
   IconButton,
   Paper,
   Typography,
-  snackbarClasses,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Notification } from '../../../@types/Notification';
 import { useUser } from '../../../context/UserContext';
 import APINotification from '../../../utils/api-notification';
@@ -27,7 +26,7 @@ type NotificationsDialogProps = {
 };
 
 function NotificationsDialog(props: NotificationsDialogProps) {
-  const { dialogOpen, setDialogOpen, onConfirmAction } = props;
+  const { dialogOpen, setDialogOpen } = props;
 
   const { user_id } = useUser();
   const snackbar = useSnackbar();
@@ -38,7 +37,7 @@ function NotificationsDialog(props: NotificationsDialogProps) {
     if (!user_id) return;
     APINotification.deleteNotification(notifications[idx]._id, user_id)
       .then(({ data: { notification, message }, status }) => {
-        if (status != STATUS_OK) throw new Error(message);
+        if (status !== STATUS_OK) throw new Error(message);
         notifications.splice(idx, 1);
         setNotifications(notifications);
         snackbar.setSuccess(message);
@@ -54,7 +53,7 @@ function NotificationsDialog(props: NotificationsDialogProps) {
         setNotifications(notification);
       }
     );
-  }, []);
+  }, [user_id]);
 
   return (
     <Dialog open={dialogOpen}>

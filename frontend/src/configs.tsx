@@ -23,3 +23,4 @@ export const URL_USER_DELETE_USER = URL_USER_SVC + USER_DELETE_USER;
 
 export const LOCAL_STORAGE_USER_KEY = 'user';
 export const LOCAL_STORAGE_HOME_KEY = 'home';
+export const LOCAL_STORAGE_SOCKET_KEY = 'socket';

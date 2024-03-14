@@ -43,11 +43,7 @@ function NotificationDetails(props: {
               variant='contained'
               onClick={() => {
                 if (!home || !user_id) return;
-                homeClient.acceptJoinRequest(
-                  sender._id,
-                  JSON.parse(message.content).socketId,
-                  deleteNotification
-                );
+                homeClient.acceptJoinRequest(sender._id, deleteNotification);
               }}
             >
               Accept

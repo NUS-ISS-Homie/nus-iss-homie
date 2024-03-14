@@ -13,7 +13,7 @@ interface Tenant {
   role: Role;
 }
 
-function Tenant(props: { tenant: Tenant }) {
+function TenantView(props: { tenant: Tenant }) {
   const { tenant } = props;
 
   return (
@@ -29,7 +29,7 @@ function Tenant(props: { tenant: Tenant }) {
     >
       <Avatar
         sx={{
-          bgcolor: tenant.role == Role.Admin ? 'primary.main' : 'secondary',
+          bgcolor: tenant.role === Role.Admin ? 'primary.main' : 'secondary',
         }}
       >
         {tenant.username[0]}
@@ -58,11 +58,11 @@ function TenantDetails() {
     );
     console.log('tenants:', tenants);
     setTenants(tenants);
-  }, []);
+  }, [home]);
 
   return (
     <Grid container columnGap={2} justifyContent='center' alignItems='center'>
-      {tenants.map((t, i) => t && <Tenant tenant={t} key={i} />)}
+      {tenants.map((t, i) => t && <TenantView tenant={t} key={i} />)}
     </Grid>
   );
 }

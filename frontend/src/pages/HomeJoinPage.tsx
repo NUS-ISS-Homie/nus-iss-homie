@@ -15,15 +15,12 @@ import { useSnackbar } from '../context/SnackbarContext';
 import { useSockets } from '../context/SocketContext';
 import { useUser } from '../context/UserContext';
 import { NOTIFICATION_JOIN_REQ, STATUS_CREATED, STATUS_OK } from '../constants';
-import { useAuth } from '../context/HomeContext';
 import APINotification from '../utils/api-notification';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  const { joinHome } = useSockets();
   const { user_id, username } = useUser();
-  const homeClient = useAuth();
   const { homeSocket } = useSockets();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -41,7 +38,7 @@ function HomeJoinPage() {
     // TODO: send request to join
     APIHome.getHome(homeId.toString())
       .then(({ data: { home, message }, status }) => {
-        if (status != STATUS_OK) {
+        if (status !== STATUS_OK) {
           throw new Error(message);
         }
 
@@ -59,7 +56,7 @@ function HomeJoinPage() {
 
         APINotification.createNotification(joinReq).then(
           ({ data: { notification, message }, status }) => {
-            if (status != STATUS_CREATED) throw Error(message);
+            if (status !== STATUS_CREATED) throw Error(message);
             homeSocket.emit('send-notification', homeId);
             snackbar.setSuccess('Join request sent!');
             navigate('/');
