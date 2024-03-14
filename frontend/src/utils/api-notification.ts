@@ -29,7 +29,9 @@ const APINotification = {
     notificationId: string,
     userId: string
   ): Promise<API.Response<NotificationResponse>> => {
-    return requests.delete(URL_NOTIF_SVC, `/${notificationId}`, { userId });
+    return requests.delete(URL_NOTIF_SVC, `/${notificationId}`, {
+      data: { userId },
+    });
   },
 };
 

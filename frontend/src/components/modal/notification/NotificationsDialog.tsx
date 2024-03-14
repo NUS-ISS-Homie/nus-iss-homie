@@ -22,11 +22,11 @@ import { useSnackbar } from '../../../context/SnackbarContext';
 type NotificationsDialogProps = {
   dialogOpen: boolean;
   setDialogOpen: (isOpen: boolean) => void;
-  onConfirmAction: () => void;
+  markRead: VoidFunction;
 };
 
 function NotificationsDialog(props: NotificationsDialogProps) {
-  const { dialogOpen, setDialogOpen } = props;
+  const { dialogOpen, setDialogOpen, markRead } = props;
 
   const { user_id } = useUser();
   const snackbar = useSnackbar();
@@ -46,14 +46,14 @@ function NotificationsDialog(props: NotificationsDialogProps) {
   };
 
   useEffect(() => {
-    if (!user_id) return;
-    APINotification.getNotificationByUserId(user_id).then(
-      ({ data: { notification, message }, status }) => {
-        console.log(notification);
+    if (!user_id || !dialogOpen) return;
+    APINotification.getNotificationByUserId(user_id)
+      .then(({ data: { notification, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
         setNotifications(notification);
-      }
-    );
-  }, [user_id]);
+      })
+      .catch((err) => snackbar.setError(err.message));
+  }, [user_id, dialogOpen, snackbar]);
 
   return (
     <Dialog open={dialogOpen}>
@@ -62,7 +62,12 @@ function NotificationsDialog(props: NotificationsDialogProps) {
       <Divider />
 
       <Box position='absolute' top={0} right={0}>
-        <IconButton onClick={() => setDialogOpen(false)}>
+        <IconButton
+          onClick={() => {
+            setDialogOpen(false);
+            markRead();
+          }}
+        >
           <Close />
         </IconButton>
       </Box>

@@ -33,17 +33,27 @@ const io = new Server(httpServer, {
 });
 
 io.use((socket, next) => {
-  const sessionId = socket.handshake.auth.sessionId;
+  const { sessionId, userId } = socket.handshake.auth;
+
   if (sessionId) {
     const session = sessionStore.find(sessionId);
-    if (session) {
+
+    // Has existing session
+    if (session && !userId) {
       socket.sessionId = sessionId;
       socket.userId = session.userId;
       return next();
     }
+
+    // Update session
+    if (session && userId) {
+      sessionStore.saveSession(sessionId, { userId });
+      socket.sessionId = sessionId;
+      socket.userId = userId;
+      return next();
+    }
   }
 
-  const userId = socket.handshake.auth.userId;
   if (!userId) {
     return next(new Error('Invalid User ID'));
   }
@@ -51,6 +61,7 @@ io.use((socket, next) => {
   // Create new session
   socket.sessionId = randomUUID();
   socket.userId = userId;
+  sessionStore.saveSession(sessionId, { userId });
   next();
 });
 

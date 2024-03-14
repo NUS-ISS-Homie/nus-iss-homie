@@ -51,7 +51,7 @@ export const requests = {
 
   delete: (base_url: string, url: string, body: {}) =>
     instance(base_url)
-      .delete(url, { data: body })
+      .delete(url, body)
       .then(responseBody)
       .catch((err) => responseBody(err.response)),
 };

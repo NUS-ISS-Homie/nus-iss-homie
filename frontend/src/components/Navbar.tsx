@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -9,6 +9,7 @@ import {
   MenuItem,
   useTheme,
   Button,
+  Badge,
 } from '@mui/material';
 import { MailRounded, SettingsRounded as Settings } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +27,9 @@ function Navbar() {
   const [changeUnameDialogOpen, setChangeUnameDialogOpen] = useState(false);
   const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
     useState(false);
+
+  // Notification States
+  const [badgeVisible, setBadgeVisible] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const user = useUser();
@@ -33,7 +37,6 @@ function Navbar() {
   const homeClient = useHomeAuth();
   const { homeSocket } = useSockets();
   const navigate = useNavigate();
-  const theme = useTheme();
 
   const handleOpenSettingsMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -56,14 +59,23 @@ function Navbar() {
 
   const handleDeleteUser = () => {
     authClient.deleteUser();
+    homeClient.leaveHome();
+    homeSocket.emit('delete-session', homeSocket.auth);
+    homeSocket.disconnect();
+    navigate('/');
   };
 
   const handleLogout = () => {
     authClient.logout();
     homeClient.setHome(null);
+    homeSocket.emit('delete-session', homeSocket.auth);
     homeSocket.disconnect();
     navigate('/');
   };
+
+  useEffect(() => {
+    homeSocket.on('notify', () => setBadgeVisible(true));
+  }, [homeSocket]);
 
   return (
     <AppBar
@@ -83,7 +95,9 @@ function Navbar() {
           aria-label='menu'
           onClick={() => setNotificationsOpen(true)}
         >
-          <MailRounded />
+          <Badge variant='dot' invisible={badgeVisible}>
+            <MailRounded />
+          </Badge>
         </IconButton>
 
         <Button
@@ -145,7 +159,7 @@ function Navbar() {
       <NotificationsDialog
         dialogOpen={notificationsOpen}
         setDialogOpen={setNotificationsOpen}
-        onConfirmAction={() => setNotificationsOpen(false)}
+        markRead={() => setBadgeVisible(false)}
       />
     </AppBar>
   );

@@ -12,22 +12,23 @@ class SessionStore {
   saveSession(sessionId, session) {
     this.sessions.set(sessionId, session);
   }
+
+  removeSession(sessionId) {
+    console.log('SESSION REMOVED!');
+    this.sessions.delete(sessionId);
+  }
 }
 
 const sessionStore = new SessionStore();
 
 const onDisconnectEvent = (socket) => {
   console.log(`Disconnected with ${socket.id}`);
-  sessionStore.saveSession(socket.sessionId, {
-    userId: socket.userId,
-    socketId: socket.socketId,
-  });
+  sessionStore.saveSession(socket.sessionId, { userId: socket.userId });
 };
 
 const onJoinHomeEvent = (io, socket, homeId) => {
   // subscribes to home for notifications
   if (!socket) return;
-  console.log('AUTH:', socket.handshake.auth);
   socket.join(homeId);
   io.to(socket.id).emit('joined-home');
   socket.on('send-notification', (notification) =>
@@ -46,6 +47,9 @@ const onSendNotificationEvent = (io, homeId) => {
 };
 
 const createEventListeners = (socket, io) => {
+  socket.on('delete-session', ({ sessionId }) =>
+    sessionStore.removeSession(sessionId)
+  );
   socket.on('join-home', (homeId) => onJoinHomeEvent(io, socket, homeId));
   socket.on('accept-join-req', ({ homeId, userId }) =>
     io.to(userId).emit('join-home', homeId)

@@ -51,10 +51,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       homeSocket.connect();
     }
 
-    homeSocket.on('session', ({ sessionId, socketId, userId }) => {
+    homeSocket.on('session', ({ sessionId }) => {
       homeSocket.auth = sessionId;
       saveSocketInStorage(sessionId);
-      homeSocket.id = socketId;
+      homeSocket.auth = { ...homeSocket.auth, sessionId };
     });
 
     homeSocket.on('join-home', (homeId) => {

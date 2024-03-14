@@ -57,7 +57,7 @@ function HomeJoinPage() {
         APINotification.createNotification(joinReq).then(
           ({ data: { notification, message }, status }) => {
             if (status !== STATUS_CREATED) throw Error(message);
-            homeSocket.emit('send-notification', homeId);
+            homeSocket.emit('send-notification', home.adminUser._id);
             snackbar.setSuccess('Join request sent!');
             navigate('/');
           }
