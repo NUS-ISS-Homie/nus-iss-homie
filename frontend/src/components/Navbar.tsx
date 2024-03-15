@@ -7,18 +7,18 @@ import {
   Typography,
   Menu,
   MenuItem,
-  useTheme,
   Button,
+  Badge,
 } from '@mui/material';
-import {
-  HomeRounded as Home,
-  SettingsRounded as Settings,
-} from '@mui/icons-material';
+import { MailRounded, SettingsRounded as Settings } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../context/UserContext';
+import { useAuth as useHomeAuth } from '../context/HomeContext';
 import ConfirmationDialog from './modal/ConfirmationDialog';
 import ChangeUsernameDialog from './modal/ChangeUsernameDialog';
 import ChangePasswordDialog from './modal/ChangePasswordDialog';
+import NotificationsDialog from './modal/notification/NotificationsDialog';
+import { useSockets } from '../context/SocketContext';
 
 function Navbar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -27,10 +27,15 @@ function Navbar() {
   const [changePasswordDialogOpen, setChangePasswordDialogOpen] =
     useState(false);
 
+  // Notification States
+  const [badgeInvisible, setBadgeInvisible] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
   const user = useUser();
   const authClient = useAuth();
+  const homeClient = useHomeAuth();
+  const { homeSocket } = useSockets();
   const navigate = useNavigate();
-  const theme = useTheme();
 
   const handleOpenSettingsMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -53,12 +58,23 @@ function Navbar() {
 
   const handleDeleteUser = () => {
     authClient.deleteUser();
+    homeClient.leaveHome();
+    homeSocket.emit('delete-session', homeSocket.auth);
+    homeSocket.disconnect();
+    navigate('/');
   };
 
   const handleLogout = () => {
     authClient.logout();
+    homeClient.setHome(null);
+    homeSocket.emit('delete-session', homeSocket.auth);
+    homeSocket.disconnect();
     navigate('/');
   };
+
+  homeSocket.on('notify', () => {
+    setBadgeInvisible(false);
+  });
 
   return (
     <AppBar
@@ -76,9 +92,11 @@ function Navbar() {
           edge='start'
           color='inherit'
           aria-label='menu'
-          onClick={() => navigate('/home')}
+          onClick={() => setNotificationsOpen(true)}
         >
-          <Home />
+          <Badge color='error' variant='dot' invisible={badgeInvisible}>
+            <MailRounded />
+          </Badge>
         </IconButton>
 
         <Button
@@ -135,6 +153,12 @@ function Navbar() {
       <ChangePasswordDialog
         dialogOpen={changePasswordDialogOpen}
         setDialogOpen={setChangePasswordDialogOpen}
+      />
+
+      <NotificationsDialog
+        dialogOpen={notificationsOpen}
+        setDialogOpen={setNotificationsOpen}
+        markRead={() => setBadgeInvisible(true)}
       />
     </AppBar>
   );

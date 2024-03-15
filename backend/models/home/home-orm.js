@@ -4,7 +4,7 @@ import {
   updateOperation,
   updateHomeModel,
   deleteHomeModel,
-  getHomeModelByUsername,
+  getHomeModelByUserId,
 } from './home-repository.js';
 
 export async function ormCreateHome(adminUser) {
@@ -29,20 +29,20 @@ export async function ormGetHome(homeId) {
   }
 }
 
-export async function ormGetHomeByUsername(username) {
+export async function ormGetHomeByUserId(userId) {
   try {
-    const home = await getHomeModelByUsername(username);
+    const home = await getHomeModelByUserId(userId);
     return home;
   } catch (err) {
     return { error: true, message: err };
   }
 }
 
-export async function ormJoinHome(homeId, username) {
+export async function ormJoinHome(homeId, userId) {
   try {
     const updatedHome = await updateHomeModel({
       homeId,
-      username,
+      userId,
       operation: updateOperation.Join,
     });
     return updatedHome;
@@ -51,11 +51,11 @@ export async function ormJoinHome(homeId, username) {
   }
 }
 
-export async function ormLeaveHome(homeId, username) {
+export async function ormLeaveHome(homeId, userId) {
   try {
     const updatedHome = await updateHomeModel({
       homeId,
-      username,
+      userId,
       operation: updateOperation.Remove,
     });
     return updatedHome;

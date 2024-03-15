@@ -14,7 +14,7 @@ import { Close } from '@mui/icons-material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { AuthClient } from '../../utils/auth-client';
-import { saveUsername, useAuth } from '../../context/UserContext';
+import { saveUserToLocalStorage, useAuth } from '../../context/UserContext';
 import { useSnackbar } from '../../context/SnackbarContext';
 import { useUser } from '../../context/UserContext';
 
@@ -59,11 +59,13 @@ function ChangeUsernameDialog(props: ChangeUsernameDialogProps) {
         if (resp.status !== 200) throw new Error(resp.data.message);
 
         // success
-        saveUsername(newUsername.toString());
         authClient.setUser({
           username: newUsername.toString(),
           user_id: user.user_id,
         }); // save in context
+        saveUserToLocalStorage(user);
+
+        // TODO: use socket to notify other tenants to update home
 
         setDialogOpen(false);
         snackBar.setSuccess('Change username success', 2000);
