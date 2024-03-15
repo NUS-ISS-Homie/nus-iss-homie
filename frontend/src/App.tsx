@@ -8,8 +8,7 @@ import {
 import { Box, CssBaseline } from '@mui/material';
 
 import './App.css';
-// import { useSockets } from './context/SocketContext';
-import HomeRegisterPage from './pages/HomeRegisterPage';
+import HomeRegisterPage, { HomeFormType } from './pages/HomeRegisterPage';
 import DashboardPage from './pages/home/DashboardPage';
 import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
@@ -26,7 +25,14 @@ function App() {
       <Route path='/' element={<DashboardPage />}></Route>
       <Route path='/home' element={<DashboardPage />}></Route>
       <Route path='/join' element={<HomeJoinPage />}></Route>
-      <Route path='/registerHome' element={<HomeRegisterPage />}></Route>
+      <Route
+        path='/registerHome'
+        element={<HomeRegisterPage type={HomeFormType.Register} />}
+      ></Route>
+      <Route
+        path='/invite'
+        element={<HomeRegisterPage type={HomeFormType.Invite} />}
+      ></Route>
       <Route path='/expense' element={<ExpenseMainPage />}></Route>
       <Route path='*' element={<Navigate replace to='/home' />} />
     </Routes>

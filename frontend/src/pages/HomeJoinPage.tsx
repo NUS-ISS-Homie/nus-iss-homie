@@ -47,10 +47,7 @@ function HomeJoinPage() {
           recipients: [home.adminUser._id],
           message: {
             title: NOTIFICATION_JOIN_REQ,
-            content: JSON.stringify({
-              socketId: homeSocket.id,
-              message: `${username} wants to join your home.`,
-            }),
+            content: `${username} wants to join your home.`,
           },
         };
 

@@ -54,4 +54,10 @@ export const AuthClient = {
   }): Promise<API.Response<{ message: string }>> => {
     return requests.delete(URL_USER_SVC, USER_DELETE_USER, { data });
   },
+
+  getUserId: (
+    username: string
+  ): Promise<API.Response<{ username: string; user_id: string }>> => {
+    return requests.get(URL_USER_SVC, `/${username}`);
+  },
 };

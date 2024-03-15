@@ -1,33 +1,27 @@
 import React from 'react';
 import { Notification } from '../../../@types/Notification';
 import { Box, Button, DialogActions, Divider, Typography } from '@mui/material';
-import { NOTIFICATION_JOIN_REQ, STATUS_OK } from '../../../constants';
-import APIHome from '../../../utils/api-home';
-import { useAuth, useHome } from '../../../context/HomeContext';
-import { useUser } from '../../../context/UserContext';
-import { useSockets } from '../../../context/SocketContext';
-import { useSnackbar } from '../../../context/SnackbarContext';
+import { NOTIFICATION_INVITE, NOTIFICATION_JOIN_REQ } from '../../../constants';
+import { useAuth } from '../../../context/HomeContext';
 
 function NotificationDetails(props: {
   notification: Notification;
   deleteNotification: VoidFunction;
 }) {
   const {
-    notification: { message, sender, recipients },
+    notification: { message, sender },
     deleteNotification,
   } = props;
 
-  const home = useHome();
   const homeClient = useAuth();
-  const { user_id } = useUser();
+
   return (
     <Box padding='1rem' width='600px'>
       <Typography variant='h6'>{message.title}</Typography>
       <Divider />
-      {message.title === NOTIFICATION_JOIN_REQ
-        ? JSON.parse(message.content).message
-        : message.content}
-      {message.title === NOTIFICATION_JOIN_REQ && (
+      {message.content}
+      {(message.title === NOTIFICATION_JOIN_REQ ||
+        message.title === NOTIFICATION_INVITE) && (
         <>
           <Divider />
           <DialogActions>
@@ -42,8 +36,18 @@ function NotificationDetails(props: {
             <Button
               variant='contained'
               onClick={() => {
-                if (!home || !user_id) return;
-                homeClient.acceptJoinRequest(sender._id, deleteNotification);
+                switch (message.title) {
+                  case NOTIFICATION_JOIN_REQ:
+                    homeClient.acceptJoinRequest(
+                      sender._id,
+                      deleteNotification
+                    );
+                    break;
+                  case NOTIFICATION_INVITE:
+                    console.log('THIS IS INVITE');
+                    homeClient.acceptInvite(sender._id, deleteNotification);
+                    break;
+                }
               }}
             >
               Accept

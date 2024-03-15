@@ -7,7 +7,7 @@ import { useHome } from '../../context/HomeContext';
 
 function DashboardPage() {
   const navigate = useNavigate();
-  const { username } = useUser();
+  const { user_id } = useUser();
   const home = useHome();
 
   const guestDashboard = (
@@ -20,6 +20,9 @@ function DashboardPage() {
   const dashboard = (
     <>
       <TenantDetails />
+      {home?.adminUser._id === user_id && (
+        <Button onClick={() => navigate('/invite')}>Invite Tenants</Button>
+      )}
       <Button onClick={() => navigate('/expense')}>Expenses</Button>
     </>
   );

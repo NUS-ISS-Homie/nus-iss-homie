@@ -8,7 +8,7 @@ import sockets from './Sockets';
 import { useSnackbar } from './SnackbarContext';
 import { LOCAL_STORAGE_SOCKET_KEY } from '../configs';
 import { useUser } from './UserContext';
-import { useAuth } from './HomeContext';
+import { useAuth, useHome } from './HomeContext';
 import APIHome from '../utils/api-home';
 import { STATUS_OK } from '../constants';
 
@@ -28,19 +28,14 @@ const saveSocketInStorage = (sessionId: string) => {
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const snackbar = useSnackbar();
   const { user_id } = useUser();
+  const home = useHome();
   const homeClient = useAuth();
 
-  const joinHome = useCallback(
-    (homeId: string, onFail?: VoidFunction) => {
-      console.log('join home request');
-      const { homeSocket } = sockets;
-      homeSocket.on('joined-home', () => {
-        snackbar.setSuccess('Successfully joined home socket');
-      });
-      homeSocket.emit('join-home', homeId);
-    },
-    [snackbar]
-  );
+  const joinHome = useCallback((homeId: string, onFail?: VoidFunction) => {
+    console.log('join home request');
+    const { homeSocket } = sockets;
+    homeSocket.emit('join-home', homeId);
+  }, []);
 
   useEffect(() => {
     const { homeSocket } = sockets;
@@ -66,7 +61,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         })
         .catch((err) => snackbar.setError(err.message));
     });
-  }, [joinHome, user_id, homeClient, snackbar]);
+
+    homeSocket.on('joined-home', () => {
+      if (!home) return;
+      APIHome.getHome(home._id)
+        .then(({ data: { home, message }, status }) => {
+          if (status !== STATUS_OK) throw new Error(message);
+          homeClient.setHome(home);
+        })
+        .catch((err) => snackbar.setError(err.message));
+    });
+  }, [joinHome, home, user_id, homeClient, snackbar]);
 
   return (
     <SocketContext.Provider value={{ ...sockets, joinHome: joinHome }}>

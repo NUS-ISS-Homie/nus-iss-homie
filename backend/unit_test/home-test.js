@@ -63,13 +63,9 @@ describe('[Event] Join Home', () => {
   let homeId1 = 'home1',
     homeId2 = 'home2';
 
-  it(`User1 should join ${homeId1}`, (done) => {
-    user1.on('joined-home', done);
-    user1.emit('join-home', homeId1);
-  });
-
-  it(`User2 should join ${homeId1}`, (done) => {
+  it(`Users should join ${homeId1}`, (done) => {
     user2.on('joined-home', done);
+    user1.emit('join-home', homeId1);
     user2.emit('join-home', homeId1);
   });
 

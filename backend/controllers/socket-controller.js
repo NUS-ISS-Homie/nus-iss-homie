@@ -30,7 +30,7 @@ const onJoinHomeEvent = (io, socket, homeId) => {
   // subscribes to home for notifications
   if (!socket) return;
   socket.join(homeId);
-  io.to(socket.id).emit('joined-home');
+  io.to(homeId).emit('joined-home');
   socket.on('leave-home', () => onLeaveHomeEvent(io, socket, homeId));
 };
 

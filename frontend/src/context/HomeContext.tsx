@@ -26,6 +26,7 @@ interface IHomeContext {
   leaveHome: VoidFunction;
   deleteHome: VoidFunction;
   acceptJoinRequest: (sender: string, callback?: VoidFunction) => void;
+  acceptInvite: (admin: string, callback?: VoidFunction) => void;
 }
 
 const HomeContext = createContext<IHomeContext>({
@@ -34,6 +35,7 @@ const HomeContext = createContext<IHomeContext>({
   leaveHome: () => {},
   deleteHome: () => {},
   acceptJoinRequest: (sender: string, callback?: VoidFunction) => {},
+  acceptInvite: (admin: string, callback?: VoidFunction) => {},
 });
 
 export function HomeProvider({ children }: { children: React.ReactNode }) {
@@ -75,18 +77,36 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
 
   const acceptJoinRequest = (sender: string, callback?: VoidFunction) => {
     if (!home) return;
-    APIHome.joinHome(home._id.toString(), sender)
+    APIHome.joinHome(home._id, sender)
       .then(({ data: { home, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
         if (!home || !home._id) return;
         saveHomeInStorage(home);
         setHome(home);
-        console.log('AUTH:', homeSocket.auth);
         homeSocket.emit('accept-join-req', {
           homeId: home._id,
           userId: sender,
         });
         callback && callback();
+      })
+      .catch((err: Error) => snackbar.setError(err.message));
+  };
+
+  const acceptInvite = (admin: string, callback?: VoidFunction) => {
+    if (!user_id) return;
+    APIHome.getHomeByUserId(admin)
+      .then(({ data: { home, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        APIHome.joinHome(home._id, user_id).then(
+          ({ data: { home, message }, status }) => {
+            if (status !== STATUS_OK) throw new Error(message);
+            if (!home || !home._id) return;
+            saveHomeInStorage(home);
+            setHome(home);
+            homeSocket.emit('join-home', home._id);
+            callback && callback();
+          }
+        );
       })
       .catch((err: Error) => snackbar.setError(err.message));
   };
@@ -116,6 +136,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         leaveHome,
         deleteHome,
         acceptJoinRequest,
+        acceptInvite,
       }}
     >
       {children}

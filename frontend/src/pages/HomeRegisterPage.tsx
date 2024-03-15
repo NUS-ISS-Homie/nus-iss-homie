@@ -9,23 +9,111 @@ import {
   Typography,
 } from '@mui/material';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AddCircle, RemoveCircle } from '@mui/icons-material';
 import APIHome from '../utils/api-home';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../context/SnackbarContext';
 import { useAuth } from '../context/HomeContext';
 import { useUser } from '../context/UserContext';
-import { STATUS_CREATED } from '../constants';
+import { NOTIFICATION_INVITE, STATUS_CREATED, STATUS_OK } from '../constants';
+import { AuthClient } from '../utils/auth-client';
+import APINotification from '../utils/api-notification';
+import { useSockets } from '../context/SocketContext';
 
-function HomeRegisterPage() {
-  const [tenants, setTenants] = useState(['']);
+export enum HomeFormType {
+  Register = 'Register',
+  Invite = 'Invite',
+}
+
+function TenantsField(props: {
+  t: number;
+  username: string;
+  setTenant: (i: number, tenant: { username: string; error: boolean }) => void;
+  addTenant: VoidFunction;
+  deleteTenant: (i: number) => void;
+  canDelete: boolean;
+}) {
+  const { t, username, setTenant, addTenant, deleteTenant, canDelete } = props;
+
+  const user = useUser();
+
+  const [tenantField, setTenantField] = useState(username);
+  const [hasUser, setHasUser] = useState(false);
+
+  const [errMessage, setErrMessage] = useState<string>('');
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (tenantField.length === 0) {
+        setHasUser(false);
+        setErrMessage('');
+        setTenant(t - 1, { username: tenantField, error: false });
+        return;
+      }
+
+      if (tenantField === user.username) {
+        return setErrMessage('Cannot add yourself as tenant');
+      }
+
+      AuthClient.getUserId(tenantField).then(({ data, status }) => {
+        setHasUser(status === STATUS_OK);
+        setTenant(t - 1, {
+          username: tenantField,
+          error: status !== STATUS_OK,
+        });
+        setErrMessage(status === STATUS_OK ? '' : 'User does not exist');
+      });
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [tenantField, setTenant, t, user.username]);
+
+  return (
+    <Grid display='flex'>
+      <Grid item xs={12}>
+        <TextField
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <AccountCircleOutlinedIcon />
+              </InputAdornment>
+            ),
+          }}
+          placeholder={`Tenant ${t}`}
+          fullWidth
+          id={`tenant${t}`}
+          label={`Tenant ${t} Username`}
+          name={`tenant${t}`}
+          value={tenantField}
+          onChange={(e) => setTenantField(e.target.value)}
+          error={errMessage.length > 0}
+          helperText={errMessage}
+        />
+      </Grid>
+      {hasUser && (
+        <IconButton aria-label='add' onClick={addTenant}>
+          <AddCircle />
+        </IconButton>
+      )}
+      {canDelete && (
+        <IconButton aria-label='delete' onClick={() => deleteTenant(t - 1)}>
+          <RemoveCircle />
+        </IconButton>
+      )}
+    </Grid>
+  );
+}
+
+function HomeRegisterPage(props: { type: HomeFormType }) {
+  const [tenants, setTenants] = useState([{ username: '', error: false }]);
+  const [hasErrors, setHasErrors] = useState(false);
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  const { user_id } = useUser();
+  const { user_id, username } = useUser();
+  const { joinHome } = useSockets();
   const homeClient = useAuth();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const invitees = [];
@@ -38,64 +126,44 @@ function HomeRegisterPage() {
       return;
     }
 
+    // TODO: send invites to invitees
+    const recipients = await Promise.all(
+      tenants.map(
+        async ({ username }) =>
+          (await AuthClient.getUserId(username)).data.user_id
+      )
+    );
+
+    const invites = {
+      sender: user_id,
+      recipients,
+      message: {
+        title: NOTIFICATION_INVITE,
+        content: `${username} invites you to join their home.`,
+      },
+    };
+
+    APINotification.createNotification(invites)
+      .then(({ data, status }) => {
+        if (status !== STATUS_CREATED)
+          throw new Error('Failed to send invites');
+        snackbar.setSuccess('Invitations sent');
+      })
+      .catch((err) => snackbar.setError(err.message));
+
+    if (props.type === HomeFormType.Invite) {
+      return navigate('/');
+    }
+
     APIHome.createHome(user_id)
       .then(({ data: { home, message }, status }) => {
         if (status !== STATUS_CREATED) throw new Error(message);
         homeClient.setHome(home);
-        // TODO: send invites to invitees
+        joinHome(home._id);
         snackbar.setSuccess(message);
         navigate('/');
       })
       .catch((err) => snackbar.setError(err));
-  };
-
-  const TenantsField = (props: { t: number; username: string | null }) => {
-    const { t, username } = props;
-    return (
-      <Grid display='flex'>
-        <Grid item xs={12}>
-          <TextField
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <AccountCircleOutlinedIcon />
-                </InputAdornment>
-              ),
-            }}
-            placeholder={`Tenant ${t}`}
-            fullWidth
-            defaultValue={username ? username : null}
-            id={`tenant${t}`}
-            label={`Tenant ${t} Username`}
-            name={`tenant${t}`}
-            onBlur={(e) => {
-              tenants[t - 1] = e.target.value;
-              setTenants([...tenants]);
-            }}
-          />
-        </Grid>
-        {username && (
-          <IconButton
-            aria-label='add'
-            onClick={() => setTenants([...tenants, ''])}
-          >
-            <AddCircle />
-          </IconButton>
-        )}
-        {t > 1 && (
-          <IconButton
-            aria-label='delete'
-            onClick={() => {
-              tenants.splice(t - 1, 1);
-              console.log(tenants);
-              setTenants([...tenants]);
-            }}
-          >
-            <RemoveCircle />
-          </IconButton>
-        )}
-      </Grid>
-    );
   };
 
   return (
@@ -116,18 +184,43 @@ function HomeRegisterPage() {
         }}
       >
         <Typography component='h1' variant='h5'>
-          Register Home
+          {props.type === HomeFormType.Register
+            ? 'Register Home'
+            : 'Invite Tenants'}
         </Typography>
         <Box
+          width='360px'
           sx={{ mt: 3 }}
           component='form'
           autoComplete={'off'}
           onSubmit={handleSubmit}
         >
-          <Grid container spacing={2}>
-            {tenants.map((username, t) => {
+          <Grid container rowGap={2}>
+            {tenants.map(({ username }, t) => {
               t = t + 1;
-              return <TenantsField t={t} username={username} key={t} />;
+              return (
+                <TenantsField
+                  t={t}
+                  username={username}
+                  key={t}
+                  setTenant={(id, tenant) => {
+                    const updated = tenants;
+                    updated[id] = tenant;
+                    setTenants(updated);
+                    setHasErrors(
+                      updated.findIndex(({ error }) => error) !== -1
+                    );
+                  }}
+                  addTenant={() =>
+                    setTenants([...tenants, { username: '', error: false }])
+                  }
+                  deleteTenant={(i) => {
+                    tenants.splice(i, 1);
+                    setTenants([...tenants]);
+                  }}
+                  canDelete={t > 1 && t === tenants.length}
+                />
+              );
             })}
           </Grid>
 
@@ -135,9 +228,10 @@ function HomeRegisterPage() {
             type='submit'
             fullWidth
             variant='contained'
+            disabled={hasErrors}
             sx={{ mt: 3, mb: 2 }}
           >
-            Register Home
+            {props.type}
           </Button>
         </Box>
       </Box>
