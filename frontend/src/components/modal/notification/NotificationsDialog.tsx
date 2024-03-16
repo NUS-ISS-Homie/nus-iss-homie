@@ -16,28 +16,44 @@ import { useUser } from '../../../context/UserContext';
 import APINotification from '../../../utils/api-notification';
 import NotificationView from './NotificationView';
 import NotificationDetails from './NotificationDetails';
+import { STATUS_OK } from '../../../constants';
+import { useSnackbar } from '../../../context/SnackbarContext';
 
 type NotificationsDialogProps = {
   dialogOpen: boolean;
   setDialogOpen: (isOpen: boolean) => void;
-  onConfirmAction: () => void;
+  markRead: VoidFunction;
 };
 
 function NotificationsDialog(props: NotificationsDialogProps) {
-  const { dialogOpen, setDialogOpen, onConfirmAction } = props;
+  const { dialogOpen, setDialogOpen, markRead } = props;
 
   const { user_id } = useUser();
+  const snackbar = useSnackbar();
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  useEffect(() => {
+  const deleteNotification = (idx: number) => {
     if (!user_id) return;
-    APINotification.getNotificationByUserId(user_id).then(
-      ({ data: { notification, message }, status }) => {
-        console.log(notification);
+    APINotification.deleteNotification(notifications[idx]._id, user_id)
+      .then(({ data: { notification, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        notifications.splice(idx, 1);
+        setNotifications(notifications);
+        snackbar.setSuccess(message);
+      })
+      .catch((err: Error) => snackbar.setError(err.message));
+  };
+
+  useEffect(() => {
+    if (!user_id || !dialogOpen) return;
+    APINotification.getNotificationByUserId(user_id)
+      .then(({ data: { notification, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
         setNotifications(notification);
-      }
-    );
-  }, []);
+      })
+      .catch((err) => snackbar.setError(err.message));
+  }, [user_id, dialogOpen, snackbar]);
 
   return (
     <Dialog open={dialogOpen}>
@@ -46,7 +62,12 @@ function NotificationsDialog(props: NotificationsDialogProps) {
       <Divider />
 
       <Box position='absolute' top={0} right={0}>
-        <IconButton onClick={() => setDialogOpen(false)}>
+        <IconButton
+          onClick={() => {
+            setDialogOpen(false);
+            markRead();
+          }}
+        >
           <Close />
         </IconButton>
       </Box>
@@ -55,7 +76,10 @@ function NotificationsDialog(props: NotificationsDialogProps) {
         {notifications.length === 0 ? (
           <Typography>You have no messages!</Typography>
         ) : (
-          <NotificationsScroll notifications={notifications} />
+          <NotificationsScroll
+            notifications={notifications}
+            deleteNotification={deleteNotification}
+          />
         )}
       </DialogContent>
 
@@ -76,21 +100,27 @@ function NotificationsDialog(props: NotificationsDialogProps) {
   );
 }
 
-function NotificationsScroll(props: { notifications: Notification[] }) {
+function NotificationsScroll(props: {
+  notifications: Notification[];
+  deleteNotification: (idx: number) => void;
+}) {
   const [selected, setSelected] = useState(0);
-  const { notifications } = props;
+  const { notifications, deleteNotification } = props;
 
   return (
     <Box display='flex'>
       <Paper style={{ maxHeight: 200, overflow: 'auto' }}>
         {notifications.length > 0 &&
           notifications.map((n, i) => (
-            <ButtonBase onClick={() => setSelected(i)}>
-              <NotificationView notification={n} key={i} />
+            <ButtonBase key={i} onClick={() => setSelected(i)}>
+              <NotificationView notification={n} />
             </ButtonBase>
           ))}
       </Paper>
-      <NotificationDetails notification={notifications[selected]} />
+      <NotificationDetails
+        notification={notifications[selected]}
+        deleteNotification={() => deleteNotification(selected)}
+      />
     </Box>
   );
 }

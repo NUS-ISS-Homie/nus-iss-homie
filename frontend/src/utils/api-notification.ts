@@ -1,5 +1,5 @@
 import {
-  Notification,
+  NotificationReq,
   NotificationResponse,
   NotificationsResponse,
 } from '../@types/Notification';
@@ -8,7 +8,7 @@ import { API, requests } from './api-request';
 
 const APINotification = {
   createNotification: (
-    notification: Notification
+    notification: NotificationReq
   ): Promise<API.Response<NotificationResponse>> => {
     return requests.post(URL_NOTIF_SVC, '', notification);
   },
@@ -29,7 +29,9 @@ const APINotification = {
     notificationId: string,
     userId: string
   ): Promise<API.Response<NotificationResponse>> => {
-    return requests.delete(URL_NOTIF_SVC, `/${notificationId}`, { userId });
+    return requests.delete(URL_NOTIF_SVC, `/${notificationId}`, {
+      data: { userId },
+    });
   },
 };
 
