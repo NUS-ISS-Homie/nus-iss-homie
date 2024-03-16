@@ -13,7 +13,7 @@ interface Tenant {
   role: Role;
 }
 
-function Tenant(props: { tenant: Tenant }) {
+function TenantView(props: { tenant: Tenant }) {
   const { tenant } = props;
 
   return (
@@ -29,7 +29,7 @@ function Tenant(props: { tenant: Tenant }) {
     >
       <Avatar
         sx={{
-          bgcolor: tenant.role == Role.Admin ? 'primary.main' : 'secondary',
+          bgcolor: tenant.role === Role.Admin ? 'primary.main' : 'secondary',
         }}
       >
         {tenant.username[0]}
@@ -49,8 +49,10 @@ function TenantDetails() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
 
   useEffect(() => {
-    if (!home.adminUser) return;
+    if (!home) return;
+    console.log('HOME', home);
     const tenants = [];
+<<<<<<< HEAD
     console.log(home);
     home.adminUser.username &&
       tenants.push({ username: home.adminUser.username, role: Role.Admin });
@@ -59,12 +61,19 @@ function TenantDetails() {
         username && tenants.push({ username, role: Role.Member })
     );
     console.log(tenants);
+=======
+    tenants.push({ username: home.adminUser.username, role: Role.Admin });
+    home.users.forEach(({ username }) =>
+      tenants.push({ username, role: Role.Member })
+    );
+    console.log('tenants:', tenants);
+>>>>>>> main
     setTenants(tenants);
-  }, []);
+  }, [home]);
 
   return (
     <Grid container columnGap={2} justifyContent='center' alignItems='center'>
-      {tenants.map((t, i) => t && <Tenant tenant={t} key={i} />)}
+      {tenants.map((t, i) => t && <TenantView tenant={t} key={i} />)}
     </Grid>
   );
 }

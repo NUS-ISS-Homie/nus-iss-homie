@@ -53,6 +53,26 @@ export async function createUser(req, res) {
   }
 }
 
+export async function getUserId(req, res) {
+  try {
+    const { username } = req.params;
+    const user = await _getUser(username);
+    if (!user) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    }
+
+    return res
+      .status(constants.STATUS_CODE_OK)
+      .json({ username: user.username, user_id: user._id });
+  } catch (err) {
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
 export async function signIn(req, res) {
   try {
     const { username, password } = req.body;
