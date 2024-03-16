@@ -52,6 +52,7 @@ function TenantDetails() {
     if (!home) return;
     console.log('HOME', home);
     const tenants = [];
+
     tenants.push({ username: home.adminUser.username, role: Role.Admin });
     home.users.forEach(({ username }) =>
       tenants.push({ username, role: Role.Member })
