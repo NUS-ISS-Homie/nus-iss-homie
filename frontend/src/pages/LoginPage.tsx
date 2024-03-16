@@ -73,6 +73,7 @@ function LoginPage() {
         homeSocket.connect();
 
         // Setup home
+
         APIHome.getHomeByUserId(user_id).then(
           ({ data: { home, message }, status }) => {
             switch (status) {

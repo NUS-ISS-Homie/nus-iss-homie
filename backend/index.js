@@ -9,16 +9,13 @@ import notificationRoutes from './routes/notification-routes.js';
 import userRoutes from './routes/user-routes.js';
 import expenseRoutes from './routes/expense-routes.js';
 import choreRoutes from './routes/chore-routes.js';
-<<<<<<< HEAD
 import groceryItemRoutes from './routes/grocery-item-routes.js';
 import createEventListeners from './controllers/socket-controller.js';
-=======
 import {
   sessionStore,
   createEventListeners,
 } from './controllers/socket-controller.js';
 import { randomUUID } from 'crypto';
->>>>>>> main
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
