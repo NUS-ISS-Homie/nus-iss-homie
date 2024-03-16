@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/', (_, res) => res.send('Hello World from grocery item CRUD'));
 
 router.post('/', createGroceryItem);
-router.get(':groceryItemId', getGroceryItem);
+router.get('/:groceryItemId', getGroceryItem);
 router.put('/:groceryItemId', updatedGroceryItem);
 router.delete('/:groceryItemId', deleteGroceryItem);
 

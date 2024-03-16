@@ -17,10 +17,10 @@ db.once('open', () => console.log('Successfully connected to MongoDB'));
 // CREATE FUNCTION
 export async function createGroceryItem(params) {
     return await GroceryItemModel.create({
-        user_id: params.user_id,
+        user: params.user_id,
         name: params.name,
-        purchasedDate: params.purchasedDate,
-        expiryDate: params.purchasedDate,
+        purchasedDate: new Date(params.purchasedDate),
+        expiryDate: new Date(params.purchasedDate),
         category: params.category,
         quantity: params.quantity,
         unit: params.unit,
@@ -47,8 +47,8 @@ export async function updateGroceryItem(params) {
         {
             $set: {
                 name: params.name,
-                purchasedDate: params.purchasedDate,
-                expiryDate: params.purchasedDate,
+                purchasedDate: new Date(params.purchasedDate),
+                expiryDate: new Date(params.purchasedDate),
                 category: params.category,
                 quantity: params.quantity,
                 unit: params.unit,
@@ -61,15 +61,14 @@ export async function updateGroceryItem(params) {
 // DELETE FUNCTION
 export async function deleteGroceryItem(params) {
     const item = await GroceryItemModel.findOne({
-        _id: grocery_item_id
+        _id: params.grocery_item_id
     });
-
     if (!item) {
         throw new Error('Database Error');
     }
 
     const deleted = await GroceryItemModel.deleteOne({
-        _id: grocery_item_id
+        _id: params.grocery_item_id
     });
     return deleted.acknowledged;
 }

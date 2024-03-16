@@ -5,6 +5,7 @@ import {
     ormDeleteGroceryItem as _deleteGroceryItem
 } from '../models/grocery-item/grocery-item-orm.js';
 import * as constants from '../common/messages.js';
+import { isDataView } from 'util/types';
 
 export const entity = 'grocery item';
 
@@ -14,7 +15,7 @@ function isDuplicateError(err) {
 }
 
 function isCompleteField(body) {
-    const { user_id, name, purchasedDate, expiryDate, quantity, unit, category } = req.body;
+    const { user_id, name, purchasedDate, expiryDate, quantity, unit, category } = body;
     return user_id, name && purchasedDate && expiryDate && quantity && unit && category;
 }
 
@@ -28,7 +29,7 @@ export async function createGroceryItem(req, res) {
                 if (isDuplicateError(resp.err)) {
                     return res
                         .status(constants.STATUS_CODE_DUPLICATE)
-                        .json({ message: constants.FAIL_DUPLICATE(entity, username) });
+                        .json({ message: constants.FAIL_DUPLICATE(entity, name) });
                 }
                 return res
                     .status(constants.STATUS_CODE_BAD_REQUEST)
@@ -36,7 +37,7 @@ export async function createGroceryItem(req, res) {
             } else {
                 return res
                     .status(constants.STATUS_CODE_CREATED)
-                    .json({ message: constants.SUCCESS_CREATE(entity, username) });
+                    .json({ message: constants.SUCCESS_CREATE(entity, name) });
             }
         } else {
             return res
@@ -61,19 +62,20 @@ export async function getGroceryItem(req, res) {
                     .json({ message: constants.FAIL_NOT_EXIST(entity) });
             }
 
-            if (user.err) {
+            if (item.err) {
                 return res
                     .status(constants.STATUS_CODE_BAD_REQUEST)
                     .json({ message: 'Could not get the item!' });
             }
-
+            return res
+                .status(constants.STATUS_CODE_OK)
+                .json({ item, message: constants.SUCCESS_READ(entity) });
         } else {
             return res
                 .status(constants.STATUS_CODE_BAD_REQUEST)
                 .json({ message: constants.FAIL_MISSING_FIELDS });
         }
     } catch (err) {
-        console.log(err);
         return res.status(constants.STATUS_CODE_SERVER_ERROR).json(err);
     }
 }
@@ -104,7 +106,7 @@ export async function updatedGroceryItem(req, res) {
 
             return res
                 .status(constants.STATUS_CODE_OK)
-                .json({ message: constants.SUCCESS_UPDATE(entity, '') });
+                .json({ message: constants.SUCCESS_UPDATE(entity, name) });
         }
         return res
             .status(constants.STATUS_CODE_BAD_REQUEST)
@@ -119,21 +121,24 @@ export async function updatedGroceryItem(req, res) {
 export async function deleteGroceryItem(req, res) {
     try {
         const { groceryItemId } = req.params;
-        if (groceryItemId) {
-            const isDeleted = await _deleteGroceryItem(groceryItemId);
-            if (!isDeleted || isDeleted.err) {
-                return res
-                    .status(constants.STATUS_CODE_NOT_FOUND)
-                    .json({ message: constants.FAIL_NOT_EXIST(entity) });
-            }
-            return res
-                .status(constants.STATUS_CODE_OK)
-                .json({ message: constants.SUCCESS_DELETE(entity, name) });
-        } else {
+        console.log(groceryItemId);
+
+        if(!groceryItemId) {
             return res
                 .status(constants.STATUS_CODE_BAD_REQUEST)
                 .json({ message: constants.FAIL_MISSING_FIELDS });
         }
+        
+        const isDeleted = await _deleteGroceryItem(groceryItemId);
+        if (!isDeleted || isDeleted.err) {
+            return res
+                .status(constants.STATUS_CODE_NOT_FOUND)
+                .json({ message: constants.FAIL_NOT_EXIST(entity) });
+        }
+        return res
+            .status(constants.STATUS_CODE_OK)
+            .json({ message: constants.SUCCESS_DELETE(entity, '') });
+
     } catch (err) {
         return res
             .status(constants.STATUS_CODE_SERVER_ERROR)

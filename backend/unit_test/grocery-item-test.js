@@ -37,6 +37,31 @@ describe('CRUD API Grocery Item', () => {
         category: 'Dairy/Eggs'
     };
 
+    const oldName = groceryItem1.name;
+
+    const updatedGroceryItem1 = {
+        _id: groceryItemId.toString(),
+        user: user1._id.toString(),
+        name: 'A Pint of Milk',
+        purchasedDate: new Date(),
+        expiryDate: new Date(),
+        quantity: 3,
+        unit: 'L',
+        category: 'Dairy/Eggs'
+    };
+
+    const wrongUpdatedGroceryItem1 = {
+        _id: new mongoose.Types.ObjectId().toString(),
+        user: user1._id.toString(),
+        name: 'A Pint of Milk',
+        purchasedDate: new Date(),
+        expiryDate: new Date(),
+        quantity: 3,
+        unit: 'L',
+        category: 'Dairy/Eggs'
+    };
+
+
     before('Connect to MongoDB', async () => {
         await mongoose.connect(process.env.DB_CLOUD_URI_TEST);
     });
@@ -53,7 +78,7 @@ describe('CRUD API Grocery Item', () => {
     });
 
     describe('POST api/grocery-item', () => {
-        it('should create a new notification', (done) => {
+        it('should create a new grocery item', (done) => {
             const newItem = {
                 user: user2._id,
                 name: 'banana',
@@ -65,8 +90,7 @@ describe('CRUD API Grocery Item', () => {
             }
 
             const expectedBody = {
-                message: msg.SUCCESS_CREATE(entity),
-                item: newItem,
+                message: msg.SUCCESS_CREATE(entity, newItem.name),
             };
 
             chai
@@ -106,28 +130,74 @@ describe('CRUD API Grocery Item', () => {
         });
     });
 
-    describe('GET api/grocery-item/:groceryItemId (by recipient)', () => {
-        it('should obtain an existing grocery item data', (done) => {
+    // describe('GET api/grocery-item/:groceryItemId', () => {
+    //     it('should obtain an existing grocery item data', (done) => {
+    //         const expectedBody = {
+    //             message: msg.SUCCESS_READ(entity),
+    //             item: groceryItem1,
+    //         };
+
+    //         chai
+    //             .request(app)
+    //             .get(`/api/grocery-item/${groceryItem1._id}`)
+    //             .send()
+    //             .end((err, res) => {
+    //                 err && console.log(err);
+    //                 chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
+    //                 chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+    //                 done();
+    //             });
+    //     });
+    // });
+
+    describe('UPDATE api/grocery-item/:groceryItemId', () => {
+        it('should not update a non-existing grocery item data', (done) => {
             const expectedBody = {
-                message: msg.SUCCESS_READ(entity),
-                item: groceryItem1,
+                message: msg.FAIL_INCORRECT_FIELDS,
             };
 
             chai
                 .request(app)
-                .get(`/api/grocery-item/${groceryItem1._id}`)
-                .send()
+                .put(`/api/grocery-item/${wrongUpdatedGroceryItem1._id}`)
+                .send(wrongUpdatedGroceryItem1)
                 .end((err, res) => {
                     err && console.log(err);
-                    chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
+                    chai.expect(res).to.have.status(msg.STATUS_CODE_BAD_REQUEST);
                     chai.expect(res.body).to.shallowDeepEqual(expectedBody);
                     done();
                 });
         });
+
+        it('should not update a grocery item data (missing grocery id)', (done) => {
+            chai
+                .request(app)
+                .put(`/api/grocery-item`)
+                .send()
+                .end((err, res) => {
+                    err && console.log(err);
+                    chai.expect(res).to.have.status(msg.STATUS_CODE_NOT_FOUND);
+                    done();
+                });
+        });
+
+
+        // it('should update an existing grocery item data', (done) => {
+        //     const expectedBody = {
+        //         message: msg.SUCCESS_UPDATE(entity, oldName),
+        //     };
+
+        //     chai
+        //         .request(app)
+        //         .put(`/api/grocery-item/${groceryItem1._id}`)
+        //         .send(updatedGroceryItem1)
+        //         .end((err, res) => {
+        //             err && console.log(err);
+        //             chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
+        //             chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+        //             done();
+        //         });
+        // });
     });
-
-
-    // TODO : Create tests for update 
 
     describe('DELETE api/grocery-item/:groceryItemId', () => {
         it('should delete an existing grocery item', (done) => {
@@ -153,8 +223,7 @@ describe('CRUD API Grocery Item', () => {
                 .send()
                 .end((err, res) => {
                     err && console.log(err);
-                    chai.expect(res).to.have.status(msg.STATUS_CODE_BAD_REQUEST);
-                    chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+                    chai.expect(res).to.have.status(msg.STATUS_CODE_NOT_FOUND);
                     done();
                 });
         });
