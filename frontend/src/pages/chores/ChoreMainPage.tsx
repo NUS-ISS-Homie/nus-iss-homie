@@ -6,6 +6,10 @@ import DeletePopup from './ChoresDeletePopUp';
 import '../../CSS/ExpenseMainPage.css'; // Import the CSS file
 import { URI_BACKEND } from '../../configs';
 import { Chore } from './ChoreType';
+import FullCalendar from '@fullcalendar/react'; // Import FullCalendar component
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction'
+import { Modal } from '@mui/material';
 
 function ChoreMainPage() {
   // State variables for managing chores and pop-up visibility
@@ -15,6 +19,7 @@ function ChoreMainPage() {
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
   const [refreshChoreList, setRefreshChoreList] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
 
   // Function to fetch chores from the backend API
 
@@ -92,12 +97,72 @@ function ChoreMainPage() {
     }
   };
 
+  const handleEventClick = (info: any) => {
+    const eventId = info.event.id;;
+    const selectedChore = chores.find((chore) => chore._id === eventId);
+    setSelectedChore(selectedChore || null);
+    setModalOpen(true);
+  };
+
   return (
     <div>
       <h1>Chore Tracker</h1>
       <div className='expense-buttons add-expense-container'>
         <button onClick={openCreatePopup}>Add Chore</button>
       </div>
+      <FullCalendar
+        plugins={[dayGridPlugin, interactionPlugin]}
+        initialView="dayGridWeek"
+        events={chores.map((chore) => ({
+          id: String(chore._id),
+          title: chore.title,
+          start: chore.dueDate, // Assuming chore.dueDate is in ISO format
+          extendedProps: {
+            assignedTo: chore.assignedTo,
+          },
+        }))}
+        eventContent={(info) => {
+          const choreTitle = info.event.title;
+          const assignedTo = info.event.extendedProps.assignedTo;
+          return (
+            <div>
+              <p>{choreTitle}</p>
+              <p>Assigned To: {assignedTo}</p>
+            </div>
+          );
+        }}
+        eventClick={handleEventClick}
+      />
+      <Modal
+        open={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div className='popup'>
+          <h2>{selectedChore?.title}</h2>
+          <p>Assigned To: {selectedChore?.assignedTo}</p>
+          <p>Date: {selectedChore?.dueDate ? new Date(selectedChore.dueDate).toLocaleDateString() : ''}</p>
+          {/* Edit and delete buttons (conditionally rendered) */}
+          {selectedChore && (
+            <div className='expense-buttons'>
+              <button onClick={() => {
+                openEditPopup(selectedChore);
+                setModalOpen(false); // Close the modal after opening the edit popup
+              }}>Edit</button>
+              <button onClick={() => {
+                openDeletePopup(selectedChore);
+                setModalOpen(false); // Close the modal after opening the delete popup
+              }}>Delete</button>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+
       <table className='expense-table'>
         <thead>
           <tr>
@@ -124,10 +189,10 @@ function ChoreMainPage() {
         </tbody>
       </table>
       {isCreateOpen && (
-        <CreatePopup
-          onClose={() => setCreateOpen(false)}
-          onSubmit={handleSubmit}
-        />
+          <CreatePopup
+            onClose={() => setCreateOpen(false)}
+            onSubmit={handleSubmit}
+          />
       )}
       {/* Pass selectedChore and handleEdit to the edit popup */}
       {isEditOpen && selectedChore && (

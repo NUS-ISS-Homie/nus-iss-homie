@@ -17,7 +17,7 @@ const DeletePopup: React.FC<DeletePopupProps> = ({
   };
 
   return (
-    <div className='popup-overlay'>
+    <div className='popup-overlay' style={{zIndex : 1}}>
       <div className='popup'>
         <h2>Delete Chore</h2>
         <p>

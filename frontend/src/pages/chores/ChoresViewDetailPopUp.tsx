@@ -7,7 +7,7 @@ interface CreatePopupProps {
   onSubmit: (formData: any) => void;
 }
 
-const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
+const choreViewDetail: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     title: '',
     assignedTo: '',
@@ -117,4 +117,4 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
     </div>
   );
 };
-export default CreatePopup;
+export default choreViewDetail;
