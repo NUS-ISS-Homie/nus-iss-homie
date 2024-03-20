@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import CreatePopup from './ChoresAddPopUp';
-import EditPopup from './ChoresEditPopUp';
-import DeletePopup from './ChoresDeletePopUp';
+import CreatePopup from '../../components/modal/ChoresAddPopUp';
+import EditPopup from '../../components/modal/ChoresEditPopUp';
+import DeletePopup from '../../components/modal/ChoresDeletePopUp';
 import '../../CSS/ExpenseMainPage.css'; // Import the CSS file
 import { URI_BACKEND } from '../../configs';
-import { Chore } from './ChoreType';
+import { Chore } from '../../@types/ChoreType';
 import FullCalendar from '@fullcalendar/react'; // Import FullCalendar component
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction'
-import { Modal } from '@mui/material';
+import ChoreViewDetail from '../../components/modal/ChoresViewDetailPopUp';
 
 function ChoreMainPage() {
   // State variables for managing chores and pop-up visibility
@@ -19,7 +19,7 @@ function ChoreMainPage() {
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
   const [refreshChoreList, setRefreshChoreList] = useState(false);
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
 
   // Function to fetch chores from the backend API
 
@@ -101,7 +101,7 @@ function ChoreMainPage() {
     const eventId = info.event.id;;
     const selectedChore = chores.find((chore) => chore._id === eventId);
     setSelectedChore(selectedChore || null);
-    setModalOpen(true);
+    setIsViewDetailsOpen(true);
   };
 
   return (
@@ -111,6 +111,7 @@ function ChoreMainPage() {
         <button onClick={openCreatePopup}>Add Chore</button>
       </div>
       <FullCalendar
+        contentHeight= 'auto'
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridWeek"
         events={chores.map((chore) => ({
@@ -132,62 +133,15 @@ function ChoreMainPage() {
           );
         }}
         eventClick={handleEventClick}
+        eventMouseEnter={(info) => { info.el.style.cursor = 'pointer'; }}
+        eventMouseLeave={(info) => { info.el.style.cursor = ''; }}
       />
-      <Modal
-        open={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <div className='popup'>
-          <h2>{selectedChore?.title}</h2>
-          <p>Assigned To: {selectedChore?.assignedTo}</p>
-          <p>Date: {selectedChore?.dueDate ? new Date(selectedChore.dueDate).toLocaleDateString() : ''}</p>
-          {/* Edit and delete buttons (conditionally rendered) */}
-          {selectedChore && (
-            <div className='expense-buttons'>
-              <button onClick={() => {
-                openEditPopup(selectedChore);
-                setModalOpen(false); // Close the modal after opening the edit popup
-              }}>Edit</button>
-              <button onClick={() => {
-                openDeletePopup(selectedChore);
-                setModalOpen(false); // Close the modal after opening the delete popup
-              }}>Delete</button>
-            </div>
-          )}
-        </div>
-      </Modal>
-
-
-      <table className='expense-table'>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Assigned To</th>
-            <th>Due Date</th>
-            <th>Actions</th> {/* New column for edit and delete buttons */}
-          </tr>
-        </thead>
-        <tbody>
-          {chores.map((chore) => (
-            <tr key={chore._id}>
-              <td>{chore.title}</td>
-              <td>{chore.assignedTo}</td>
-              <td>{chore.dueDate ? new Date(chore.dueDate).toLocaleDateString() : ''}</td>
-              <td className='expense-buttons'>
-                {/* Edit button */}
-                <button onClick={() => openEditPopup(chore)}>Edit</button>
-                {/* Delete button */}
-                <button onClick={() => openDeletePopup(chore)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {isViewDetailsOpen && <ChoreViewDetail
+        selectedChore={selectedChore}
+        openEditPopup={openEditPopup}
+        setIsViewDetailsOpen={setIsViewDetailsOpen}
+        openDeletePopup={openDeletePopup}
+      />}
       {isCreateOpen && (
           <CreatePopup
             onClose={() => setCreateOpen(false)}

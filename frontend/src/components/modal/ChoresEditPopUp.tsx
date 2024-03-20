@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Chore } from './ChoreType';
+import { Chore } from '../../@types/ChoreType';
 import { useUser } from '../../context/UserContext';
 import APIHome from '../../utils/api-home';
 import zIndex from '@mui/material/styles/zIndex';
