@@ -6,16 +6,15 @@ import mongoose from 'mongoose';
 import 'dotenv/config';
 import assert from 'assert';
 import * as msg from '../common/messages.js';
-import { entity } from '../controllers/home-controller.js';
+import { entity } from '../controllers/grocery-list-controller.js';
 import HomeModel from '../models/home/home-model.js';
 import UserModel from '../models/user/user-model.js';
-import groceryItemModel from '../models/grocery-item/grocery-item-model';
-import groceryListModel from '../models/grocery-list/grocery-list-model';
+import groceryItemModel from '../models/grocery-item/grocery-item-model.js';
+import groceryListModel from '../models/grocery-list/grocery-list-model.js';
 
 assert(process.env.ENV == 'TEST');
 chai.use(chaiHttp);
 chai.use(chaiShallowDeepEqual);
-import mongoose from "mongoose";
 
 describe('Grocery List CRUD API', () => {
     const adminUser = {
@@ -31,6 +30,7 @@ describe('Grocery List CRUD API', () => {
         username: 'user2',
     };
     const homeId = new mongoose.Types.ObjectId().toString();
+    const homeId2 = new mongoose.Types.ObjectId().toString();
     const groceryListId = new mongoose.Types.ObjectId().toString();
 
     const item1 = {
@@ -38,7 +38,7 @@ describe('Grocery List CRUD API', () => {
         user: user1._id,
         name: 'Milk',
         purchasedDate: new Date(),
-        expirtyDate: new Date(),
+        expiryDate: new Date(),
         quantity: 2,
         unit: 'L',
         category: 'Dairy/Eggs'
@@ -48,16 +48,27 @@ describe('Grocery List CRUD API', () => {
         user: user2._id,
         name: 'Chicken Breast',
         purchasedDate: new Date(),
-        expirtyDate: new Date(),
+        expiryDate: new Date(),
         quantity: 500,
         unit: 'gr',
         category: 'Meat'
     }
 
+    const item3 = {
+        _id: new mongoose.Types.ObjectId().toString(),
+        user: user1._id,
+        name: 'Salmon',
+        purchasedDate: new Date(),
+        expiryDate: new Date(),
+        quantity: 1,
+        unit: 'kg',
+        category: 'Fish'
+    }
+
     const groceryList = {
         _id: groceryListId,
         home: homeId,
-        users: [user1._id, user2._id]
+        items: [item1._id, item2._id]
     }
 
     before('Connect to MongoDB', async () => {
@@ -78,11 +89,23 @@ describe('Grocery List CRUD API', () => {
             users: [user1._id, user2._id],
         });
 
+        await HomeModel.create({
+            _id: homeId2,
+            adminUser: user1._id,
+            users: [user1._id, user2._id],
+        });
+
         await groceryItemModel.deleteMany();
         await groceryItemModel.create({ ...item1 });
         await groceryItemModel.create({ ...item2 });
+        await groceryItemModel.create({ ...item3 });
 
         await groceryListModel.deleteMany();
+        await groceryListModel.create({
+            _id: groceryListId,
+            home: homeId,
+            items: [item1._id, item2._id]
+        });
     });
 
     describe('POST api/grocery-list', () => {
@@ -90,9 +113,8 @@ describe('Grocery List CRUD API', () => {
             const expectedBody = {
                 message: msg.SUCCESS_CREATE(entity),
                 list: {
-                    _id: groceryList._id,
-                    home: groceryList.home,
-                    users: []
+                    homeId: homeId2,
+                    items: []
                 },
             };
 
@@ -100,30 +122,13 @@ describe('Grocery List CRUD API', () => {
                 .request(app)
                 .post('/api/grocery-list')
                 .send({
-                    _id: groceryList._id,
-                    home: groceryList.home,
+                    homeId: homeId2,
                 })
                 .end((err, res) => {
                     err && console.log(err);
                     chai.expect(res).to.have.status(msg.STATUS_CODE_CREATED);
-                    chai.expect(res.body).to.shallowDeepEqual(expectedBody);
-                    done();
-                });
-        });
-
-        it('should not create a new list (missing homeId)', (done) => {
-            const expectedBody = { message: msg.FAIL_MISSING_FIELDS };
-
-            chai
-                .request(app)
-                .post('/api/grocery-list')
-                .send({
-                    _id: groceryList._id,
-                })
-                .end((err, res) => {
-                    err && console.log(err);
-                    chai.expect(res).to.have.status(msg.STATUS_CODE_BAD_REQUEST);
-                    chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+                    chai.expect(res.body.list.home._id).to.shallowDeepEqual(expectedBody.list.homeId);
+                    chai.expect(res.body.list.items).to.shallowDeepEqual(expectedBody.list.items);
                     done();
                 });
         });
@@ -133,11 +138,7 @@ describe('Grocery List CRUD API', () => {
         it('should obtain an existing list data', (done) => {
             const expectedBody = {
                 message: msg.SUCCESS_READ(entity),
-                list: {
-                    _id: groceryList._id,
-                    home: groceryList.home,
-                    users: []
-                },
+                list: groceryList
             };
 
             chai
@@ -147,12 +148,38 @@ describe('Grocery List CRUD API', () => {
                 .end((err, res) => {
                     err && console.log(err);
                     chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
-                    chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+                    chai.expect(res.body.list.home._id).to.shallowDeepEqual(expectedBody.list.home);
+                    chai.expect(res.body.list._id).to.shallowDeepEqual(expectedBody.list._id);
+                    chai.expect(res.body.list.items[0]._id).to.shallowDeepEqual(expectedBody.list.items[0]);
+                    chai.expect(res.body.list.items[1]._id).to.shallowDeepEqual(expectedBody.list.items[1]);                    done();
+                });
+        });
+    });
+
+    describe('PUT api/grocery-list', () => {
+        it('should obtain an existing list data', (done) => {
+            const expectedBody = {
+                message: msg.SUCCESS_READ(entity),
+                list: groceryList
+            };
+
+            chai
+                .request(app)
+                .put(`/api/grocery-list/`)
+                .send({ listId: groceryListId })
+                .end((err, res) => {
+                    err && console.log(err);
+                    chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
+                    chai.expect(res._body.list.home._id).to.shallowDeepEqual(expectedBody.list.home);
+                    chai.expect(res._body.list._id).to.shallowDeepEqual(expectedBody.list._id);
+                    chai.expect(res._body.list.items[0]._id).to.shallowDeepEqual(expectedBody.list.items[0]);
+                    chai.expect(res._body.list.items[1]._id).to.shallowDeepEqual(expectedBody.list.items[1]);
                     done();
                 });
         });
 
-        it('should not obtain an existing grocery list data (missing homeId)', (done) => {
+
+        it('should not obtain an existing grocery list data (missing listId)', (done) => {
             const expectedBody = { message: msg.FAIL_MISSING_FIELDS };
 
             chai
@@ -173,20 +200,24 @@ describe('Grocery List CRUD API', () => {
             const expectedList = {
                 _id: groceryList._id,
                 home: groceryList.home,
-                items: [item1]
+                items: [item1._id, item2._id, item3._id]
             };
 
             chai
                 .request(app)
                 .put(`/api/grocery-list/${homeId}/add`)
-                .send({ itemId: item1._id })
+                .send({ itemId: item3._id })
                 .end((err, res) => {
                     err && console.log(err);
                     chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
                     chai
                         .expect(res.body.message)
                         .to.equal(msg.SUCCESS_ACTION('added to', entity));
-                    chai.expect(res.body.home).to.shallowDeepEqual(expectedList);
+                    chai.expect(res.body.list.home._id).to.shallowDeepEqual(expectedList.home);
+                    chai.expect(res.body.list._id).to.shallowDeepEqual(expectedList._id);
+                    chai.expect(res.body.list.items[0]._id).to.shallowDeepEqual(expectedList.items[0]);
+                    chai.expect(res.body.list.items[1]._id).to.shallowDeepEqual(expectedList.items[1]);
+                    chai.expect(res.body.list.items[2]._id).to.shallowDeepEqual(expectedList.items[2]);
                     done();
                 });
         });
@@ -223,30 +254,6 @@ describe('Grocery List CRUD API', () => {
         });
     });
 
-    describe('PUT api/grocery-list', () => {
-        it('should obtain an existing list data', (done) => {
-            const expectedBody = {
-                message: msg.SUCCESS_READ(entity),
-                list: {
-                    _id: groceryList._id,
-                    home: groceryList.home,
-                    items: [item1]
-                }
-            };
-
-            chai
-                .request(app)
-                .get(`/api/grocery-list/`)
-                .send({ listId: groceryListId })
-                .end((err, res) => {
-                    err && console.log(err);
-                    chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
-                    chai.expect(res.body).to.shallowDeepEqual(expectedBody);
-                    done();
-                });
-        });
-    });
-
     describe('PUT api/grocery-list/:homeId/remove', () => {
         it('should remove from an existing list', (done) => {
             const expectedBody = { message: msg.SUCCESS_ACTION('removed from', entity) };
@@ -254,12 +261,12 @@ describe('Grocery List CRUD API', () => {
             chai
                 .request(app)
                 .put(`/api/grocery-list/${homeId}/remove`)
-                .send({ itemId: user1._id })
+                .send({ itemId: item2._id })
                 .end((err, res) => {
                     err && console.log(err);
                     chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
                     chai.expect(res.body).to.shallowDeepEqual(expectedBody);
-                    chai.expect(res.body.home.items).to.not.contain(user1._id);
+                    chai.expect(res.body.list.items).to.not.contain(item2._id);
                     done();
                 });
         });
@@ -281,11 +288,11 @@ describe('Grocery List CRUD API', () => {
 
         it('should not remove from an existing list (list does not exist)', (done) => {
             const expectedBody = { message: msg.FAIL_NOT_EXIST };
-
+            const randomId = new mongoose.Types.ObjectId().toString();
             chai
                 .request(app)
-                .put(`/api/grocery-list/${homeId}/remove`)
-                .send({ userId: user1._id })
+                .put(`/api/grocery-list/${randomId}/remove`)
+                .send({ itemId: item1._id })
                 .end((err, res) => {
                     err && console.log(err);
                     chai.expect(res).to.have.status(msg.STATUS_CODE_NOT_FOUND);
@@ -304,7 +311,7 @@ describe('Grocery List CRUD API', () => {
             chai
                 .request(app)
                 .delete(`/api/grocery-list`)
-                .send({ listId: groceryListId })
+                .send({ homeId: homeId })
                 .end((err, res) => {
                     err && console.log(err);
                     chai.expect(res).to.have.status(msg.STATUS_CODE_OK);
@@ -313,17 +320,17 @@ describe('Grocery List CRUD API', () => {
                 });
         });
 
-        it('should not delete an existing list (listId does not exist)', (done) => {
+        it('should not delete an existing list (list with homeId does not exist)', (done) => {
             const expectedBody = { message: msg.FAIL_NOT_EXIST };
 
             chai
                 .request(app)
                 .delete(`/api/grocery-list`)
-                .send({ listId: randomId })
+                .send({ homeId: randomId })
                 .end((err, res) => {
                     err && console.log(err);
                     chai.expect(res).to.have.status(msg.STATUS_CODE_NOT_FOUND);
-                    chai.expect(res.body).to.shallowDeepEqual(expectedBody);
+                    chai.expect(res.body.message).to.shallowDeepEqual(expectedBody.message);
                     done();
                 });
         });

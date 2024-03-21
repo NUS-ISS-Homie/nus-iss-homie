@@ -54,7 +54,6 @@ export async function getGroceryList(req, res) {
             : await _getListByHomeId(homeId);
 
         if (!resp || resp.error) {
-            console.log(resp);
             return res
                 .status(msg.STATUS_CODE_NOT_FOUND)
                 .json({ message: msg.FAIL_NOT_EXIST(entity) });
@@ -95,7 +94,7 @@ export async function addToList(req, res) {
 
         return res
             .status(msg.STATUS_CODE_OK)
-            .json({ list: resp, message: msg.SUCCESS_ACTION('Added to', entity) });
+            .json({ list: resp, message: msg.SUCCESS_ACTION('added to', entity) });
     } catch (err) {
         console.log('Error grocery list: ' + err);
         return res.status(msg.STATUS_CODE_SERVER_ERROR).json({ message: err });
@@ -114,9 +113,10 @@ export async function deleteFromList(req, res) {
         }
 
         const list = await _getListByHomeId(homeId);
+
         if (!list) {
             return res
-                .status(msg.STATUS_CODE_BAD_REQUEST)
+                .status(msg.STATUS_CODE_NOT_FOUND)
                 .json({ message: msg.FAIL_NOT_EXIST(entity) });
         }
 
@@ -129,7 +129,7 @@ export async function deleteFromList(req, res) {
 
         return res
             .status(msg.STATUS_CODE_OK)
-            .json({ list: updatedList, message: msg.SUCCESS_ACTION('Removed from', entity) });
+            .json({ list: updatedList, message: msg.SUCCESS_ACTION('removed from', entity) });
     } catch (err) {
         console.log('Error grocery list: ' + err);
         return res.status(msg.STATUS_CODE_SERVER_ERROR).json({ message: err });
@@ -150,8 +150,8 @@ export async function deleteList(req, res) {
         const list = await _getListByHomeId(homeId);
         if (!list) {
             return res
-                .status(msg.STATUS_CODE_UNAUTHORIZED)
-                .json({ message: msg.FAIL_UNAUTHORIZED });
+                .status(msg.STATUS_CODE_NOT_FOUND)
+                .json({ message: msg.FAIL_NOT_EXIST });
         }
 
         const resp = await _deleteList(homeId);

@@ -33,9 +33,9 @@ export async function getGroceryList(grocery_list_id) {
     return list;
 }
 
-export async function getGroceryListByHomeId(home_id) {
+export async function getGroceryListByHomeId(homeId) {
     const list = await GroceryListModel.findOne({
-        home: home_id
+        home: homeId
     })
     .populate('home')
     .populate('items')

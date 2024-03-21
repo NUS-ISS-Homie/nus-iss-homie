@@ -16,7 +16,7 @@ chai.use(chaiShallowDeepEqual);
 
 // CRUD
 
-describe('CRUD API Grocery Item', () => {
+describe('Grocery Item CRUD API', () => {
     const groceryItemId = new mongoose.Types.ObjectId().toString();
     const user1 = {
         _id: new mongoose.Types.ObjectId().toString(),
