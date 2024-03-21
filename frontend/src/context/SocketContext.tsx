@@ -15,6 +15,7 @@ import { STATUS_OK } from '../constants';
 const SocketContext = createContext({
   ...sockets,
   joinHome: (homeId: string, onFail?: VoidFunction) => {},
+  createGroceryItem: (itemId: string, onFail?: VoidFunction) => {},
 });
 
 const getSession = () => {
@@ -36,6 +37,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     const { homeSocket } = sockets;
     homeSocket.emit('join-home', homeId);
   }, []);
+
+  const createGroceryItem = useCallback(
+    (itemId: string, onFail?: VoidFunction) => {
+      console.log('create grocery item request');
+      const { homeSocket } = sockets;
+      homeSocket.emit('create-grocery-item', itemId);
+    },
+    []
+  );
 
   useEffect(() => {
     const { homeSocket } = sockets;
@@ -74,7 +84,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [joinHome, home, user_id, homeClient, snackbar]);
 
   return (
-    <SocketContext.Provider value={{ ...sockets, joinHome: joinHome }}>
+    <SocketContext.Provider
+      value={{
+        ...sockets,
+        joinHome: joinHome,
+        createGroceryItem: createGroceryItem,
+      }}
+    >
       {children}
     </SocketContext.Provider>
   );

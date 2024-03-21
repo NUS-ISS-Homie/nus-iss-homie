@@ -43,6 +43,18 @@ const onSendNotificationEvent = (io, homeId) => {
   io.to(homeId).emit('notify');
 };
 
+const onGroceryItemCreateEvent = (io, socket, itemId) => {
+  if (!socket) return;
+  socket.join(itemId);
+  io.to(itemId).emit('created-item');
+  socket.on('delete-item', () => onGroceryItemDeleteEvent(io, socket, itemId));
+};
+
+const onGroceryItemDeleteEvent = (io, socket, itemId) => {
+  socket.leave(itemId);
+  io.to(socket.id).emit('deleted-item');
+};
+
 const createEventListeners = (socket, io) => {
   socket.on('delete-session', ({ sessionId }) =>
     sessionStore.removeSession(sessionId)
@@ -54,6 +66,9 @@ const createEventListeners = (socket, io) => {
   socket.on('disconnect', () => onDisconnectEvent(socket));
   socket.on('send-notification', (homeId) =>
     onSendNotificationEvent(io, homeId)
+  );
+  socket.on('create-grocery-item', (itemId) =>
+    onGroceryItemCreateEvent(io, socket, itemId)
   );
 };
 
