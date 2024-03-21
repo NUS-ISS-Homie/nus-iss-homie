@@ -121,7 +121,6 @@ export async function updatedGroceryItem(req, res) {
 export async function deleteGroceryItem(req, res) {
     try {
         const { groceryItemId } = req.params;
-        console.log(groceryItemId);
 
         if(!groceryItemId) {
             return res
