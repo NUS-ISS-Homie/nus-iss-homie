@@ -10,12 +10,12 @@ import {
 const router = express.Router();
 
 // Controller will contain all user-defined routes
-router.get('/', (_, res) => res.send('Hello World from user-service-home'));
 router.post('/', createHome);
+router.put('/', getHome);
+router.delete('/', deleteHome);
+router.put('/leave', leaveHome);
 
 router.get('/:homeId', getHome);
-router.delete('/:homeId', deleteHome);
 router.put('/:homeId/join', joinHome);
-router.put('/:homeId/leave', leaveHome);
 
 export default router;

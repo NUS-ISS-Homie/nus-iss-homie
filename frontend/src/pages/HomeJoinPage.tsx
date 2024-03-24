@@ -11,16 +11,17 @@ import {
 import React from 'react';
 import APIHome from '../utils/api-home';
 import { useNavigate } from 'react-router-dom';
-import { STATUS_CODE_OK } from '../common/messages';
 import { useSnackbar } from '../context/SnackbarContext';
 import { useSockets } from '../context/SocketContext';
 import { useUser } from '../context/UserContext';
+import { NOTIFICATION_JOIN_REQ, STATUS_CREATED, STATUS_OK } from '../constants';
+import APINotification from '../utils/api-notification';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  const { joinHome } = useSockets();
-  const { username } = useUser();
+  const { user_id, username } = useUser();
+  const { homeSocket } = useSockets();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,22 +30,37 @@ function HomeJoinPage() {
 
     if (!homeId) return;
 
-    if (!username) {
+    if (!user_id) {
       navigate('/');
       return;
     }
 
-    // TODO: get current userId
-    APIHome.joinHome(homeId.toString(), username)
+    // TODO: send request to join
+    APIHome.getHome(homeId.toString())
       .then(({ data: { home, message }, status }) => {
-        if (status !== STATUS_CODE_OK) throw new Error(message);
+        if (status !== STATUS_OK) {
+          throw new Error(message);
+        }
 
-        // TODO: send invites to invitees
+        const joinReq = {
+          sender: user_id,
+          recipients: [home.adminUser._id],
+          message: {
+            title: NOTIFICATION_JOIN_REQ,
+            content: `${username} wants to join your home.`,
+          },
+        };
 
-        joinHome(home._id);
-        navigate('/');
+        APINotification.createNotification(joinReq).then(
+          ({ data: { notification, message }, status }) => {
+            if (status !== STATUS_CREATED) throw Error(message);
+            homeSocket.emit('send-notification', home.adminUser._id);
+            snackbar.setSuccess('Join request sent!');
+            navigate('/');
+          }
+        );
       })
-      .catch((err) => snackbar.setError(err));
+      .catch((err: Error) => snackbar.setError(err.message));
 
     navigate('/');
   };

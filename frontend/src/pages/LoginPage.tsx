@@ -17,8 +17,12 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AuthClient } from '../utils/auth-client';
 import { useNavigate } from 'react-router-dom';
-import { STATUS_OK } from '../constants';
-import { saveUsername, useAuth } from '../context/UserContext';
+import { STATUS_NOT_FOUND, STATUS_OK } from '../constants';
+import { saveUserToLocalStorage, useAuth } from '../context/UserContext';
+import { useAuth as useHomeAuth } from '../context/HomeContext';
+import APIHome from '../utils/api-home';
+import { useSnackbar } from '../context/SnackbarContext';
+import { useSockets } from '../context/SocketContext';
 
 enum LoginStatus {
   SUCCESS = 1,
@@ -37,6 +41,9 @@ function LoginPage() {
 
   const navigate = useNavigate();
   const authClient = useAuth();
+  const homeClient = useHomeAuth();
+  const snackbar = useSnackbar();
+  const { homeSocket } = useSockets();
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -58,12 +65,35 @@ function LoginPage() {
     AuthClient.login(body)
       .then(({ data: { username, user_id, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
-        authClient.setUser({ username: username, user_id: user_id });
-        saveUsername(username);
+        authClient.setUser({ username, user_id });
+        saveUserToLocalStorage({ username, user_id });
+
+        // Setup socket
+        homeSocket.auth = { userId: user_id };
+        homeSocket.connect();
+
+        // Setup home
+
+        APIHome.getHomeByUserId(user_id).then(
+          ({ data: { home, message }, status }) => {
+            switch (status) {
+              case STATUS_OK:
+                homeClient.setHome(home);
+                break;
+              case STATUS_NOT_FOUND:
+                homeClient.setHome(null);
+                break;
+              default:
+                throw new Error(message);
+            }
+          }
+        );
+
         setLoginStatus(LoginStatus.SUCCESS);
         navigate('/home');
       })
       .catch((err) => {
+        snackbar.setError(err.message);
         setLoginStatus(LoginStatus.FAILED);
         setLoginFailMessage(err);
       })

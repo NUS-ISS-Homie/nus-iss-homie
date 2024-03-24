@@ -1,9 +1,15 @@
-export interface Home {
+interface User {
   _id: string;
-  users: string[];
+  username: string;
 }
 
-export interface HomeModel {
+export interface Home {
+  _id: string;
+  users: User[];
+  adminUser: User;
+}
+
+export interface HomeResponse {
   home: Home;
   message: string;
 }
