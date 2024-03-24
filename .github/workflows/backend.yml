@@ -24,17 +24,35 @@ jobs:
         working-directory: 'backend'
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm run test
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build --if-present
+
+      - name: Run tests
+        run: npm run test
         env:
           ENV: TEST
-          DB_CLOUD_URI_TEST: ${{secrets.DB_CLOUD_URI_TEST}}
+          DB_CLOUD_URI_TEST: ${{ secrets.DB_CLOUD_URI_TEST }}
           PORT: 8000
           SALT_ROUNDS: 10
+
+      - name: Build and Push Docker Image
+        uses: mr-smithers-excellent/docker-build-push@v4
+        with:
+          image: zephan99/homies
+          registry: docker.io
+          username: zephan99
+          password: Homies999
+          # username: ${{ secrets.DOCKER_USERNAME }}
+          # password: ${{ secrets.DOCKER_PASSWORD }}
