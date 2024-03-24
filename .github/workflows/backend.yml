@@ -52,7 +52,5 @@ jobs:
         with:
           image: zephan99/homies
           registry: docker.io
-          # username: zephan99
-          # password: Homies999
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
