@@ -40,3 +40,14 @@ jobs:
           tags: |
             zephan99/homies:latest
           #   ghcr.io/jamtur01/animal-farm-nodejs:latest
+      # Create and run container
+      - name: Create container
+        uses: docker/create-container-action@v1
+        with:
+          image: zephan99/homies:latest
+          name: my-container
+
+      - name: Run container
+        uses: docker/run-container-action@v1
+        with:
+          container: my-container
