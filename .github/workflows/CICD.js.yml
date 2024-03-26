@@ -22,7 +22,7 @@ jobs:
           npm i
           cd frontend
           npm i
-          npm run start
+          npm run build
           cd ..
           cd backend
           npm i
