@@ -1,0 +1,30 @@
+name: CICD.js
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{matrix.node-version}}
+      - name: Install Dependencies and Run Dev Server
+        run: |
+          npm i
+          cd frontend
+          npm i
+          npm run nuild
+          npm run start
+          cd ..
+          cd backend
+          npm i
+          npm run dev
