@@ -1,26 +1,27 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User } from '../@types/UserContext';
 import * as authClient from '../utils/auth-client';
-import { LOCAL_STORAGE_USERNAME_KEY } from '../configs';
+import { LOCAL_STORAGE_USER_KEY } from '../configs';
 import { STATUS_OK, STATUS_BAD_REQUEST } from '../constants';
 import { useSnackbar } from './SnackbarContext';
+import { useNavigate } from 'react-router-dom';
 
 export const defaultUser: User = {
   username: null,
   user_id: null,
 };
 
-export const getUsername = () => {
-  const username = window.localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY);
-  return { username: username || '' };
+export const getUserFromLocalStorage = () => {
+  const userStr = window.localStorage.getItem(LOCAL_STORAGE_USER_KEY);
+  return userStr && JSON.parse(userStr);
 };
 
 export const removeUser = () => {
-  window.localStorage.removeItem(LOCAL_STORAGE_USERNAME_KEY);
+  window.localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
 };
 
-export const saveUsername = (username: string) => {
-  window.localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, username);
+export const saveUserToLocalStorage = (user: User) => {
+  window.localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(user));
 };
 
 const UserContext = createContext({
@@ -38,20 +39,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setLoading(true);
-    const { username } = getUsername();
     setUser({ username: '', user_id: '' });
     removeUser();
     setLoading(false);
   };
 
   const deleteUser = () => {
+    if (!user.username) return;
     setLoading(true);
-    const { username } = getUsername();
-    authClient.AuthClient.deleteUser({ username })
+    authClient.AuthClient.deleteUser({ username: user.username })
       .then((resp) => {
         if (resp.status !== STATUS_OK)
           throw new Error('Something went wrong when deleting the account!');
-
         removeUser();
         setUser({ username: '', user_id: '' });
         snackbar.setSuccess('Account deleted');
@@ -65,8 +64,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const { username } = getUsername();
-    username && setUser({ username, user_id: '' });
+    const user = getUserFromLocalStorage();
+    user && setUser(user);
   }, []);
 
   if (loading) {
