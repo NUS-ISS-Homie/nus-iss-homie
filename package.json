@@ -12,7 +12,8 @@
     "backend": "cd backend && npm run dev",
     "i-backend": "cd backend && npm i",
     "install-dep": "concurrently 'npm run i-frontend' 'npm run i-backend'",
-    "dev": "concurrently --kill-others 'npm run frontend' 'npm run backend'"
+    "dev": "concurrently --kill-others 'npm run frontend' 'npm run backend'",
+    "all": "cd frontend && npm i && cd .. && cd backend && npm i && npm run dev"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
