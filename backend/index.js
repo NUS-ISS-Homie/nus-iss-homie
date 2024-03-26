@@ -19,6 +19,10 @@ import {
 import { randomUUID } from 'crypto';
 
 const app = express();
+const path = require('path');
+
+app.use(express.static(path.join(__dirname, '/frontend/build')));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors()); // config cors so that front-end can use
