@@ -30,6 +30,7 @@ function SignUpPage() {
   );
   const [signUpFailMessage, setSignUpFailMessage] = useState<string>('');
   const [showAlert, setShowAlert] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [passwordShown, setPasswordShown] = useState(false);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

@@ -2,9 +2,9 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { User } from '../@types/UserContext';
 import * as authClient from '../utils/auth-client';
 import { LOCAL_STORAGE_USER_KEY } from '../configs';
-import { STATUS_OK, STATUS_BAD_REQUEST } from '../constants';
+import { STATUS_OK } from '../constants';
 import { useSnackbar } from './SnackbarContext';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 export const defaultUser: User = {
   username: null,

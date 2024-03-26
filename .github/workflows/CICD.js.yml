@@ -19,12 +19,7 @@ jobs:
           node-version: ${{matrix.node-version}}
       - name: Install Dependencies and Run Dev Server
         run: |
-          # npm i
+          npm i
           cd frontend
           npm i
           npm run build
-          npm run start
-          cd ..
-          cd backend
-          npm i
-          npm run dev

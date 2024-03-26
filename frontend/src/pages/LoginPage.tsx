@@ -32,6 +32,7 @@ enum LoginStatus {
 
 function LoginPage() {
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [passwordShown, setPasswordShown] = useState(false);
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
     LoginStatus.IN_PROGRESS

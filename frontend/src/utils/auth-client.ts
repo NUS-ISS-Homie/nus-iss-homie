@@ -32,6 +32,7 @@ export const AuthClient = {
     newUsername: string;
     password: string;
   }): Promise<API.Response<{ message: string }>> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -43,6 +44,7 @@ export const AuthClient = {
     oldPassword: string;
     newPassword: string;
   }): Promise<API.Response<{ message: string }>> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const headers = {
       'Content-Type': 'application/json',
     };
