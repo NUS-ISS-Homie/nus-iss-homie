@@ -4,11 +4,13 @@ import { Button } from '@mui/material';
 import { useUser } from '../../context/UserContext';
 import TenantDetails from './TenantDetails';
 import { useHome } from '../../context/HomeContext';
+import { useItemAuth } from '../../context/GroceryItemContext';
 
 function DashboardPage() {
   const navigate = useNavigate();
   const { user_id } = useUser();
   const home = useHome();
+  const itemClient = useItemAuth();
 
   const guestDashboard = (
     <>
@@ -24,6 +26,9 @@ function DashboardPage() {
         <Button onClick={() => navigate('/invite')}>Invite Tenants</Button>
       )}
       <Button onClick={() => navigate('/expense')}>Expenses</Button>
+      <Button onClick={() => console.log(itemClient.groceryEmit('test'))}>
+        Emit Test
+      </Button>
     </>
   );
 

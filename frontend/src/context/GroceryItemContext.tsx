@@ -6,10 +6,14 @@ import { GroceryItem } from '../@types/GroceryItemContext';
 
 interface IGroceryContext {
   item: GroceryItem | null;
+  groceryTest: VoidFunction;
+  groceryEmit: (sender: string, callback?: VoidFunction) => void;
 }
 
 const GroceryContext = createContext<IGroceryContext>({
   item: null,
+  groceryTest: () => {},
+  groceryEmit: () => {},
 });
 
 export function GroceryProvider({ children }: { children: React.ReactNode }) {
@@ -23,10 +27,24 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
   };
 
+  const groceryTest = () => {
+    console.log('grocery test working');
+  };
+
+  const groceryEmit = (sender: string) => {
+    console.log('attempting emit');
+    homeSocket.emit('create-grocery-item', {
+      itemId: 'abcde',
+      userId: sender,
+    });
+  };
+
   return (
     <GroceryContext.Provider
       value={{
         item: item,
+        groceryTest,
+        groceryEmit,
       }}
     >
       {children}
@@ -35,6 +53,6 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
 }
 
 const useItemAuth = () => useContext(GroceryContext);
-const useItem = useItemAuth().item;
+const useItem = () => useItemAuth().item;
 
 export { useItemAuth, useItem };

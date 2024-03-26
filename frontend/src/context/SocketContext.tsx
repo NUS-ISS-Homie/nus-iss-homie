@@ -70,6 +70,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         .then(({ data: { item, message }, status }) => {
           if (status !== STATUS_OK) throw new Error(message);
           createGroceryItem(groceryId);
+          itemClient.groceryTest();
         })
         .catch((err) => snackbar.setError(err.message));
     });
