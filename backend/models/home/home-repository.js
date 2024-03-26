@@ -21,17 +21,22 @@ if (process.env.ENV != 'PROD') {
 // CRUD functions
 
 export async function createHomeModel(params) {
-  return await HomeModel.create(params);
+  const home = await HomeModel.create(params);
+  return getHomeModel(home._id);
 }
 
 export async function getHomeModel(homeId) {
-  return await HomeModel.findById(homeId);
+  return await HomeModel.findById(homeId)
+    .populate({ path: 'adminUser', select: 'username' })
+    .populate({ path: 'users', select: 'username' });
 }
 
-export async function getHomeModelByUsername(username) {
+export async function getHomeModelByUserId(userId) {
   return await HomeModel.findOne({
-    $or: [{ adminUser: username }, { users: username }],
-  });
+    $or: [{ adminUser: userId }, { users: userId }],
+  })
+    .populate({ path: 'adminUser', select: 'username' })
+    .populate({ path: 'users', select: 'username' });
 }
 
 export const updateOperation = {
@@ -42,17 +47,21 @@ export const updateOperation = {
 export async function updateHomeModel(params) {
   switch (params.operation) {
     case updateOperation.Join:
-      return await HomeModel.findOneAndUpdate(
-        { _id: params.homeId },
-        { $addToSet: { users: params.username } },
-        { returnDocument: 'after' }
-      );
+      return await HomeModel.findByIdAndUpdate(
+        params.homeId,
+        { $addToSet: { users: params.userId } },
+        { new: true }
+      )
+        .populate({ path: 'adminUser', select: 'username' })
+        .populate({ path: 'users', select: 'username' });
     case updateOperation.Remove:
-      return await HomeModel.findOneAndUpdate(
-        { _id: params.homeId },
-        { $pull: { users: params.username } },
-        { returnDocument: 'after' }
-      );
+      return await HomeModel.findByIdAndUpdate(
+        params.homeId,
+        { $pull: { users: params.userId } },
+        { new: true }
+      )
+        .populate({ path: 'adminUser', select: 'username' })
+        .populate({ path: 'users', select: 'username' });
     default:
       throw new Error('Invalid update operation');
   }

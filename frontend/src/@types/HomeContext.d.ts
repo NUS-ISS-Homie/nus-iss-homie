@@ -1,7 +1,12 @@
+interface User {
+  _id: string;
+  username: string;
+}
+
 export interface Home {
-  _id: string | null;
-  users: string[];
-  adminUser: string | null;
+  _id: string;
+  users: User[];
+  adminUser: User;
 }
 
 export interface HomeResponse {

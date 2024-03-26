@@ -11,25 +11,23 @@ const APIHome = {
     return requests.get(URL_HOME_SVC, `/${homeId}`);
   },
 
-  getHomeByUsername: (
-    username: string
-  ): Promise<API.Response<HomeResponse>> => {
-    return requests.put(URL_HOME_SVC, '', { username });
+  getHomeByUserId: (userId: string): Promise<API.Response<HomeResponse>> => {
+    return requests.put(URL_HOME_SVC, '', { userId });
   },
 
   joinHome: (
     homeId: string,
-    username: string
+    userId: string
   ): Promise<API.Response<HomeResponse>> => {
-    return requests.put(URL_HOME_SVC, `/${homeId}/join`, { username });
+    return requests.put(URL_HOME_SVC, `/${homeId}/join`, { userId });
   },
 
-  leaveHome: (username: string): Promise<API.Response<HomeResponse>> => {
-    return requests.put(URL_HOME_SVC, `/leave`, { username });
+  leaveHome: (userId: string): Promise<API.Response<HomeResponse>> => {
+    return requests.put(URL_HOME_SVC, `/leave`, { userId });
   },
 
-  deleteHome: (username: string): Promise<API.Response<HomeResponse>> => {
-    return requests.delete(URL_HOME_SVC, `/`, { username });
+  deleteHome: (userId: string): Promise<API.Response<HomeResponse>> => {
+    return requests.delete(URL_HOME_SVC, `/`, { userId });
   },
 };
 
