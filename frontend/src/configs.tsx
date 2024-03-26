@@ -2,10 +2,12 @@ export const URI_BACKEND = 'http://localhost:8000';
 const PREFIX_HOME_SVC = '/api/home';
 const PREFIX_USER_SVC = '/api/user';
 const PREFIX_NOTIF_SVC = '/api/notification';
+const PREFIX_ITEM_SVC = '/api/grocery-item';
 
 export const URL_HOME_SVC = URI_BACKEND + PREFIX_HOME_SVC;
 export const URL_USER_SVC = URI_BACKEND + PREFIX_USER_SVC;
 export const URL_NOTIF_SVC = URI_BACKEND + PREFIX_NOTIF_SVC;
+export const URL_ITEM_SVC = URI_BACKEND + PREFIX_ITEM_SVC;
 
 export const USER_SIGNUP = '/signup';
 export const USER_LOGIN = '/login';

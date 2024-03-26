@@ -11,6 +11,8 @@ import { useUser } from './UserContext';
 import { useAuth, useHome } from './HomeContext';
 import APIHome from '../utils/api-home';
 import { STATUS_OK } from '../constants';
+import APIGroceryItem from '../utils/api-grocery-item';
+import { GroceryProvider, useItemAuth } from './GroceryItemContext';
 
 const SocketContext = createContext({
   ...sockets,
@@ -31,6 +33,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const { user_id } = useUser();
   const home = useHome();
   const homeClient = useAuth();
+  const itemClient = useItemAuth();
 
   const joinHome = useCallback((homeId: string, onFail?: VoidFunction) => {
     console.log('join home request');
@@ -60,6 +63,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       homeSocket.auth = sessionId;
       saveSocketInStorage(sessionId);
       homeSocket.auth = { ...homeSocket.auth, sessionId };
+    });
+
+    homeSocket.on('create-grocery-item', (groceryId) => {
+      APIGroceryItem.getItem(groceryId)
+        .then(({ data: { item, message }, status }) => {
+          if (status !== STATUS_OK) throw new Error(message);
+          createGroceryItem(groceryId);
+        })
+        .catch((err) => snackbar.setError(err.message));
     });
 
     homeSocket.on('join-home', (homeId) => {
