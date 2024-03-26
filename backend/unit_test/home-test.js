@@ -18,28 +18,44 @@ chai.use(chaiShallowDeepEqual);
 
 // Socket
 const DEV_SERVER_URI = `http://localhost:${process.env.PORT}`;
+console.log(DEV_SERVER_URI);
 
 const SOCKET_OPTIONS = {
   transports: ['websocket'],
-  'force new connection': true,
+  forceNew: true,
+  'reconnection delay': 0,
+  'reopen delay': 0,
 };
 
 let user1, user2, user3;
+const sessionStorage = new Map();
 
 describe('Socket connection', () => {
   it('should connect user1', (done) => {
-    user1 = io.connect(DEV_SERVER_URI, SOCKET_OPTIONS);
+    user1 = io(DEV_SERVER_URI, {
+      ...SOCKET_OPTIONS,
+      auth: { userId: 'user1' },
+    });
     user1.on('connect', done);
+    user1.connect();
   });
 
   it('should connect user2', (done) => {
-    user2 = io.connect(DEV_SERVER_URI, SOCKET_OPTIONS);
+    user2 = io(DEV_SERVER_URI, {
+      ...SOCKET_OPTIONS,
+      auth: { userId: 'user2' },
+    });
     user2.on('connect', done);
+    user2.connect();
   });
 
   it('should connect user3', (done) => {
-    user3 = io.connect(DEV_SERVER_URI, SOCKET_OPTIONS);
+    user3 = io(DEV_SERVER_URI, {
+      ...SOCKET_OPTIONS,
+      auth: { userId: 'user3' },
+    });
     user3.on('connect', done);
+    user3.connect();
   });
 });
 
@@ -47,13 +63,9 @@ describe('[Event] Join Home', () => {
   let homeId1 = 'home1',
     homeId2 = 'home2';
 
-  it(`User1 should join ${homeId1}`, (done) => {
-    user1.on('joined-home', done);
-    user1.emit('join-home', homeId1);
-  });
-
-  it(`User2 should join ${homeId1}`, (done) => {
+  it(`Users should join ${homeId1}`, (done) => {
     user2.on('joined-home', done);
+    user1.emit('join-home', homeId1);
     user2.emit('join-home', homeId1);
   });
 
@@ -63,15 +75,10 @@ describe('[Event] Join Home', () => {
   });
 
   describe('[Event] Send Notification', () => {
-    const notification = { homeId: homeId1, message: 'hello!' };
-
     it(`should only send notification to ${homeId1}`, (done) => {
-      user2.on('notify', (notification) => {
-        chai.expect(notification).to.equal(notification);
-        done();
-      });
       user3.on('notify', () => assert.fail('should not get here!'));
-      user1.emit('send-notification', notification);
+      user1.emit('send-notification', homeId1);
+      user2.on('notify', done);
     });
   });
 
@@ -150,7 +157,7 @@ describe('CRUD API', () => {
     it('should create a new home', (done) => {
       const expectedBody = {
         message: msg.SUCCESS_CREATE(entity),
-        home: { adminUser: user2._id },
+        home: { adminUser: user2 },
       };
 
       chai

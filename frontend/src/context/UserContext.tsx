@@ -4,6 +4,7 @@ import * as authClient from '../utils/auth-client';
 import { LOCAL_STORAGE_USER_KEY } from '../configs';
 import { STATUS_OK, STATUS_BAD_REQUEST } from '../constants';
 import { useSnackbar } from './SnackbarContext';
+import { useNavigate } from 'react-router-dom';
 
 export const defaultUser: User = {
   username: null,
@@ -25,9 +26,9 @@ export const saveUserToLocalStorage = (user: User) => {
 
 const UserContext = createContext({
   user: defaultUser,
-  setUser: (user: User) => {},
-  logout: () => {},
-  deleteUser: () => {},
+  setUser: (user: User) => { },
+  logout: () => { },
+  deleteUser: () => { },
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
@@ -38,20 +39,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setLoading(true);
-    const { username } = getUserFromLocalStorage();
     setUser({ username: '', user_id: '' });
     removeUser();
     setLoading(false);
   };
 
   const deleteUser = () => {
+    if (!user.username) return;
     setLoading(true);
-    const { username } = getUserFromLocalStorage();
-    authClient.AuthClient.deleteUser({ username })
+    authClient.AuthClient.deleteUser({ username: user.username })
       .then((resp) => {
         if (resp.status !== STATUS_OK)
           throw new Error('Something went wrong when deleting the account!');
-
         removeUser();
         setUser({ username: '', user_id: '' });
         snackbar.setSuccess('Account deleted');

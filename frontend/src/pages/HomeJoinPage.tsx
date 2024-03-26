@@ -14,15 +14,14 @@ import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../context/SnackbarContext';
 import { useSockets } from '../context/SocketContext';
 import { useUser } from '../context/UserContext';
-import { STATUS_OK } from '../constants';
-import { useAuth } from '../context/HomeContext';
+import { NOTIFICATION_JOIN_REQ, STATUS_CREATED, STATUS_OK } from '../constants';
+import APINotification from '../utils/api-notification';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
-  const { joinHome } = useSockets();
-  const { user_id } = useUser();
-  const homeClient = useAuth();
+  const { user_id, username } = useUser();
+  const { homeSocket } = useSockets();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,16 +35,32 @@ function HomeJoinPage() {
       return;
     }
 
-    // TODO: get current userId
-    APIHome.joinHome(homeId.toString(), user_id)
+    // TODO: send request to join
+    APIHome.getHome(homeId.toString())
       .then(({ data: { home, message }, status }) => {
-        if (status !== STATUS_OK) throw new Error(message);
-        if (!home || !home._id) return;
-        homeClient.setHome(home);
-        joinHome(home._id);
-        navigate('/');
+        if (status !== STATUS_OK) {
+          throw new Error(message);
+        }
+
+        const joinReq = {
+          sender: user_id,
+          recipients: [home.adminUser._id],
+          message: {
+            title: NOTIFICATION_JOIN_REQ,
+            content: `${username} wants to join your home.`,
+          },
+        };
+
+        APINotification.createNotification(joinReq).then(
+          ({ data: { notification, message }, status }) => {
+            if (status !== STATUS_CREATED) throw Error(message);
+            homeSocket.emit('send-notification', home.adminUser._id);
+            snackbar.setSuccess('Join request sent!');
+            navigate('/');
+          }
+        );
       })
-      .catch((err) => snackbar.setError(err));
+      .catch((err: Error) => snackbar.setError(err.message));
 
     navigate('/');
   };
