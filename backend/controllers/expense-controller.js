@@ -1,93 +1,53 @@
 import * as constants from '../common/messages.js';
-import bcryptjs from 'bcryptjs';
 import {
   ormCreateExpense as _createExpense,
   ormGetExpense as _getExpense,
-  ormGetAllExpense as _getAllExpenses,
   ormUpdateExpense as _updateExpense,
   ormDeleteExpense as _deleteExpense,
 } from '../models/expense/expense-orm.js';
-import mongoose from 'mongoose';
 
 export const entity = 'expense';
 
 export async function createExpense(req, res) {
   try {
-    const { title, amount, category, username } = req.body;
-    const saltRounds = parseInt(process.env.SALT_ROUNDS);
-    console.log('createExpense ', title, amount, category, username);
+    const { title, amount, category, user } = req.body;
 
-    if (title && amount && category && username) {
-      const newExpense = await _createExpense({
-        title,
-        amount,
-        category,
-        username,
-      });
+    if (title && amount && category && user) {
+      const expense = await _createExpense(req.body);
       return res.status(constants.STATUS_CODE_CREATED).json({
+        expense,
         message: constants.SUCCESS_CREATE('expense', title),
-      }); // Pass 'expense' as entity and newExpense.title as the parameter
-    } else {
-      return res
-        .status(constants.STATUS_CODE_BAD_REQUEST)
-        .json({ message: constants.FAIL_MISSING_FIELDS });
+      });
     }
+
+    return res
+      .status(constants.STATUS_CODE_BAD_REQUEST)
+      .json({ message: constants.FAIL_MISSING_FIELDS });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
   }
 }
-
-export async function getAllExpenses(req, res) {
-  try {
-    const expenses = await _getAllExpenses(); // Call the function to fetch all expenses from the database
-    if (!expenses || expenses.length === 0) {
-      return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'No expenses found' });
-    }
-    return res.status(constants.STATUS_CODE_OK).json({ expenses });
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(constants.STATUS_CODE_SERVER_ERROR)
-      .json({ message: constants.FAIL_DATABASE_ERROR });
-  }
-}
-
-// export async function getAllExpenses(req, res) {
-//   try {
-//     const expenses = await _getAllExpenses(); // Call the function to fetch all expenses from the database
-//     return res.status(constants.STATUS_CODE_OK).json({ expenses });
-//   } catch (err) {
-//     console.error(err);
-//     return res
-//       .status(constants.STATUS_CODE_SERVER_ERROR)
-//       .json({ message: constants.FAIL_DATABASE_ERROR });
-//   }
-// }
 
 export async function getExpense(req, res) {
   try {
     const { expenseId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+    if (!expenseId) {
       return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'Expense not found' });
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
     }
 
     const expense = await _getExpense(expenseId);
-    console.log('expense: ', expense);
-    if (!expense) {
+    if (!expense || expense.err) {
       return res
         .status(constants.STATUS_CODE_NOT_FOUND)
         .json({ message: constants.FAIL_NOT_EXIST(entity) });
     }
+
     return res.status(constants.STATUS_CODE_OK).json({ expense });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
@@ -97,13 +57,14 @@ export async function getExpense(req, res) {
 export async function updateExpense(req, res) {
   try {
     const { expenseId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+    if (!expenseId) {
       return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'Expense not found' });
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
     }
+
     const updatedFields = req.body;
-    if (expenseId && Object.keys(updatedFields).length > 0) {
+    if (Object.keys(updatedFields).length > 0) {
       const updatedExpense = await _updateExpense(expenseId, updatedFields);
       if (!updatedExpense) {
         return res
@@ -112,14 +73,13 @@ export async function updateExpense(req, res) {
       }
       return res
         .status(constants.STATUS_CODE_OK)
-        .json({ message: constants.SUCCESS_UPDATE(entity, 'Updated Expense') });
-    } else {
-      return res
-        .status(constants.STATUS_CODE_BAD_REQUEST)
-        .json({ message: constants.FAIL_MISSING_FIELDS });
+        .json({ message: constants.SUCCESS_UPDATE(entity) });
     }
+
+    return res
+      .status(constants.STATUS_CODE_BAD_REQUEST)
+      .json({ message: constants.FAIL_MISSING_FIELDS });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
@@ -129,28 +89,23 @@ export async function updateExpense(req, res) {
 export async function deleteExpense(req, res) {
   try {
     const { expenseId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(expenseId)) {
-      return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'Expense not found' });
-    }
-    if (expenseId) {
-      const isDeleted = await _deleteExpense(expenseId);
-      if (!isDeleted) {
-        return res
-          .status(constants.STATUS_CODE_NOT_FOUND)
-          .json({ message: constants.FAIL_NOT_EXIST(entity) });
-      }
-      return res
-        .status(constants.STATUS_CODE_OK)
-        .json({ message: constants.SUCCESS_DELETE(entity) });
-    } else {
+    if (!expenseId) {
       return res
         .status(constants.STATUS_CODE_BAD_REQUEST)
         .json({ message: constants.FAIL_MISSING_FIELDS });
     }
+
+    const deleted = await _deleteExpense(expenseId);
+    if (!deleted || deleted.err) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    }
+
+    return res
+      .status(constants.STATUS_CODE_OK)
+      .json({ message: constants.SUCCESS_DELETE(entity) });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
