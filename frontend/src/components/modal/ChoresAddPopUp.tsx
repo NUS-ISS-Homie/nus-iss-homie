@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import APIHome from '../../utils/api-home';
-import { useUser } from '../../context/UserContext';
+import { useHome } from '../../context/HomeContext';
 
 interface CreatePopupProps {
   onClose: () => void;
@@ -13,28 +12,23 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
     assignedTo: '',
     dueDate: new Date(),
   });
-  const user = useUser();
-  const username = user ? user.username : '';
 
   const [dueDateAsString, setDueDateAsString] = useState<string>('');
   const today = new Date().toISOString().split('T')[0]; 
   const [houseMembers, setHouseMembers] = useState<string[]>([]);
-
+  const home = useHome();
+  
   useEffect(() => {
-    // Fetch list of people living in the house when component mounts
-    if(username){
-      APIHome.getHomeByUsername(username)
-      .then(response => {
-        if (response.data && response.data.home.users) {
-          const members = response.data.home.users.map((member: any) => member);
-          setHouseMembers(members);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching people in house:', error);
-      });
-    }
-  }, []); 
+    if (!home) return;
+    console.log('HOME', home);
+  
+    // Extract usernames from the array of objects
+    const usernames = home.users.map(({ username }) => username);
+    console.log('usernames:', usernames);
+  
+    // Set the state with the array of usernames
+    setHouseMembers(usernames);
+  }, [home]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

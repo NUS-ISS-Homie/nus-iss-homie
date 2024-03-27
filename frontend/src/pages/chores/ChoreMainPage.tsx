@@ -10,6 +10,7 @@ import FullCalendar from '@fullcalendar/react'; // Import FullCalendar component
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction'
 import ChoreViewDetail from '../../components/modal/ChoresViewDetailPopUp';
+import { useHome } from '../../context/HomeContext';
 
 function ChoreMainPage() {
   // State variables for managing chores and pop-up visibility
@@ -20,14 +21,22 @@ function ChoreMainPage() {
   const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
   const [refreshChoreList, setRefreshChoreList] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
+  const home = useHome();
 
   // Function to fetch chores from the backend API
 
   useEffect(() => {
+    if (!home) return;
+  
     axios
       .get(URI_BACKEND + '/api/chore')
       .then((response) => {
-        setChores(response.data.chores);
+        const allChores = response.data.chores;
+        // Filter chores based on usernames in the home
+        const filteredChores = allChores.filter((chore:Chore) =>
+          home.users.some((user) => user.username === chore.assignedTo)
+        );
+        setChores(filteredChores);
       })
       .catch((error) => {
         console.error('Error fetching chores:', error);

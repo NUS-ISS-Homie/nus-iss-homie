@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Chore } from '../../@types/ChoreType';
-import { useUser } from '../../context/UserContext';
-import APIHome from '../../utils/api-home';
-import zIndex from '@mui/material/styles/zIndex';
+import { useHome } from '../../context/HomeContext';
 
 interface EditPopupProps {
   chore: Chore;
@@ -14,26 +12,20 @@ const EditPopup: React.FC<EditPopupProps> = ({ chore, onClose, onEdit }) => {
   const [editedChore, setEditedChore] = useState<Chore>(chore);
   const [dueDateAsString, setDueDateAsString] = useState<string>(chore.dueDate ? new Date(chore.dueDate).toISOString().split('T')[0] : '2024-10-10');
   const today = new Date().toISOString().split('T')[0]; 
-  const user = useUser();
-  const username = user ? user.username : '';
-
+  const home = useHome();
   const [houseMembers, setHouseMembers] = useState<string[]>([]);
 
   useEffect(() => {
-    // Fetch list of people living in the house when component mounts
-    if(username){
-      APIHome.getHomeByUsername(username)
-      .then(response => {
-        if (response.data && response.data.home.users) {
-          const members = response.data.home.users.map((member: any) => member);
-          setHouseMembers(members);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching people in house:', error);
-      });
-    }
-  }, []); 
+    if (!home) return;
+    console.log('HOME', home);
+  
+    // Extract usernames from the array of objects
+    const usernames = home.users.map(({ username }) => username);
+    console.log('usernames:', usernames);
+  
+    // Set the state with the array of usernames
+    setHouseMembers(usernames);
+  }, [home]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
