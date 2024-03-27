@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useState } from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Button,
@@ -20,7 +20,8 @@ import dayjs from 'dayjs';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
-import { GroceryItem, Unit, Category } from '../../../@types/GroceryItemContext';
+import { GroceryItem } from '../../../@types/GroceryItemContext';
+import { Unit, Category } from '../../../enums';
 import { useUser } from '../../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 

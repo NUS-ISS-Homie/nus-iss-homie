@@ -23,7 +23,8 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { useUser } from '../../../context/UserContext';
 import { useHome } from '../../../context/HomeContext';
-import { GroceryItem, Unit, Category } from '../../../@types/GroceryItemContext';
+import { GroceryItem } from '../../../@types/GroceryItemContext';
+import { Unit, Category } from '../../../enums';
 import { useNavigate } from 'react-router-dom';
 
 type CreateGroceryItemDialogProps = {
@@ -41,6 +42,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
     const home = useHome();
     const homeId = home ? home._id : "";
     const snackBar = useSnackbar();
+    const navigate = useNavigate()
 
     const handleUnitChange = (event: SelectChangeEvent) => {
         setUnit(event.target.value as string);
@@ -58,7 +60,6 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
         const quantity = data.get('quantity');
         const unit = data.get('unit');
         const category = data.get('category');
-        const navigate = useNavigate();
 
         if (!user_id || !name || !purchasedDate || !expiryDate || !quantity || !unit || !category) {
             return;
