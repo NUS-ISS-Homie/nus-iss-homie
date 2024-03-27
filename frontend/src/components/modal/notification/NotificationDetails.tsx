@@ -1,7 +1,7 @@
 import React from 'react';
 import { Notification } from '../../../@types/Notification';
 import { Box, Button, DialogActions, Divider, Typography } from '@mui/material';
-import { NOTIFICATION_INVITE, NOTIFICATION_JOIN_REQ } from '../../../constants';
+import { NOTIFICATION_INVITE, NOTIFICATION_JOIN_REQ, NOTIFICATION_CHORE_REMINDER } from '../../../constants';
 import { useAuth } from '../../../context/HomeContext';
 
 function NotificationDetails(props: {
@@ -54,6 +54,20 @@ function NotificationDetails(props: {
             </Button>
           </DialogActions>
         </>
+      )}
+      {(message.title === NOTIFICATION_CHORE_REMINDER) && (
+        <>
+        <Divider />
+        <DialogActions>
+        <Button
+          color='primary'
+          variant='outlined'
+          onClick={deleteNotification}
+        >
+          Close Reminder
+        </Button>
+        </DialogActions>
+      </>
       )}
     </Box>
   );

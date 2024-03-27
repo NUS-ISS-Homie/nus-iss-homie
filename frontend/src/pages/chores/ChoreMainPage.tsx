@@ -11,6 +11,11 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction'
 import ChoreViewDetail from '../../components/modal/ChoresViewDetailPopUp';
 import { useHome } from '../../context/HomeContext';
+import { useSnackbar } from '../../context/SnackbarContext';
+import APINotification from '../../utils/api-notification';
+import { STATUS_CREATED } from '../../constants';
+import { NOTIFICATION_CHORE_REMINDER } from '../../constants';
+import { AuthClient } from '../../utils/auth-client';
 
 function ChoreMainPage() {
   // State variables for managing chores and pop-up visibility
@@ -22,12 +27,12 @@ function ChoreMainPage() {
   const [refreshChoreList, setRefreshChoreList] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const home = useHome();
+  const snackbar = useSnackbar();
 
   // Function to fetch chores from the backend API
 
   useEffect(() => {
     if (!home) return;
-  
     axios
       .get(URI_BACKEND + '/api/chore')
       .then((response) => {
@@ -42,6 +47,31 @@ function ChoreMainPage() {
         console.error('Error fetching chores:', error);
       });
   }, [refreshChoreList]);
+
+  const handleSendNotification = async (recipientIds: string[]) => {
+    if(!home) return;
+    const notificationMessage = `You have been assigned a new chore.`;
+    const notification = {
+      sender: home.adminUser._id, // Provide the sender ID
+      recipients: recipientIds, // Provide the recipient user IDs as an array
+      message: {
+        title: NOTIFICATION_CHORE_REMINDER,
+        content: notificationMessage,
+      },
+    };
+
+    try {
+      const response = await APINotification.createNotification(notification);
+      if (response.status === STATUS_CREATED) {
+        snackbar.setSuccess('Notification sent successfully.');
+      } else {
+        snackbar.setError('Failed to send notification.');
+      }
+    } catch (error) {
+      snackbar.setError('Error sending notification.');
+      console.error('Error sending notification:', error);
+    }
+  };
 
   // Function to handle opening the create pop-up
   const openCreatePopup = () => {
@@ -61,17 +91,23 @@ function ChoreMainPage() {
   };
 
   // Function to handle submitting new chore data
-  const handleSubmit = (formData: any) => {
-    axios
-      .post(URI_BACKEND + '/api/chore/create', formData)
-      .then((response) => {
-        setChores([...chores, response.data]);
-        setRefreshChoreList((refreshChoreList:any) => !refreshChoreList)
-      })
-      .catch((error) => {
-        console.error('Error creating chore:', error);
-      });
+  const handleSubmit = async (formData: any) => {
+    const assigned = formData.assignedTo;
+    try {
+      const response = await axios.post(URI_BACKEND + '/api/chore/create', formData);
+      setChores([...chores, response.data]);
+      setRefreshChoreList((refreshChoreList: any) => !refreshChoreList);
+  
+      // Get the user ID synchronously
+      const userId = (await AuthClient.getUserId(assigned)).data.user_id;
+  
+      // Pass the user ID as an array to handleSendNotification
+      handleSendNotification([userId]);
+    } catch (error) {
+      console.error('Error creating chore:', error);
+    }
   };
+  
 
   // Function to handle editing an chore
   const handleEdit = (editedChore: Chore) => {
