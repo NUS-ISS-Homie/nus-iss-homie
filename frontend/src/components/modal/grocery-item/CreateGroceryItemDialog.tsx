@@ -23,24 +23,8 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { useUser } from '../../../context/UserContext';
 import { useHome } from '../../../context/HomeContext';
-import { GroceryItem } from '../../../@types/GroceryItemContext';
+import { GroceryItem, Unit, Category } from '../../../@types/GroceryItemContext';
 import { useNavigate } from 'react-router-dom';
-
-const Unit: string[] = ['pc', 'kg', 'lb', 'L'];
-
-
-const Category: string[] = [
-    'Meat',
-    'Seafood',
-    'Vegetable',
-    'Fruit',
-    'Snack',
-    'Dairy/Egg',
-    'Frozen',
-    'Condiment/Seasoning',
-    'Fermented',
-    'Beverage'
-]
 
 type CreateGroceryItemDialogProps = {
     dialogOpen: boolean;
