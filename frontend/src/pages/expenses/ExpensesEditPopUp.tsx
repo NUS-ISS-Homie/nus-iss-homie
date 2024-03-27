@@ -5,18 +5,17 @@ import { useHome } from '../../context/HomeContext';
 import APIExpense from '../../utils/api-expense';
 import { STATUS_OK } from '../../constants';
 import { useSnackbar } from '../../context/SnackbarContext';
+import { useSockets } from '../../context/SocketContext';
 
 interface EditPopupProps {
   expense: Expense;
   onClose: () => void;
-  // onEdit: (editedExpense: Expense) => void;
   updateExpenses: () => void;
 }
 
 const EditPopup: React.FC<EditPopupProps> = ({
   expense,
   onClose,
-  // onEdit,
   updateExpenses,
 }) => {
   const [editedExpense, setEditedExpense] = useState<Expense>(expense);
@@ -24,6 +23,7 @@ const EditPopup: React.FC<EditPopupProps> = ({
   const { user_id } = useUser();
   const home = useHome();
   const snackbar = useSnackbar();
+  const { homeSocket } = useSockets();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -57,6 +57,7 @@ const EditPopup: React.FC<EditPopupProps> = ({
     APIExpense.updateExpense(updatedExpense)
       .then(({ data: { expense, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
+        homeSocket.emit('update-expenses', home._id);
         updateExpenses();
         onClose();
         snackbar.setSuccess(message);

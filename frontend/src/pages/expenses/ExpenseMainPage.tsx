@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import CreatePopup from './ExpensesAddPopUp';
 import EditPopup from './ExpensesEditPopUp';
 import DeletePopup from './ExpensesDeletePopUp';
@@ -8,6 +8,7 @@ import APIExpense from '../../utils/api-expense';
 import { useHome } from '../../context/HomeContext';
 import { STATUS_OK } from '../../constants';
 import { Expense } from '../../@types/Expense';
+import { useSockets } from '../../context/SocketContext';
 
 function ExpenseMainPage() {
   // State variables for managing expenses and pop-up visibility
@@ -19,8 +20,9 @@ function ExpenseMainPage() {
 
   const home = useHome();
   const snackbar = useSnackbar();
+  const { homeSocket } = useSockets();
 
-  const updateExpenses = () => {
+  const updateExpenses = useCallback(() => {
     if (!home) return;
     APIExpense.getExpenses(home._id)
       .then(({ data: { expenses, message }, status }) => {
@@ -28,9 +30,16 @@ function ExpenseMainPage() {
         setExpenses(expenses);
       })
       .catch((err) => snackbar.setError(err.message));
-  };
+  }, [home, snackbar]);
 
-  useEffect(updateExpenses, [home, snackbar]);
+  useEffect(updateExpenses, [updateExpenses]);
+
+  useEffect(() => {
+    homeSocket.on('update-expenses', updateExpenses);
+    return () => {
+      homeSocket.off('update-expenses', updateExpenses);
+    };
+  }, [homeSocket, updateExpenses]);
 
   const openCreatePopup = () => {
     setCreateOpen(true);

@@ -4,6 +4,7 @@ import { useHome } from '../../context/HomeContext';
 import APIExpense from '../../utils/api-expense';
 import { STATUS_CREATED } from '../../constants';
 import { useSnackbar } from '../../context/SnackbarContext';
+import { useSockets } from '../../context/SocketContext';
 
 interface CreatePopupProps {
   onClose: () => void;
@@ -25,6 +26,7 @@ const CreatePopup: React.FC<CreatePopupProps> = ({
   const { user_id } = useUser();
   const home = useHome();
   const snackbar = useSnackbar();
+  const { homeSocket } = useSockets();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -57,6 +59,7 @@ const CreatePopup: React.FC<CreatePopupProps> = ({
     APIExpense.createExpense(newExpense)
       .then(({ data: { expense, message }, status }) => {
         if (status !== STATUS_CREATED) throw new Error(message);
+        homeSocket.emit('update-expenses', updateExpenses);
         updateExpenses();
         onClose();
         user_id &&

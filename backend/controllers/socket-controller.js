@@ -43,6 +43,10 @@ const onSendNotificationEvent = (io, homeId) => {
   io.to(homeId).emit('notify');
 };
 
+const onUpdateExpensesEvent = (io, homeId) => {
+  io.to(homeId).emit('update-expenses');
+};
+
 const createEventListeners = (socket, io) => {
   socket.on('delete-session', ({ sessionId }) =>
     sessionStore.removeSession(sessionId)
@@ -55,6 +59,8 @@ const createEventListeners = (socket, io) => {
   socket.on('send-notification', (homeId) =>
     onSendNotificationEvent(io, homeId)
   );
+
+  socket.on('update-expenses', (homeId) => onUpdateExpensesEvent(io, homeId));
 };
 
 export { sessionStore, createEventListeners };
