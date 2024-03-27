@@ -1,6 +1,7 @@
 import { User } from "./UserContext"
 
 export interface GroceryItem {
+    _id: string,
     user: User,
     name: string,
     purchasedDate: Date,

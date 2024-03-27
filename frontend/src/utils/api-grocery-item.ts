@@ -35,3 +35,5 @@ export const APIGroceryItem = {
         return requests.delete(URL_GROCERY_ITEM_SVC, `/${name}`, '');
     },
 };
+
+export default APIGroceryItem;

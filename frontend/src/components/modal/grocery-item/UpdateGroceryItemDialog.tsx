@@ -22,6 +22,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import { GroceryItem } from '../../../@types/GroceryItemContext';
 import { useUser } from '../../../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const Unit: string[] = ['pc', 'kg', 'lb', 'L'];
 
@@ -48,9 +49,6 @@ type UpdateGroceryItemDialogProps = {
 function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
     const { dialogOpen, setDialogOpen, groceryItem } = props;
     const [loading, setLoading] = useState(false);
-    const [errorText, setErrorText] = useState('');
-    const [unit, setUnit] = useState('');
-    const [category, setCategory] = useState('');
     const [itemState, setItemState] = useState(groceryItem);
 
     const handleItemChange = (event: SelectChangeEvent<string>) => {
@@ -60,16 +58,8 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
             [name]: value
         }));
     }
-    // const handleUnitChange = (event: SelectChangeEvent) => {
-    //     setUnit(event.target.value as string);
-    //     groceryItem.unit = event.target.value;
-    // };
 
-    // const handleCategoryChange = (event: SelectChangeEvent) => {
-    //     setCategory(event.target.value as string);
-    //     groceryItem.category = event.target.value;
-    // };
-
+    const navigate = useNavigate();
     const snackBar = useSnackbar();
     const user = useUser();
 
@@ -106,6 +96,7 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
 
                 // success
                 setDialogOpen(false);
+                navigate('/grocery-list');
                 snackBar.setSuccess(`Item ${item.name} successfully created`, 2000);
             })
             .catch((err) => {

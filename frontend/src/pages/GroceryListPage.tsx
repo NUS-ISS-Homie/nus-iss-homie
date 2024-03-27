@@ -1,44 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IconButton, Grid, Stack, Typography } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import APIGroceryList from '../utils/api-grocery-list';
 
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import CreateGroceryItemDialog from '../components/modal/grocery-item/CreateGroceryItemDialog';
 import GroceryItemCard from './GroceryItemCard';
+import { useHome } from '../context/HomeContext';
+import { STATUS_OK } from '../constants';
+import { GroceryItem } from '../@types/GroceryItemContext';
 
 function GroceryListPage() {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [createItemDialogOpen, setCreateItemDialogOpen] = useState(false);
+    const [groceryList, setGroceryList] = useState<GroceryItem[]>();
     const theme = createTheme();
+    const home = useHome();
+    const homeId = home ? home._id : "";
 
-    const groceryItems = [
-        {
-            user: {
-                user_id: 'hoho',
-                username: 'hoho'
-            },
-            name: "Milk",
-            purchasedDate: new Date(),
-            expiryDate: new Date(),
-            quantity: 2,
-            unit: 'L',
-            category: 'Dairy/Egg'
-        },
-        {
-            user: {
-                user_id: 'hihi',
-                username: 'hihi'
-            },
-            name: "Nugget",
-            purchasedDate: new Date(),
-            expiryDate: new Date(),
-            quantity: 1,
-            unit: "pc",
-            category: "Frozen"
-        }
-    ]
+    useEffect(() => {
+        getGroceryList();
+    }, [])
 
-    // TODO : Call API to get a list of all grocery items of the house
+    const getGroceryList = () => {
+        APIGroceryList.getListByHomeId(homeId).then(
+            ({ data: { list, message }, status }) => {
+                if (status !== STATUS_OK) throw Error(message);
+                setGroceryList(list.items);
+            }
+        );
+    }
 
     const handleOpenCreateItem = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -54,7 +45,7 @@ function GroceryListPage() {
             >
                 <Typography variant='h4'>Grocery List</Typography>
 
-                {groceryItems.map(
+                {groceryList?.map(
                     item => <GroceryItemCard item={item} />
                 )}
 

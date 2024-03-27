@@ -9,6 +9,9 @@ import { STATUS_OK } from '../constants';
 import { useSnackbar } from "../context/SnackbarContext";
 import ConfirmationDialog from '../components/modal/ConfirmationDialog';
 import UpdateGroceryItemDialog from '../components/modal/grocery-item/UpdateGroceryItemDialog';
+import APIGroceryList from "../utils/api-grocery-list";
+import { useHome } from "../context/HomeContext";
+import { useNavigate } from "react-router-dom";
 
 type ItemProps = {
     item: GroceryItem
@@ -21,6 +24,9 @@ function GroceryItemCard(props: ItemProps) {
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
     const [isLoading, setLoading] = useState(false);
     const snackBar = useSnackbar();
+    const home = useHome();
+    const homeId = home ? home._id : "";
+    const navigate = useNavigate();
 
     const handleOpenUpdateItem = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -37,6 +43,8 @@ function GroceryItemCard(props: ItemProps) {
         APIGroceryItem.deleteItem(item.name)
             .then(({ data: { item, message }, status }) => {
                 if (status !== STATUS_OK) throw new Error(message);
+                removeItemFromList(item);
+                navigate('/grocery-list');
                 snackBar.setSuccess(`Item ${item.name} successfully deleted`, 2000);
             })
             .catch((err) => {
@@ -45,6 +53,15 @@ function GroceryItemCard(props: ItemProps) {
             .finally(() => {
                 setLoading(false);
             });
+    }
+
+    const removeItemFromList = (item: GroceryItem) => {
+        APIGroceryList.removeItemFromList(homeId, item._id).then(
+            ({ data: { list, message }, status }) => {
+                if (status !== STATUS_OK) throw Error(message);
+            }).catch((err) => {
+                snackBar.setError(err.toString());
+            })
     }
 
     return (
