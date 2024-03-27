@@ -1,3 +1,7 @@
+import React from 'react';
+import { useHome } from '../../context/HomeContext'; 
+import { useUser } from '../../context/UserContext';
+
 interface choreViewDetailProps {
   selectedChore: any
   openEditPopup: any
@@ -6,6 +10,9 @@ interface choreViewDetailProps {
 }
 
 const ChoreViewDetail: React.FC<choreViewDetailProps> = ({selectedChore, openEditPopup, setIsViewDetailsOpen, openDeletePopup}) => {
+  const home = useHome();
+  const { user_id } = useUser();
+  const isAdmin = home?.adminUser?._id === user_id && user_id !== null;
   return (
     <div className='popup-overlay' style={{ zIndex: 1 }}>
       <div className='popup' style={{position:'relative'}}>
@@ -31,10 +38,12 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({selectedChore, openEdi
               openEditPopup(selectedChore);
               setIsViewDetailsOpen(false); // Close the modal after opening the edit popup
             }}>Edit</button>
-            <button onClick={() => {
-              openDeletePopup(selectedChore);
-              setIsViewDetailsOpen(false); // Close the modal after opening the delete popup
-            }}>Delete</button>
+            {isAdmin && (
+              <button onClick={() => {
+                openDeletePopup(selectedChore);
+                setIsViewDetailsOpen(false); // Close the modal after opening the delete popup
+              }}>Delete</button>
+            )}
           </div>
         )}
       </div>

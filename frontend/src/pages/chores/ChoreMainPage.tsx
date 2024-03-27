@@ -13,9 +13,9 @@ import ChoreViewDetail from '../../components/modal/ChoresViewDetailPopUp';
 import { useHome } from '../../context/HomeContext';
 import { useSnackbar } from '../../context/SnackbarContext';
 import APINotification from '../../utils/api-notification';
-import { STATUS_CREATED } from '../../constants';
-import { NOTIFICATION_CHORE_REMINDER } from '../../constants';
+import { NOTIFICATION_NEW_CHORE, STATUS_CREATED } from '../../constants';
 import { AuthClient } from '../../utils/auth-client';
+import { useUser } from '../../context/UserContext';
 
 function ChoreMainPage() {
   // State variables for managing chores and pop-up visibility
@@ -28,6 +28,7 @@ function ChoreMainPage() {
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const home = useHome();
   const snackbar = useSnackbar();
+  const { user_id } = useUser();
 
   // Function to fetch chores from the backend API
 
@@ -48,14 +49,13 @@ function ChoreMainPage() {
       });
   }, [refreshChoreList]);
 
-  const handleSendNotification = async (recipientIds: string[]) => {
+  const handleSendNotification = async (recipientIds: string[], notificationMessage: string) => {
     if(!home) return;
-    const notificationMessage = `You have been assigned a new chore.`;
     const notification = {
-      sender: home.adminUser._id, // Provide the sender ID
+      sender: user_id || '', // Provide the sender ID
       recipients: recipientIds, // Provide the recipient user IDs as an array
       message: {
-        title: NOTIFICATION_CHORE_REMINDER,
+        title: NOTIFICATION_NEW_CHORE,
         content: notificationMessage,
       },
     };
@@ -93,6 +93,8 @@ function ChoreMainPage() {
   // Function to handle submitting new chore data
   const handleSubmit = async (formData: any) => {
     const assigned = formData.assignedTo;
+    const choreTitle = formData.title;
+    const dueDate = new Date(formData.dueDate).toLocaleDateString();
     try {
       const response = await axios.post(URI_BACKEND + '/api/chore/create', formData);
       setChores([...chores, response.data]);
@@ -100,9 +102,9 @@ function ChoreMainPage() {
   
       // Get the user ID synchronously
       const userId = (await AuthClient.getUserId(assigned)).data.user_id;
-  
+      const notificationMessage = `You have been assigned a new chore: ${choreTitle}, due on ${dueDate}.`;
       // Pass the user ID as an array to handleSendNotification
-      handleSendNotification([userId]);
+      handleSendNotification([userId], notificationMessage);
     } catch (error) {
       console.error('Error creating chore:', error);
     }

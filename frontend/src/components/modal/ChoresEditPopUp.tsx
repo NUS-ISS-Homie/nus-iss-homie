@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Chore } from '../../@types/ChoreType';
 import { useHome } from '../../context/HomeContext';
+import { useUser } from '../../context/UserContext';
 
 interface EditPopupProps {
   chore: Chore;
@@ -13,7 +14,9 @@ const EditPopup: React.FC<EditPopupProps> = ({ chore, onClose, onEdit }) => {
   const [dueDateAsString, setDueDateAsString] = useState<string>(chore.dueDate ? new Date(chore.dueDate).toISOString().split('T')[0] : '2024-10-10');
   const today = new Date().toISOString().split('T')[0]; 
   const home = useHome();
+  const { user_id } = useUser();
   const [houseMembers, setHouseMembers] = useState<string[]>([]);
+  const isAdmin = home?.adminUser?._id === user_id && user_id !== null;
 
   useEffect(() => {
     if (!home) return;
@@ -71,6 +74,7 @@ const EditPopup: React.FC<EditPopupProps> = ({ chore, onClose, onEdit }) => {
               value={editedChore.assignedTo}
               onChange={handleChange}
               required
+              disabled={!isAdmin}
               style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', width: '100%' }}
             >
               <option value='' disabled>Select member</option>
@@ -89,6 +93,7 @@ const EditPopup: React.FC<EditPopupProps> = ({ chore, onClose, onEdit }) => {
               onChange={handleDueDateChange}
               min={today}
               required
+              disabled={!isAdmin}
               style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', width: '100%' }}
             />}
           </div>
