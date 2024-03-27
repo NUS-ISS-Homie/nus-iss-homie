@@ -2,6 +2,7 @@ import * as constants from '../common/messages.js';
 import {
   ormCreateExpense as _createExpense,
   ormGetExpense as _getExpense,
+  ormGetExpenses as _getExpenses,
   ormUpdateExpense as _updateExpense,
   ormDeleteExpense as _deleteExpense,
 } from '../models/expense/expense-orm.js';
@@ -47,6 +48,31 @@ export async function getExpense(req, res) {
     }
 
     return res.status(constants.STATUS_CODE_OK).json({ expense });
+  } catch (err) {
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
+export async function getExpenses(req, res) {
+  try {
+    const { title, user, home, category } = req.body;
+
+    if (!title && !user && !home && !category) {
+      return res
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
+    }
+
+    const expenses = await _getExpenses(req.body);
+    if (!expenses || expenses.err) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    }
+
+    return res.status(constants.STATUS_CODE_OK).json({ expenses });
   } catch (err) {
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)

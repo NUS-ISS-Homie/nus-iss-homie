@@ -2,6 +2,7 @@ import {
   createExpense,
   deleteExpense,
   getExpense,
+  getExpenses,
   updateExpense,
 } from './expense-repository.js';
 
@@ -20,6 +21,16 @@ export async function ormCreateExpense(params) {
 export async function ormGetExpense(expenseId) {
   try {
     const expense = await getExpense(expenseId);
+    return expense;
+  } catch (err) {
+    console.log(err);
+    return { err };
+  }
+}
+
+export async function ormGetExpenses(params) {
+  try {
+    const expense = await getExpenses(params);
     return expense;
   } catch (err) {
     console.log(err);

@@ -36,6 +36,17 @@ export async function getExpense(expenseId) {
   }
 }
 
+export async function getExpenses(params) {
+  try {
+    return await ExpenseModel.find(params).populate({
+      path: 'user',
+      select: 'username',
+    });
+  } catch (err) {
+    return { err };
+  }
+}
+
 // UPDATE FUNCTION
 export async function updateExpense(expenseId, updatedFields) {
   try {

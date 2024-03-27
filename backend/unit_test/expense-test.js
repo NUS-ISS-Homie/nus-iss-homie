@@ -6,8 +6,9 @@ import assert from 'assert';
 import 'dotenv/config';
 
 import * as constants from '../common/messages.js';
-import UserModel from '../models/user/user-model.js';
 import ExpenseModel from '../models/expense/expense-model.js';
+import HomeModel from '../models/home/home-model.js';
+import UserModel from '../models/user/user-model.js';
 import { entity } from '../controllers/expense-controller.js';
 import app from '../index.js';
 
@@ -26,12 +27,19 @@ describe('Expense API CRUD', () => {
     username: 'user2',
   };
 
+  const home = {
+    _id: new mongoose.Types.ObjectId().toString(),
+    adminUser: user1._id,
+    users: [user2._id],
+  };
+
   const expense1 = {
     _id: new mongoose.Types.ObjectId().toString(),
     title: 'Grocery',
     amount: 50.0,
     category: 'Food',
     user: user1._id,
+    home: home._id,
   };
 
   const expense2 = {
@@ -40,6 +48,7 @@ describe('Expense API CRUD', () => {
     amount: 1000.0,
     category: 'Housing',
     user: user2._id,
+    home: home._id,
   };
 
   before(
@@ -52,6 +61,10 @@ describe('Expense API CRUD', () => {
     await UserModel.deleteMany();
     await UserModel.create({ ...user1, hashedPassword: 'password' });
     await UserModel.create({ ...user2, hashedPassword: 'password' });
+
+    // Create Home
+    await HomeModel.deleteMany();
+    await HomeModel.create(home);
 
     // Create Expenses
     await ExpenseModel.deleteMany();
@@ -66,6 +79,7 @@ describe('Expense API CRUD', () => {
         amount: 65.0,
         category: 'Housing',
         user: user1._id,
+        home: home._id,
       };
 
       const expectedBody = {
@@ -83,9 +97,7 @@ describe('Expense API CRUD', () => {
           done();
         });
     });
-  });
 
-  describe('POST /api/expense', () => {
     it('should return a 400 Bad Request for incomplete or invalid data', (done) => {
       const invalidExpenseData = {
         title: 'Utilities',
@@ -119,11 +131,9 @@ describe('Expense API CRUD', () => {
           done();
         });
     });
-  });
 
-  // Negative test case: Invalid expense ID
-  describe('GET /api/expense/:id', () => {
-    it('should return a 400 Bad Request for an invalid expense ID', (done) => {
+    // Negative test case: Invalid expense ID
+    it('should not return for non-existent expense ID', (done) => {
       const invalidExpenseId = 'invalid_id';
 
       const expected = { message: constants.FAIL_NOT_EXIST(entity) };
@@ -134,6 +144,47 @@ describe('Expense API CRUD', () => {
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
+          chai.expect(res.body).to.deep.equal(expected);
+          done();
+        });
+    });
+  });
+
+  describe('PUT /api/expense', () => {
+    it('should retrieve expenses based on search params', (done) => {
+      const searchParams = { home: home._id };
+
+      const expenses = {
+        expenses: [
+          { ...expense1, user: user1 },
+          { ...expense2, user: user2 },
+        ],
+      };
+
+      chai
+        .request(app)
+        .put(`/api/expense`)
+        .send(searchParams)
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
+          chai.expect(res.body).to.shallowDeepEqual(expenses);
+          done();
+        });
+    });
+
+    it('should return a 400 Bad Request for an invalid search params', (done) => {
+      const expected = { message: constants.FAIL_MISSING_FIELDS };
+
+      const invalidSearchParams = { userId: user1._id };
+
+      chai
+        .request(app)
+        .put(`/api/expense`)
+        .send(invalidSearchParams)
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
           chai.expect(res.body).to.deep.equal(expected);
           done();
         });
@@ -157,10 +208,8 @@ describe('Expense API CRUD', () => {
           done();
         });
     });
-  });
 
-  // negative PUT test
-  describe('PUT /api/expense/:id', () => {
+    // negative PUT test
     it('should return a 404 Not Found for an invalid expense ID', (done) => {
       const invalidId = new mongoose.Types.ObjectId().toString();
       const updatedExpense = {
@@ -198,9 +247,7 @@ describe('Expense API CRUD', () => {
           done();
         });
     });
-  });
 
-  describe('DELETE /api/expense/:id', () => {
     it('should return a 404 Not Found for an invalid expense ID', (done) => {
       const invalidExpenseId = 'invalid_id';
 
