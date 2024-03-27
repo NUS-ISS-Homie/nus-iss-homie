@@ -14,7 +14,6 @@ class SessionStore {
   }
 
   removeSession(sessionId) {
-    console.log('SESSION REMOVED!');
     this.sessions.delete(sessionId);
   }
 }
@@ -30,12 +29,13 @@ const onJoinHomeEvent = (io, socket, homeId) => {
   // subscribes to home for notifications
   if (!socket) return;
   socket.join(homeId);
-  io.to(homeId).emit('joined-home');
-  socket.on('leave-home', () => onLeaveHomeEvent(io, socket, homeId));
+  io.to(homeId).emit('update-home');
 };
 
 const onLeaveHomeEvent = (io, socket, homeId) => {
   socket.leave(homeId);
+  console.log('LEAVE HOME', homeId);
+  io.to(homeId).emit('update-home');
   io.to(socket.id).emit('left-home');
 };
 
@@ -51,10 +51,13 @@ const createEventListeners = (socket, io) => {
   socket.on('accept-join-req', ({ homeId, userId }) =>
     io.to(userId).emit('join-home', homeId)
   );
-  socket.on('disconnect', () => onDisconnectEvent(socket));
+
   socket.on('send-notification', (homeId) =>
     onSendNotificationEvent(io, homeId)
   );
+  socket.on('leave-home', (homeId) => onLeaveHomeEvent(io, socket, homeId));
+
+  socket.on('disconnect', () => onDisconnectEvent(socket));
 };
 
 export { sessionStore, createEventListeners };

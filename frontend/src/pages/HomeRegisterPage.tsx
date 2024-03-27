@@ -110,7 +110,7 @@ function HomeRegisterPage(props: { type: HomeFormType }) {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const { user_id, username } = useUser();
-  const { joinHome } = useSockets();
+  const { joinHome, homeSocket } = useSockets();
   const homeClient = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -147,6 +147,9 @@ function HomeRegisterPage(props: { type: HomeFormType }) {
       .then(({ data, status }) => {
         if (status !== STATUS_CREATED)
           throw new Error('Failed to send invites');
+        invites.recipients.forEach((r) =>
+          homeSocket.emit('send-notification', r)
+        );
         snackbar.setSuccess('Invitations sent');
       })
       .catch((err) => snackbar.setError(err.message));

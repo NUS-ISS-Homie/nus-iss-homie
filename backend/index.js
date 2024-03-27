@@ -36,7 +36,7 @@ const io = new Server(httpServer, {
 });
 
 io.use((socket, next) => {
-  const { sessionId, userId } = socket.handshake.auth;
+  const { sessionId, userId, homeId } = socket.handshake.auth;
 
   if (sessionId) {
     const session = sessionStore.find(sessionId);
@@ -45,14 +45,16 @@ io.use((socket, next) => {
     if (session && !userId) {
       socket.sessionId = sessionId;
       socket.userId = session.userId;
+      socket.homeId = session.homeId;
       return next();
     }
 
     // Update session
     if (session && userId) {
-      sessionStore.saveSession(sessionId, { userId });
+      sessionStore.saveSession(sessionId, { userId, homeId });
       socket.sessionId = sessionId;
       socket.userId = userId;
+      socket.homeId = homeId;
       return next();
     }
   }
@@ -64,15 +66,17 @@ io.use((socket, next) => {
   // Create new session
   socket.sessionId = randomUUID();
   socket.userId = userId;
-  sessionStore.saveSession(sessionId, { userId });
+  socket.homeId = homeId;
+  sessionStore.saveSession(sessionId, { userId, homeId });
   next();
 });
 
 io.on('connection', (socket) => {
-  console.log(`Connected to ${socket.id}`);
-  console.log('SOCKET USER ID: ', socket.userId);
+  console.log('SOCKET USER ID: ', socket.userId, '\n');
+  console.log('SOCKET HOME ID: ', socket.homeId, '\n');
 
   socket.join(socket.userId);
+  socket.join(socket.homeId);
 
   socket.emit('session', { sessionId: socket.sessionId });
 

@@ -25,6 +25,9 @@ const saveSocketInStorage = (sessionId: string) => {
   window.localStorage.setItem(LOCAL_STORAGE_SOCKET_KEY, sessionId);
 };
 
+export const removeSocketInStorage = () =>
+  window.localStorage.removeItem(LOCAL_STORAGE_SOCKET_KEY);
+
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const snackbar = useSnackbar();
   const { user_id } = useUser();
@@ -32,46 +35,58 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const homeClient = useAuth();
 
   const joinHome = useCallback((homeId: string, onFail?: VoidFunction) => {
-    console.log('join home request');
     const { homeSocket } = sockets;
     homeSocket.emit('join-home', homeId);
   }, []);
 
-  useEffect(() => {
-    const { homeSocket } = sockets;
-
-    const sessionId = getSession();
-    if (sessionId) {
-      homeSocket.auth = { sessionId, userId: user_id };
-      homeSocket.connect();
-    }
-
-    homeSocket.on('session', ({ sessionId }) => {
-      homeSocket.auth = sessionId;
-      saveSocketInStorage(sessionId);
-      homeSocket.auth = { ...homeSocket.auth, sessionId };
-    });
-
-    homeSocket.on('join-home', (homeId) => {
+  const updateHome = useCallback(
+    (homeId: string | undefined) => {
+      if (!homeId) return homeClient.setHome(null);
       APIHome.getHome(homeId)
         .then(({ data: { home, message }, status }) => {
           if (status !== STATUS_OK) throw new Error(message);
           homeClient.setHome(home);
-          joinHome(homeId);
         })
         .catch((err) => snackbar.setError(err.message));
-    });
+    },
+    [homeClient, snackbar]
+  );
 
-    homeSocket.on('joined-home', () => {
+  useEffect(() => {
+    const { homeSocket } = sockets;
+
+    // Home Socket Event Listeners
+    const sessionId = getSession();
+    if (sessionId) {
+      homeSocket.auth = { sessionId, userId: user_id, homeId: home?._id };
+      homeSocket.connect();
+    }
+
+    const onSession = (data: { sessionId: string }) => {
+      const { sessionId } = data;
+      saveSocketInStorage(sessionId);
+      homeSocket.auth = { ...homeSocket.auth, sessionId };
+    };
+
+    const onJoinHome = (homeId: string) => {
+      updateHome(homeId);
       if (!home) return;
-      APIHome.getHome(home._id)
-        .then(({ data: { home, message }, status }) => {
-          if (status !== STATUS_OK) throw new Error(message);
-          homeClient.setHome(home);
-        })
-        .catch((err) => snackbar.setError(err.message));
-    });
-  }, [joinHome, home, user_id, homeClient, snackbar]);
+      joinHome(homeId);
+    };
+
+    const onUpdateHome = () => updateHome(home?._id);
+
+    homeSocket.on('session', onSession);
+    homeSocket.on('join-home', onJoinHome);
+    homeSocket.on('update-home', onUpdateHome);
+
+    return () => {
+      // Remove event listeners to prevent duplicate event registrations
+      homeSocket.off('session', onSession);
+      homeSocket.off('join-home', onJoinHome);
+      homeSocket.off('update-home', onUpdateHome);
+    };
+  }, [joinHome, updateHome, home, user_id, homeClient, snackbar]);
 
   return (
     <SocketContext.Provider value={{ ...sockets, joinHome: joinHome }}>

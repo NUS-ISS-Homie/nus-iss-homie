@@ -44,7 +44,6 @@ function NotificationDetails(props: {
                     );
                     break;
                   case NOTIFICATION_INVITE:
-                    console.log('THIS IS INVITE');
                     homeClient.acceptInvite(sender._id, deleteNotification);
                     break;
                 }

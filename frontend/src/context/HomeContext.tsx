@@ -27,6 +27,7 @@ interface IHomeContext {
   deleteHome: VoidFunction;
   acceptJoinRequest: (sender: string, callback?: VoidFunction) => void;
   acceptInvite: (admin: string, callback?: VoidFunction) => void;
+  updateHome: VoidFunction;
 }
 
 const HomeContext = createContext<IHomeContext>({
@@ -36,6 +37,7 @@ const HomeContext = createContext<IHomeContext>({
   deleteHome: () => {},
   acceptJoinRequest: (sender: string, callback?: VoidFunction) => {},
   acceptInvite: (admin: string, callback?: VoidFunction) => {},
+  updateHome: () => {},
 });
 
 export function HomeProvider({ children }: { children: React.ReactNode }) {
@@ -111,6 +113,17 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       .catch((err: Error) => snackbar.setError(err.message));
   };
 
+  const updateHome = () => {
+    if (!home) return;
+    APIHome.getHome(home._id)
+      .then(({ data: { home, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        saveHomeInStorage(home);
+        setHome(home);
+      })
+      .catch((err: Error) => snackbar.setError(err.message));
+  };
+
   useEffect(() => {
     const home = getHome();
     home && setHome(home);
@@ -137,6 +150,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         deleteHome,
         acceptJoinRequest,
         acceptInvite,
+        updateHome,
       }}
     >
       {children}

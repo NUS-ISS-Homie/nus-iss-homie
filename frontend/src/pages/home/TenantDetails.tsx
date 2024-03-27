@@ -29,7 +29,8 @@ function TenantView(props: { tenant: Tenant }) {
     >
       <Avatar
         sx={{
-          bgcolor: tenant.role === Role.Admin ? 'primary.main' : 'secondary',
+          bgcolor:
+            tenant.role === Role.Admin ? 'primary.main' : 'secondary.main',
         }}
       >
         {tenant.username[0]}
@@ -50,14 +51,12 @@ function TenantDetails() {
 
   useEffect(() => {
     if (!home) return;
-    console.log('HOME', home);
     const tenants = [];
 
     tenants.push({ username: home.adminUser.username, role: Role.Admin });
     home.users.forEach(({ username }) =>
       tenants.push({ username, role: Role.Member })
     );
-    console.log('tenants:', tenants);
     setTenants(tenants);
   }, [home]);
 
