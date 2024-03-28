@@ -1,10 +1,9 @@
 import React from 'react';
-// import { Expense } from './type';
 
 interface DeletePopupProps {
-  expenseId: number; // Change the type to number for the expense ID
+  expenseId: string;
   onClose: () => void;
-  onDelete: (expenseId: number) => void; // Accept expense ID as a parameter
+  onDelete: (expenseId: string) => void; // Accept expense ID as a parameter
 }
 
 const DeletePopup: React.FC<DeletePopupProps> = ({

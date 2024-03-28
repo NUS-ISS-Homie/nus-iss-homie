@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
 import CreatePopup from './ExpensesAddPopUp';
 import EditPopup from './ExpensesEditPopUp';
 import DeletePopup from './ExpensesDeletePopUp';
-import '../../CSS/ExpenseMainPage.css'; // Import the CSS file
-import { URI_BACKEND } from '../../configs';
-
-// Define Expense interface
-interface Expense {
-  _id: number;
-  title: string;
-  amount: number;
-  category: string;
-  username: string;
-}
+import '../../CSS/ExpenseMainPage.css';
+import { useSnackbar } from '../../context/SnackbarContext';
+import APIExpense from '../../utils/api-expense';
+import { useHome } from '../../context/HomeContext';
+import { STATUS_OK } from '../../constants';
+import { Expense } from '../../@types/Expense';
+import { useSockets } from '../../context/SocketContext';
+import { homeSocketEvents as events } from '../../constants';
 
 function ExpenseMainPage() {
   // State variables for managing expenses and pop-up visibility
@@ -23,78 +19,52 @@ function ExpenseMainPage() {
   const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
 
-  // Function to fetch expenses from the backend API
-  useEffect(() => {
-    axios
-      .get(URI_BACKEND + '/api/expense')
-      .then((response) => {
-        setExpenses(response.data.expenses);
-      })
-      .catch((error) => {
-        console.error('Error fetching expenses:', error);
-      });
-  }, []);
+  const home = useHome();
+  const snackbar = useSnackbar();
+  const { homeSocket } = useSockets();
 
-  // Function to handle opening the create pop-up
+  const updateExpenses = useCallback(() => {
+    if (!home) return;
+    APIExpense.getExpenses(home._id)
+      .then(({ data: { expenses, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        setExpenses(expenses);
+      })
+      .catch((err) => snackbar.setError(err.message));
+  }, [home, snackbar]);
+
+  useEffect(updateExpenses, [updateExpenses]);
+
+  useEffect(() => {
+    homeSocket.on(events.UPDATE_EXPENSES, updateExpenses);
+    return () => {
+      homeSocket.off(events.UPDATE_EXPENSES, updateExpenses);
+    };
+  }, [homeSocket, updateExpenses]);
+
   const openCreatePopup = () => {
     setCreateOpen(true);
   };
 
-  // Function to handle opening the edit pop-up
   const openEditPopup = (expense: Expense) => {
     setSelectedExpense(expense);
     setEditOpen(true);
   };
 
-  // Function to handle opening the delete pop-up
   const openDeletePopup = (expense: Expense) => {
     setSelectedExpense(expense);
     setDeleteOpen(true);
   };
 
-  // Function to handle submitting new expense data
-  const handleSubmit = (formData: any) => {
-    axios
-      .post(URI_BACKEND + '/api/expense/create', formData)
-      .then((response) => {
-        setExpenses([...expenses, response.data]);
-      })
-      .catch((error) => {
-        console.error('Error creating expense:', error);
-      });
-  };
-
-  // Function to handle editing an expense
-  const handleEdit = (editedExpense: Expense) => {
-    axios
-      .put(URI_BACKEND + `/api/expense/${editedExpense._id}`, editedExpense)
-      .then(() => {
-        const updatedExpenses = expenses.map((expense) =>
-          expense._id === editedExpense._id ? editedExpense : expense
-        );
-        setExpenses(updatedExpenses);
-      })
-      .catch((error) => {
-        console.error('Error editing expense:', error);
-      });
-  };
-
-  // Function to handle deleting an expense
   const handleDelete = () => {
-    if (selectedExpense) {
-      console.log(selectedExpense._id);
-      axios
-        .delete(URI_BACKEND + `/api/expense/${selectedExpense._id}`)
-        .then(() => {
-          const updatedExpenses = expenses.filter(
-            (expense) => expense._id !== selectedExpense._id
-          );
-          setExpenses(updatedExpenses);
-        })
-        .catch((error) => {
-          console.error('Error deleting expense:', error);
-        });
-    }
+    if (!selectedExpense) return;
+    APIExpense.deleteExpense(selectedExpense._id)
+      .then(({ data: { expense, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        homeSocket.emit(events.UPDATE_EXPENSES, home?._id);
+        updateExpenses();
+      })
+      .catch((err) => snackbar.setError(err.message));
   };
 
   return (
@@ -119,11 +89,9 @@ function ExpenseMainPage() {
               <td>{expense.title}</td>
               <td>{expense.amount}</td>
               <td>{expense.category}</td>
-              <td>{expense.username}</td>
+              <td>{expense.user.username}</td>
               <td className='expense-buttons'>
-                {/* Edit button */}
                 <button onClick={() => openEditPopup(expense)}>Edit</button>
-                {/* Delete button */}
                 <button onClick={() => openDeletePopup(expense)}>Delete</button>
               </td>
             </tr>
@@ -133,21 +101,19 @@ function ExpenseMainPage() {
       {isCreateOpen && (
         <CreatePopup
           onClose={() => setCreateOpen(false)}
-          onSubmit={handleSubmit}
+          updateExpenses={updateExpenses}
         />
       )}
-      {/* Pass selectedExpense and handleEdit to the edit popup */}
       {isEditOpen && selectedExpense && (
         <EditPopup
           expense={selectedExpense}
           onClose={() => setEditOpen(false)}
-          onEdit={handleEdit}
+          updateExpenses={updateExpenses}
         />
       )}
-      {/* Pass selectedExpense and handleDelete to the delete popup */}
       {isDeleteOpen && selectedExpense && (
         <DeletePopup
-          expenseId={selectedExpense._id} // Pass the _id instead of the entire expense
+          expenseId={selectedExpense._id}
           onClose={() => setDeleteOpen(false)}
           onDelete={handleDelete}
         />

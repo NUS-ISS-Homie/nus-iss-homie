@@ -1,60 +1,77 @@
-class SessionStore {
-  sessions = new Map();
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import {
+  sessionStore,
+  createEventListeners,
+  registerHomeEvents,
+} from '../sockets/home-socket.js';
+import { randomUUID } from 'crypto';
+import events from '../sockets/events.js';
+import 'dotenv/config';
+import { entity as homeEntity } from './home-controller.js';
 
-  constructor() {
-    this.sessions = new Map();
-  }
+const port = process.env.PORT;
 
-  find(sessionId) {
-    return this.sessions.get(sessionId);
-  }
+const socket = (app) => {
+  const httpServer = createServer(app);
 
-  saveSession(sessionId, session) {
-    this.sessions.set(sessionId, session);
-  }
+  const io = new Server(httpServer, {
+    cors: { origin: 'http://localhost:3000' },
+  });
 
-  removeSession(sessionId) {
-    console.log('SESSION REMOVED!');
-    this.sessions.delete(sessionId);
-  }
-}
+  const homeNamespace = io.of(`/${homeEntity}`);
+  homeNamespace.use((socket, next) => {
+    const { sessionId, userId, homeId } = socket.handshake.auth;
 
-const sessionStore = new SessionStore();
+    if (sessionId) {
+      const session = sessionStore.find(sessionId);
 
-const onDisconnectEvent = (socket) => {
-  console.log(`Disconnected with ${socket.id}`);
-  sessionStore.saveSession(socket.sessionId, { userId: socket.userId });
+      // Has existing session
+      if (session && !userId) {
+        socket.sessionId = sessionId;
+        socket.userId = session.userId;
+        socket.homeId = session.homeId;
+        return next();
+      }
+
+      // Update session
+      if (session && userId) {
+        sessionStore.saveSession(sessionId, { userId, homeId });
+        socket.sessionId = sessionId;
+        socket.userId = userId;
+        socket.homeId = homeId;
+        return next();
+      }
+    }
+
+    if (!userId) {
+      return next(new Error('Invalid User ID'));
+    }
+
+    // Create new session
+    socket.sessionId = randomUUID();
+    socket.userId = userId;
+    socket.homeId = homeId;
+    sessionStore.saveSession(sessionId, { userId, homeId });
+    next();
+  });
+
+  homeNamespace.on(events.CONNECTION, (socket) => {
+    console.log('SOCKET USER ID: ', socket.userId, '\n');
+    console.log('SOCKET HOME ID: ', socket.homeId, '\n');
+
+    socket.join(socket.userId);
+    socket.join(socket.homeId);
+
+    socket.emit(events.SESSION, { sessionId: socket.sessionId });
+
+    createEventListeners(socket, io);
+    registerHomeEvents(socket, homeNamespace);
+  });
+
+  httpServer.listen(port, () => {
+    console.log(`Homie listening on port ${port}`);
+  });
 };
 
-const onJoinHomeEvent = (io, socket, homeId) => {
-  // subscribes to home for notifications
-  if (!socket) return;
-  socket.join(homeId);
-  io.to(homeId).emit('joined-home');
-  socket.on('leave-home', () => onLeaveHomeEvent(io, socket, homeId));
-};
-
-const onLeaveHomeEvent = (io, socket, homeId) => {
-  socket.leave(homeId);
-  io.to(socket.id).emit('left-home');
-};
-
-const onSendNotificationEvent = (io, homeId) => {
-  io.to(homeId).emit('notify');
-};
-
-const createEventListeners = (socket, io) => {
-  socket.on('delete-session', ({ sessionId }) =>
-    sessionStore.removeSession(sessionId)
-  );
-  socket.on('join-home', (homeId) => onJoinHomeEvent(io, socket, homeId));
-  socket.on('accept-join-req', ({ homeId, userId }) =>
-    io.to(userId).emit('join-home', homeId)
-  );
-  socket.on('disconnect', () => onDisconnectEvent(socket));
-  socket.on('send-notification', (homeId) =>
-    onSendNotificationEvent(io, homeId)
-  );
-};
-
-export { sessionStore, createEventListeners };
+export default socket;

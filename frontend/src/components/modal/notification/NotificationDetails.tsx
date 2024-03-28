@@ -22,39 +22,38 @@ function NotificationDetails(props: {
       {message.content}
       {(message.title === NOTIFICATION_JOIN_REQ ||
         message.title === NOTIFICATION_INVITE) && (
-          <>
-            <Divider />
-            <DialogActions>
-              <Button
-                color='primary'
-                variant='outlined'
-                onClick={deleteNotification}
-              >
-                Decline
-              </Button>
+        <>
+          <Divider />
+          <DialogActions>
+            <Button
+              color='primary'
+              variant='outlined'
+              onClick={deleteNotification}
+            >
+              Decline
+            </Button>
 
-              <Button
-                variant='contained'
-                onClick={() => {
-                  switch (message.title) {
-                    case NOTIFICATION_JOIN_REQ:
-                      homeClient.acceptJoinRequest(
-                        sender._id,
-                        deleteNotification
-                      );
-                      break;
-                    case NOTIFICATION_INVITE:
-                      console.log('THIS IS INVITE');
-                      homeClient.acceptInvite(sender._id, deleteNotification);
-                      break;
-                  }
-                }}
-              >
-                Accept
-              </Button>
-            </DialogActions>
-          </>
-        )}
+            <Button
+              variant='contained'
+              onClick={() => {
+                switch (message.title) {
+                  case NOTIFICATION_JOIN_REQ:
+                    homeClient.acceptJoinRequest(
+                      sender._id,
+                      deleteNotification
+                    );
+                    break;
+                  case NOTIFICATION_INVITE:
+                    homeClient.acceptInvite(sender._id, deleteNotification);
+                    break;
+                }
+              }}
+            >
+              Accept
+            </Button>
+          </DialogActions>
+        </>
+      )}
     </Box>
   );
 }
