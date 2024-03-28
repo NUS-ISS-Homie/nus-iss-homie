@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiShallowDeepEqual from 'chai-shallow-deep-equal';
-import io from 'socket.io-client';
+import io, { Manager } from 'socket.io-client';
 import app from '../index.js';
 import mongoose from 'mongoose';
 import 'dotenv/config';
@@ -11,6 +11,7 @@ import { entity } from '../controllers/home-controller.js';
 import HomeModel from '../models/home/home-model.js';
 import { FAIL_NOT_TENANT } from '../models/home/home-messages.js';
 import UserModel from '../models/user/user-model.js';
+import events from '../sockets/events.js';
 
 assert(process.env.ENV == 'TEST');
 chai.use(chaiHttp);
@@ -18,7 +19,6 @@ chai.use(chaiShallowDeepEqual);
 
 // Socket
 const DEV_SERVER_URI = `http://localhost:${process.env.PORT}`;
-console.log(DEV_SERVER_URI);
 
 const SOCKET_OPTIONS = {
   transports: ['websocket'],
@@ -28,7 +28,6 @@ const SOCKET_OPTIONS = {
 };
 
 let user1, user2, user3;
-const sessionStorage = new Map();
 
 describe('Socket connection', () => {
   it('should connect user1', (done) => {
@@ -64,38 +63,44 @@ describe('[Event] Join Home', () => {
     homeId2 = 'home2';
 
   it(`Users should join ${homeId1}`, (done) => {
-    user2.on('joined-home', done);
-    user1.emit('join-home', homeId1);
-    user2.emit('join-home', homeId1);
+    user2.on(events.UPDATE_HOME, () => {
+      user2.off(events.UPDATE_HOME);
+      return done();
+    });
+    user1.emit(events.JOIN_HOME, homeId1);
+    user2.emit(events.JOIN_HOME, homeId1);
   });
 
   it(`User3 should join ${homeId2}`, (done) => {
-    user3.on('joined-home', done);
-    user3.emit('join-home', homeId2);
+    user3.on(events.UPDATE_HOME, () => {
+      user3.off(events.UPDATE_HOME);
+      return done();
+    });
+    user3.emit(events.JOIN_HOME, homeId2);
   });
 
   describe('[Event] Send Notification', () => {
     it(`should only send notification to ${homeId1}`, (done) => {
-      user3.on('notify', () => assert.fail('should not get here!'));
-      user1.emit('send-notification', homeId1);
-      user2.on('notify', done);
+      user3.on(events.NOTIFY, () => assert.fail('should not get here!'));
+      user1.emit(events.SEND_NOTIFICATION, homeId1);
+      user2.on(events.NOTIFY, done);
     });
   });
 
   describe('[Event] Leave Home', () => {
     it(`User1 should leave ${homeId1}`, (done) => {
-      user1.emit('leave-home');
-      user1.on('left-home', done);
+      user1.emit(events.LEAVE_HOME);
+      user1.on(events.LEAVE_HOME, done);
     });
 
     it(`User2 should leave ${homeId1}`, (done) => {
-      user2.on('left-home', done);
-      user2.emit('leave-home');
+      user2.on(events.LEAVE_HOME, done);
+      user2.emit(events.LEAVE_HOME);
     });
 
     it(`User3 should leave ${homeId1}`, (done) => {
-      user3.on('left-home', done);
-      user3.emit('leave-home');
+      user3.on(events.LEAVE_HOME, done);
+      user3.emit(events.LEAVE_HOME);
     });
   });
 });
