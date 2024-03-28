@@ -15,7 +15,7 @@ function DashboardPage() {
 
   useEffect(() => {
     homeSocket.on('update-home', homeClient.updateHome);
-  }, [homeSocket]);
+  }, [homeSocket, homeClient.updateHome]);
 
   const guestDashboard = (
     <>

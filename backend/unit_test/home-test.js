@@ -18,7 +18,7 @@ chai.use(chaiHttp);
 chai.use(chaiShallowDeepEqual);
 
 // Socket
-const DEV_SERVER_URI = `http://localhost:${process.env.PORT}`;
+const DEV_SERVER_URI = `http://localhost:${process.env.PORT}/${entity}`;
 
 const SOCKET_OPTIONS = {
   transports: ['websocket'],

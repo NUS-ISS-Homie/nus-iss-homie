@@ -28,14 +28,22 @@ const onDisconnectEvent = (socket) => {
 };
 
 const onJoinHomeEvent = (io, socket, homeId) => {
-  console.log('HIII!', socket.userId, homeId);
   if (!socket) return;
   socket.join(homeId);
+  socket.homeId = homeId;
+  sessionStore.saveSession(socket.sessionId, {
+    userId: socket.userId,
+    homeId: socket.homeId,
+  });
   io.to(homeId).emit(events.UPDATE_HOME);
 };
 
 const onLeaveHomeEvent = (io, socket, homeId) => {
   socket.leave(homeId);
+  sessionStore.saveSession(socket.sessionId, {
+    userId: socket.userId,
+    homeId: null,
+  });
   io.to(homeId).emit(events.UPDATE_HOME);
   io.to(socket.id).emit(events.LEAVE_HOME);
 };

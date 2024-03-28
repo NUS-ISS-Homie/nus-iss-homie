@@ -8,6 +8,7 @@ import {
 import { randomUUID } from 'crypto';
 import events from '../sockets/events.js';
 import 'dotenv/config';
+import { entity as homeEntity } from './home-controller.js';
 
 const port = process.env.PORT;
 
@@ -18,7 +19,8 @@ const socket = (app) => {
     cors: { origin: 'http://localhost:3000' },
   });
 
-  io.use((socket, next) => {
+  const homeNamespace = io.of(`/${homeEntity}`);
+  homeNamespace.use((socket, next) => {
     const { sessionId, userId, homeId } = socket.handshake.auth;
 
     if (sessionId) {
@@ -54,7 +56,7 @@ const socket = (app) => {
     next();
   });
 
-  io.on(events.CONNECTION, (socket) => {
+  homeNamespace.on(events.CONNECTION, (socket) => {
     console.log('SOCKET USER ID: ', socket.userId, '\n');
     console.log('SOCKET HOME ID: ', socket.homeId, '\n');
 
@@ -64,7 +66,7 @@ const socket = (app) => {
     socket.emit('session', { sessionId: socket.sessionId });
 
     createEventListeners(socket, io);
-    registerHomeEvents(socket, io);
+    registerHomeEvents(socket, homeNamespace);
   });
 
   httpServer.listen(port, () => {
