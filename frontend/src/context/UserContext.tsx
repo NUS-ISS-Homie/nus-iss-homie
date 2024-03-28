@@ -26,9 +26,9 @@ export const saveUserToLocalStorage = (user: User) => {
 
 const UserContext = createContext({
   user: defaultUser,
-  setUser: (user: User) => {},
-  logout: () => {},
-  deleteUser: () => {},
+  setUser: (user: User) => { },
+  logout: () => { },
+  deleteUser: () => { },
 });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {

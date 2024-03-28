@@ -2,6 +2,12 @@ export const URI_BACKEND = 'http://localhost:8000';
 const PREFIX_EXPENSE_SVC = '/api/expense';
 const PREFIX_HOME_SVC = '/api/home';
 const PREFIX_USER_SVC = '/api/user';
+
+const PREFIX_GROCERY_ITEM_SVC = '/api/grocery-item';
+const PREFIX_GROCERY_LIST_SVC = '/api/grocery-list';
+export const URL_GROCERY_ITEM_SVC = URI_BACKEND + PREFIX_GROCERY_ITEM_SVC;
+export const URL_GROCERY_LIST_SVC = URI_BACKEND + PREFIX_GROCERY_LIST_SVC;
+
 const PREFIX_NOTIF_SVC = '/api/notification';
 
 export const SOCKET_NAMESPACE_HOME = 'home';

@@ -32,6 +32,7 @@ function DashboardPage() {
         <Button onClick={() => navigate('/invite')}>Invite Tenants</Button>
       )}
       <Button onClick={() => navigate('/expense')}>Expenses</Button>
+      <Button onClick={() => navigate('/grocery-list')}>Grocery List</Button>
     </>
   );
 
