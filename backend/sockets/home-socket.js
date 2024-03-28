@@ -52,6 +52,10 @@ const onSendNotificationEvent = (io, homeId) => {
   io.to(homeId).emit(events.NOTIFY);
 };
 
+const onUpdateExpensesEvent = (io, homeId) => {
+  io.to(homeId).emit(events.UPDATE_EXPENSES);
+};
+
 const createEventListeners = (socket, io) => {
   socket.on(events.DELETE_SESSION, ({ sessionId }) =>
     sessionStore.removeSession(sessionId)
@@ -64,12 +68,16 @@ const registerHomeEvents = (socket, io) => {
   socket.on(events.ACCEPT_JOIN_REQ, ({ homeId, userId }) =>
     io.to(userId).emit(events.JOIN_HOME, homeId)
   );
+  socket.on(events.LEAVE_HOME, (homeId) =>
+    onLeaveHomeEvent(io, socket, homeId)
+  );
 
   socket.on(events.SEND_NOTIFICATION, (homeId) =>
     onSendNotificationEvent(io, homeId)
   );
-  socket.on(events.LEAVE_HOME, (homeId) =>
-    onLeaveHomeEvent(io, socket, homeId)
+
+  socket.on(events.UPDATE_EXPENSES, (homeId) =>
+    onUpdateExpensesEvent(io, homeId)
   );
 };
 

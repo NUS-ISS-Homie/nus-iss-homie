@@ -9,6 +9,9 @@ const events = {
   LEAVE_HOME: 'leave-home',
   ACCEPT_JOIN_REQ: 'accept-join-req',
 
+  // Expense events
+  UPDATE_EXPENSES: 'update-expenses',
+
   // Notification events
   SEND_NOTIFICATION: 'send-notification',
   NOTIFY: 'notify',

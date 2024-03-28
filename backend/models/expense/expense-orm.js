@@ -1,43 +1,39 @@
-import ExpenseModel from './expense-model.js'; // Import Mongoose model for expenses
+import {
+  createExpense,
+  deleteExpense,
+  getExpense,
+  getExpenses,
+  updateExpense,
+} from './expense-repository.js';
 
 // CREATE FUNCTION
-export async function ormCreateExpense(object, amount, category, username) {
+export async function ormCreateExpense(params) {
   try {
-    const { title, amount, category, username } = object;
-
-    console.log(
-      'ormCreateExpense',
-      JSON.stringify({ title, amount, category, username })
-    );
-    const newExpense = new ExpenseModel({ title, amount, category, username });
-    await newExpense.save(); // Just call save() without passing parameters
-    return true;
+    const expense = await createExpense(params);
+    await expense.save();
+    return expense;
   } catch (err) {
     return { err };
   }
 }
 
 // READ FUNCTION
-export async function ormGetAllExpense() {
-  try {
-    const expenses = await ExpenseModel.find(); // Fetch all expenses from the database
-    return expenses;
-  } catch (err) {
-    console.error(err);
-    console.error('ERROR: Could not get expenses from DB.');
-    return { error: err };
-  }
-}
-
-// READ FUNCTION
 export async function ormGetExpense(expenseId) {
   try {
-    console.log('expenseId ' + expenseId);
-    const expense = await ExpenseModel.findById(expenseId);
+    const expense = await getExpense(expenseId);
     return expense;
   } catch (err) {
     console.log(err);
-    console.log(`ERROR: Could not get expense from DB.`);
+    return { err };
+  }
+}
+
+export async function ormGetExpenses(params) {
+  try {
+    const expense = await getExpenses(params);
+    return expense;
+  } catch (err) {
+    console.log(err);
     return { err };
   }
 }
@@ -45,11 +41,7 @@ export async function ormGetExpense(expenseId) {
 // UPDATE FUNCTION
 export async function ormUpdateExpense(expenseId, updatedFields) {
   try {
-    const updatedExpense = await ExpenseModel.findByIdAndUpdate(
-      expenseId,
-      updatedFields,
-      { new: true }
-    );
+    const updatedExpense = await updateExpense(expenseId, updatedFields);
     return updatedExpense;
   } catch (err) {
     return { err };
@@ -59,7 +51,7 @@ export async function ormUpdateExpense(expenseId, updatedFields) {
 // DELETE FUNCTION
 export async function ormDeleteExpense(expenseId) {
   try {
-    const deletedExpense = await ExpenseModel.findByIdAndDelete(expenseId);
+    const deletedExpense = await deleteExpense(expenseId);
     return deletedExpense;
   } catch (err) {
     return { err };

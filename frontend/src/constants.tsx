@@ -19,6 +19,9 @@ export const homeSocketEvents = {
   LEAVE_HOME: 'leave-home',
   ACCEPT_JOIN_REQ: 'accept-join-req',
 
+  // Socket events
+  UPDATE_EXPENSES: 'update-expenses',
+
   // Notification events
   SEND_NOTIFICATION: 'send-notification',
   NOTIFY: 'notify',
