@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import chaiShallowDeepEqual from 'chai-shallow-deep-equal';
-import io, { Manager } from 'socket.io-client';
+import io from 'socket.io-client';
 import app from '../index.js';
 import mongoose from 'mongoose';
 import 'dotenv/config';

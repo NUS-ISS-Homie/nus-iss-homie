@@ -76,13 +76,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     const onUpdateHome = () => updateHome(home?._id);
 
-    homeSocket.on('session', onSession);
+    homeSocket.on(events.SESSION, onSession);
     homeSocket.on(events.JOIN_HOME, onJoinHome);
     homeSocket.on(events.UPDATE_HOME, onUpdateHome);
 
     return () => {
       // Remove event listeners to prevent duplicate event registrations
-      homeSocket.off('session', onSession);
+      homeSocket.off(events.SESSION, onSession);
       homeSocket.off(events.JOIN_HOME, onJoinHome);
       homeSocket.off(events.UPDATE_HOME, onUpdateHome);
     };

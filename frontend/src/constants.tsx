@@ -11,6 +11,7 @@ export const NOTIFICATION_INVITE = '[HOME INVITE]';
 export const homeSocketEvents = {
   CONNECTION: 'connection',
   DISCONNECT: 'disconnect',
+  SESSION: 'session',
   DELETE_SESSION: 'delete-session',
 
   // Home events

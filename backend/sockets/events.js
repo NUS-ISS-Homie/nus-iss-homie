@@ -1,6 +1,7 @@
 const events = {
   CONNECTION: 'connection',
   DISCONNECT: 'disconnect',
+  SESSION: 'session',
   DELETE_SESSION: 'delete-session',
 
   // Home events

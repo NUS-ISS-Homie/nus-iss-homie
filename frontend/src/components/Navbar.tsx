@@ -85,9 +85,9 @@ function Navbar() {
 
   useEffect(() => {
     const onNotify = () => setBadgeInvisible(false);
-    homeSocket.on('notify', onNotify);
+    homeSocket.on(events.NOTIFY, onNotify);
     return () => {
-      homeSocket.off('notify', onNotify);
+      homeSocket.off(events.NOTIFY, onNotify);
     };
   }, [homeSocket]);
 

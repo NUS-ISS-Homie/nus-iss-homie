@@ -63,7 +63,7 @@ const socket = (app) => {
     socket.join(socket.userId);
     socket.join(socket.homeId);
 
-    socket.emit('session', { sessionId: socket.sessionId });
+    socket.emit(events.SESSION, { sessionId: socket.sessionId });
 
     createEventListeners(socket, io);
     registerHomeEvents(socket, homeNamespace);
