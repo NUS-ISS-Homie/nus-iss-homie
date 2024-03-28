@@ -35,6 +35,7 @@ function App() {
         element={<HomeRegisterPage type={HomeFormType.Invite} />}
       ></Route>
       <Route path='/expense' element={<ExpenseMainPage />}></Route>
+      <Route path='/grocery-list' element={<GroceryListPage />} />
       <Route path='*' element={<Navigate replace to='/home' />} />
     </Routes>
   );
@@ -44,7 +45,6 @@ function App() {
       <Route path='/' element={<Navigate replace to='/signup' />}></Route>
       <Route path='/signup' element={<SignUpPage />} />
       <Route path='/login' element={<LoginPage />} />
-      <Route path='/grocery-list' element={<GroceryListPage />} />
       <Route path='*' element={<Navigate replace to='/login' />} />
     </Routes>
   );
