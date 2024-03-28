@@ -28,10 +28,11 @@ type UpdateGroceryItemDialogProps = {
   dialogOpen: boolean;
   setDialogOpen: (isOpen: boolean) => void;
   groceryItem: GroceryItem;
+  getGroceryList: () => void;
 };
 
 function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
-  const { dialogOpen, setDialogOpen, groceryItem } = props;
+  const { dialogOpen, setDialogOpen, groceryItem, getGroceryList } = props;
   const [loading, setLoading] = useState(false);
   const [itemState, setItemState] = useState(groceryItem);
 
@@ -86,6 +87,7 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
         if (status !== STATUS_OK) throw new Error(message);
 
         // success
+        getGroceryList();
         setDialogOpen(false);
         snackBar.setSuccess(
           `Item ${itemState.name} successfully updated`,
@@ -158,6 +160,7 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
               label='quantity'
               name='quantity'
               type='number'
+              InputProps={{ inputProps: { min: 0 } }}
               defaultValue={itemState.quantity}
             />
           </Grid>
@@ -171,8 +174,10 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
               value={itemState.unit}
               onChange={handleItemChange}
             >
-              {Unit.map((unit) => (
-                <MenuItem value={unit}>{unit}</MenuItem>
+              {Unit.map((unit, i) => (
+                <MenuItem key={i} value={unit}>
+                  {unit}
+                </MenuItem>
               ))}
             </Select>
           </Grid>
@@ -187,8 +192,10 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
               label='Category'
               onChange={handleItemChange}
             >
-              {Category.map((cat) => (
-                <MenuItem value={cat}>{cat}</MenuItem>
+              {Category.map((cat, i) => (
+                <MenuItem key={i} value={cat}>
+                  {cat}
+                </MenuItem>
               ))}
             </Select>
           </Grid>

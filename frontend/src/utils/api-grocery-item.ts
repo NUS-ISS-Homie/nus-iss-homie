@@ -28,9 +28,6 @@ export const APIGroceryItem = {
       category: string;
     }
   ): Promise<API.Response<GroceryItemResponse>> => {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
     return requests.put(URL_GROCERY_ITEM_SVC, `/${itemId}`, body);
   },
 
