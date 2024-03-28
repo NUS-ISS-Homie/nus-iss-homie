@@ -9,6 +9,7 @@ import { useHome } from '../../context/HomeContext';
 import { STATUS_OK } from '../../constants';
 import { Expense } from '../../@types/Expense';
 import { useSockets } from '../../context/SocketContext';
+import { homeSocketEvents as events } from '../../constants';
 
 function ExpenseMainPage() {
   // State variables for managing expenses and pop-up visibility
@@ -35,9 +36,9 @@ function ExpenseMainPage() {
   useEffect(updateExpenses, [updateExpenses]);
 
   useEffect(() => {
-    homeSocket.on('update-expenses', updateExpenses);
+    homeSocket.on(events.UPDATE_EXPENSES, updateExpenses);
     return () => {
-      homeSocket.off('update-expenses', updateExpenses);
+      homeSocket.off(events.UPDATE_EXPENSES, updateExpenses);
     };
   }, [homeSocket, updateExpenses]);
 
@@ -60,10 +61,8 @@ function ExpenseMainPage() {
     APIExpense.deleteExpense(selectedExpense._id)
       .then(({ data: { expense, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
-        const updatedExpenses = expenses.filter(
-          (expense) => expense._id !== selectedExpense._id
-        );
-        setExpenses(updatedExpenses);
+        homeSocket.emit(events.UPDATE_EXPENSES, home?._id);
+        updateExpenses();
       })
       .catch((err) => snackbar.setError(err.message));
   };

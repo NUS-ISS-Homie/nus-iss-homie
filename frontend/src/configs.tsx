@@ -4,6 +4,8 @@ const PREFIX_HOME_SVC = '/api/home';
 const PREFIX_USER_SVC = '/api/user';
 const PREFIX_NOTIF_SVC = '/api/notification';
 
+export const SOCKET_NAMESPACE_HOME = 'home';
+
 export const URL_EXPENSE_SVC = URI_BACKEND + PREFIX_EXPENSE_SVC;
 export const URL_HOME_SVC = URI_BACKEND + PREFIX_HOME_SVC;
 export const URL_USER_SVC = URI_BACKEND + PREFIX_USER_SVC;

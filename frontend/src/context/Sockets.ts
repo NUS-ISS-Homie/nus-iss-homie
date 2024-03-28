@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client';
-import { URI_BACKEND } from '../configs';
+import { SOCKET_NAMESPACE_HOME, URI_BACKEND } from '../configs';
 
 const sockets = {
-  homeSocket: io(URI_BACKEND),
+  homeSocket: io(`${URI_BACKEND}/${SOCKET_NAMESPACE_HOME}`),
 };
 
 export default sockets;

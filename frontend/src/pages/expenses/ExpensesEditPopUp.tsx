@@ -6,6 +6,7 @@ import APIExpense from '../../utils/api-expense';
 import { STATUS_OK } from '../../constants';
 import { useSnackbar } from '../../context/SnackbarContext';
 import { useSockets } from '../../context/SocketContext';
+import { homeSocketEvents as events } from '../../constants';
 
 interface EditPopupProps {
   expense: Expense;
@@ -57,7 +58,7 @@ const EditPopup: React.FC<EditPopupProps> = ({
     APIExpense.updateExpense(updatedExpense)
       .then(({ data: { expense, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
-        homeSocket.emit('update-expenses', home._id);
+        homeSocket.emit(events.UPDATE_EXPENSES, home._id);
         updateExpenses();
         onClose();
         snackbar.setSuccess(message);

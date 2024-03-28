@@ -16,6 +16,7 @@ import { useSockets } from '../context/SocketContext';
 import { useUser } from '../context/UserContext';
 import { NOTIFICATION_JOIN_REQ, STATUS_CREATED, STATUS_OK } from '../constants';
 import APINotification from '../utils/api-notification';
+import { homeSocketEvents as events } from '../constants';
 
 function HomeJoinPage() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ function HomeJoinPage() {
         APINotification.createNotification(joinReq).then(
           ({ data: { notification, message }, status }) => {
             if (status !== STATUS_CREATED) throw Error(message);
-            homeSocket.emit('send-notification', home.adminUser._id);
+            homeSocket.emit(events.SEND_NOTIFICATION, home.adminUser._id);
             snackbar.setSuccess('Join request sent!');
             navigate('/');
           }

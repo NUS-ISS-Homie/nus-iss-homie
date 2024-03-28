@@ -1,5 +1,4 @@
 import {
-  Expense,
   ExpenseResponse,
   ExpensesResponse,
   NewExpense,
