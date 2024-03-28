@@ -19,6 +19,7 @@ import ChangeUsernameDialog from './modal/ChangeUsernameDialog';
 import ChangePasswordDialog from './modal/ChangePasswordDialog';
 import NotificationsDialog from './modal/notification/NotificationsDialog';
 import { removeSocketInStorage, useSockets } from '../context/SocketContext';
+import { homeSocketEvents as events } from '../constants';
 
 function Navbar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -60,9 +61,9 @@ function Navbar() {
 
   const handleDeleteUser = () => {
     authClient.deleteUser();
-    homeSocket.emit('leave-home', home?._id);
+    homeSocket.emit(events.LEAVE_HOME, home?._id);
     homeClient.leaveHome();
-    homeSocket.emit('delete-session', homeSocket.auth);
+    homeSocket.emit(events.DELETE_SESSION, homeSocket.auth);
     homeSocket.disconnect();
     removeSocketInStorage();
     navigate('/');
@@ -71,14 +72,14 @@ function Navbar() {
   const handleLogout = () => {
     authClient.logout();
     homeClient.setHome(null);
-    homeSocket.emit('delete-session', homeSocket.auth);
+    homeSocket.emit(events.DELETE_SESSION, homeSocket.auth);
     homeSocket.disconnect();
     removeSocketInStorage();
     navigate('/');
   };
 
   const handleLeaveHome = () => {
-    homeSocket.emit('leave-home', home?._id);
+    homeSocket.emit(events.LEAVE_HOME, home?._id);
     homeClient.leaveHome();
   };
 

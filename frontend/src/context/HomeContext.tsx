@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Home } from '../@types/HomeContext';
 import { LOCAL_STORAGE_HOME_KEY } from '../configs';
-import { STATUS_OK } from '../constants';
+import { STATUS_OK, homeSocketEvents as events } from '../constants';
 import { useSnackbar } from './SnackbarContext';
 import APIHome from '../utils/api-home';
 import { useSockets } from './SocketContext';
@@ -85,7 +85,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         if (!home || !home._id) return;
         saveHomeInStorage(home);
         setHome(home);
-        homeSocket.emit('accept-join-req', {
+        homeSocket.emit(events.ACCEPT_JOIN_REQ, {
           homeId: home._id,
           userId: sender,
         });
@@ -105,7 +105,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
             if (!home || !home._id) return;
             saveHomeInStorage(home);
             setHome(home);
-            homeSocket.emit('join-home', home._id);
+            homeSocket.emit(events.JOIN_HOME, home._id);
             callback && callback();
           }
         );

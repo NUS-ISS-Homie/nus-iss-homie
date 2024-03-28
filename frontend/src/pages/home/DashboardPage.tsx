@@ -5,6 +5,7 @@ import { useUser } from '../../context/UserContext';
 import TenantDetails from './TenantDetails';
 import { useAuth, useHome } from '../../context/HomeContext';
 import { useSockets } from '../../context/SocketContext';
+import { homeSocketEvents as events } from '../../constants';
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ function DashboardPage() {
   const { homeSocket } = useSockets();
 
   useEffect(() => {
-    homeSocket.on('update-home', homeClient.updateHome);
+    homeSocket.on(events.UPDATE_HOME, homeClient.updateHome);
   }, [homeSocket, homeClient.updateHome]);
 
   const guestDashboard = (

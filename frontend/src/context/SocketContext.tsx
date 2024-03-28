@@ -10,7 +10,7 @@ import { LOCAL_STORAGE_SOCKET_KEY } from '../configs';
 import { useUser } from './UserContext';
 import { useAuth, useHome } from './HomeContext';
 import APIHome from '../utils/api-home';
-import { STATUS_OK } from '../constants';
+import { STATUS_OK, homeSocketEvents as events } from '../constants';
 
 const SocketContext = createContext({
   ...sockets,
@@ -36,7 +36,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   const joinHome = useCallback((homeId: string, onFail?: VoidFunction) => {
     const { homeSocket } = sockets;
-    homeSocket.emit('join-home', homeId);
+    homeSocket.emit(events.JOIN_HOME, homeId);
   }, []);
 
   const updateHome = useCallback(
@@ -77,14 +77,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     const onUpdateHome = () => updateHome(home?._id);
 
     homeSocket.on('session', onSession);
-    homeSocket.on('join-home', onJoinHome);
-    homeSocket.on('update-home', onUpdateHome);
+    homeSocket.on(events.JOIN_HOME, onJoinHome);
+    homeSocket.on(events.UPDATE_HOME, onUpdateHome);
 
     return () => {
       // Remove event listeners to prevent duplicate event registrations
       homeSocket.off('session', onSession);
-      homeSocket.off('join-home', onJoinHome);
-      homeSocket.off('update-home', onUpdateHome);
+      homeSocket.off(events.JOIN_HOME, onJoinHome);
+      homeSocket.off(events.UPDATE_HOME, onUpdateHome);
     };
   }, [joinHome, updateHome, home, user_id, homeClient, snackbar]);
 
