@@ -32,7 +32,6 @@ enum LoginStatus {
 
 function LoginPage() {
   const [loading, setLoading] = useState(false);
-  const [passwordShown, setPasswordShown] = useState(false);
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
     LoginStatus.IN_PROGRESS
   );
@@ -159,7 +158,7 @@ function LoginPage() {
                 id='password'
                 label='Password'
                 name='password'
-                type={passwordShown ? 'text' : 'password'}
+                type='password'
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>

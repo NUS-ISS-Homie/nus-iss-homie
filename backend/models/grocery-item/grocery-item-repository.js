@@ -20,7 +20,7 @@ export async function createGroceryItem(params) {
     user: params.user_id,
     name: params.name,
     purchasedDate: new Date(params.purchasedDate),
-    expiryDate: new Date(params.purchasedDate),
+    expiryDate: new Date(params.expiryDate),
     category: params.category,
     quantity: params.quantity,
     unit: params.unit,

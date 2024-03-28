@@ -30,7 +30,6 @@ function SignUpPage() {
   );
   const [signUpFailMessage, setSignUpFailMessage] = useState<string>('');
   const [showAlert, setShowAlert] = useState(false);
-  const [passwordShown, setPasswordShown] = useState(false);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -122,7 +121,7 @@ function SignUpPage() {
                 id='password'
                 label='Password'
                 name='password'
-                type={passwordShown ? 'text' : 'password'}
+                type='password'
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>

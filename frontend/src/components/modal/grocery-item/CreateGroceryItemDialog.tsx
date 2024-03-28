@@ -29,7 +29,7 @@ import { Unit, Category } from '../../../enums';
 type CreateGroceryItemDialogProps = {
   dialogOpen: boolean;
   setDialogOpen: (isOpen: boolean) => void;
-  getGroceryList: (homeId: string) => void;
+  getGroceryList: () => void;
 };
 
 function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
@@ -92,9 +92,6 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
       })
       .catch((err) => {
         snackBar.setError(err.toString());
-      })
-      .finally(() => {
-        setLoading(false);
       });
   };
 
@@ -102,7 +99,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
     APIGroceryList.addItemToList(homeId, item._id)
       .then(({ data: { list, message }, status }) => {
         if (status !== STATUS_OK) throw Error(message);
-        getGroceryList(homeId);
+        getGroceryList();
         snackBar.setSuccess(`Item ${item.name} successfully created`, 2000);
       })
       .catch((err) => {
@@ -111,7 +108,6 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    console.log('Submitting...');
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     createGroceryItem(data);
@@ -174,6 +170,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
               label='quantity'
               name='quantity'
               type='number'
+              InputProps={{ inputProps: { min: 0 } }}
             />
           </Grid>
           <Grid item xs={12}>

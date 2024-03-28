@@ -32,9 +32,6 @@ export const AuthClient = {
     newUsername: string;
     password: string;
   }): Promise<API.Response<{ message: string }>> => {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
     return requests.put(URL_USER_SVC, USER_CHANGE_USERNAME, body);
   },
 
@@ -43,9 +40,6 @@ export const AuthClient = {
     oldPassword: string;
     newPassword: string;
   }): Promise<API.Response<{ message: string }>> => {
-    const headers = {
-      'Content-Type': 'application/json',
-    };
     return requests.put(URL_USER_SVC, USER_CHANGE_PASSWORD, body);
   },
 

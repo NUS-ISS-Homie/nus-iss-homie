@@ -8,7 +8,6 @@ import {
   Grid,
 } from '@mui/material';
 import { GroceryItem } from '../@types/GroceryItemContext';
-import { Box } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { APIGroceryItem } from '../utils/api-grocery-item';
@@ -22,34 +21,28 @@ import { useNavigate } from 'react-router-dom';
 
 type ItemProps = {
   item: GroceryItem;
-  getGroceryList: (homeId: string) => void;
+  getGroceryList: () => void;
 };
 
 function GroceryItemCard(props: ItemProps) {
   const { item, getGroceryList } = props;
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [updateItemDialogOpen, setUpdateItemDialogOpen] = useState(false);
   const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
-  const [isLoading, setLoading] = useState(false);
   const snackBar = useSnackbar();
   const home = useHome();
-  const homeId = home ? home._id : '';
   const navigate = useNavigate();
 
   const handleOpenUpdateItem = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
     setUpdateItemDialogOpen(true);
-    getGroceryList(homeId);
+    getGroceryList();
   };
 
   const handleOpenDeleteItem = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
     setConfirmDeleteDialogOpen(true);
   };
 
   const handleDeleteItem = () => {
     const currItem = item;
-    setLoading(true);
     console.log(item);
     APIGroceryItem.deleteItem(item._id)
       .then(({ data: { item, message }, status }) => {
@@ -57,18 +50,14 @@ function GroceryItemCard(props: ItemProps) {
         removeItemFromList(currItem);
         snackBar.setSuccess(`Item ${currItem.name} successfully deleted`, 2000);
       })
-      .catch((err) => {
-        snackBar.setError(err.toString());
-      })
-      .finally(() => {
-        setLoading(false);
-        getGroceryList(homeId);
-      });
+      .catch((err) => snackBar.setError(err.toString()))
+      .finally(getGroceryList);
   };
 
   const removeItemFromList = (item: GroceryItem) => {
     console.log(item);
-    APIGroceryList.removeItemFromList(homeId, item._id)
+    if (!home) return;
+    APIGroceryList.removeItemFromList(home._id, item._id)
       .then(({ data: { list, message }, status }) => {
         if (status !== STATUS_OK) throw Error(message);
         setConfirmDeleteDialogOpen(false);
@@ -80,7 +69,7 @@ function GroceryItemCard(props: ItemProps) {
   };
 
   return (
-    <Card>
+    <Card sx={{ textAlign: 'left' }}>
       <CardContent>
         <Typography>
           <b>User : </b>
@@ -129,6 +118,7 @@ function GroceryItemCard(props: ItemProps) {
         groceryItem={item}
         dialogOpen={updateItemDialogOpen}
         setDialogOpen={setUpdateItemDialogOpen}
+        getGroceryList={getGroceryList}
       />
     </Card>
   );
