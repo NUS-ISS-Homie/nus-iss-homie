@@ -15,10 +15,8 @@ const ExpenseSchema = new Schema({
     type: String,
     required: true,
   },
-  username: {
-    type: String,
-    required: true,
-  },
+  user: { type: Schema.Types.ObjectId, ref: 'UserModel', required: true },
+  home: { type: Schema.Types.ObjectId, ref: 'HomeModel', required: true },
 });
 
 export default mongoose.model('ExpenseModel', ExpenseSchema);

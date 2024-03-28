@@ -1,46 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useUser } from '../../context/UserContext';
+import { useHome } from '../../context/HomeContext';
+import APIExpense from '../../utils/api-expense';
+import { STATUS_CREATED } from '../../constants';
+import { useSnackbar } from '../../context/SnackbarContext';
+import { useSockets } from '../../context/SocketContext';
 
 interface CreatePopupProps {
   onClose: () => void;
-  onSubmit: (formData: any) => void;
+  updateExpenses: () => void;
 }
 
-const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
+const CreatePopup: React.FC<CreatePopupProps> = ({
+  onClose,
+  updateExpenses,
+}) => {
   const [formData, setFormData] = useState({
     title: '',
     amount: '',
     category: '',
-    username: '',
+    user: '',
+    home: '',
   });
-  const user = useUser();
 
-  useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      username: user.username ?? '',
-    }));
-  }, [user.username]);
+  const { user_id } = useUser();
+  const home = useHome();
+  const snackbar = useSnackbar();
+  const { homeSocket } = useSockets();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-    onClose();
-    setFormData({
-      title: '',
-      amount: '',
-      category: '',
-      username: user.username ?? '',
-    });
-    window.location.reload(); // Refresh the page
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const data = new FormData(event.currentTarget);
+    const title = data.get('title');
+    const amount = data.get('amount');
+    const category = data.get('category');
+
+    if (!title || !amount || !category || !user_id || !home) return;
+
+    const newExpense = {
+      title: title.toString(),
+      amount: Number.parseFloat(amount.toString()),
+      category: category.toString(),
+      user: user_id,
+      home: home?._id,
+    };
+
+    APIExpense.createExpense(newExpense)
+      .then(({ data: { expense, message }, status }) => {
+        if (status !== STATUS_CREATED) throw new Error(message);
+        homeSocket.emit('update-expenses', updateExpenses);
+        updateExpenses();
+        onClose();
+        user_id &&
+          home &&
+          setFormData({
+            title: '',
+            amount: '',
+            category: '',
+            user: user_id,
+            home: home._id,
+          });
+        snackbar.setSuccess(message);
+      })
+      .catch((err) => snackbar.setError(err.message));
   };
 
   return (
@@ -101,22 +134,6 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
               <option value='Taxes'>Taxes</option>
               <option value='Miscellaneous'>Miscellaneous</option>
             </select>
-          </div>
-          <div className='form-group'>
-            <label htmlFor='username'>Username</label>
-            <input
-              type='text'
-              id='username'
-              name='username'
-              value={formData.username}
-              readOnly
-              style={{
-                backgroundColor: '#f2f2f2',
-                color: '#666',
-                cursor: 'not-allowed',
-              }} // Apply styling here
-              required
-            />
           </div>
           <div className='button-container expense-buttons'>
             <button type='submit'>Submit</button>

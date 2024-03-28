@@ -1,6 +1,6 @@
-import ExpenseModel from './expense-model.js'; // Import Mongoose model for expenses
-import 'dotenv/config';
 import mongoose from 'mongoose';
+import ExpenseModel from './expense-model.js';
+import 'dotenv/config';
 
 let mongoDB =
   process.env.ENV == 'PROD'
@@ -16,14 +16,10 @@ db.once('open', () => console.log('Successfully connected to MongoDB'));
 // CREATE FUNCTION
 export async function createExpense(params) {
   try {
-    console.log('Creating expense');
-    return await ExpenseModel.create({
-      title: params.title,
-      amount: params.amount,
-      category: params.category,
-      username: params.username,
-    });
+    const expense = await ExpenseModel.create(params);
+    return getExpense(expense._id);
   } catch (err) {
+    console.log(err);
     return { err };
   }
 }
@@ -31,9 +27,22 @@ export async function createExpense(params) {
 // READ FUNCTION
 export async function getExpense(expenseId) {
   try {
-    return await ExpenseModel.findById(expenseId);
+    return await ExpenseModel.findById(expenseId).populate({
+      path: 'user',
+      select: 'username',
+    });
   } catch (err) {
-    console.log(`ERROR: Could not get expense from DB.`);
+    return { err };
+  }
+}
+
+export async function getExpenses(params) {
+  try {
+    return await ExpenseModel.find(params).populate({
+      path: 'user',
+      select: 'username',
+    });
+  } catch (err) {
     return { err };
   }
 }
@@ -43,7 +52,7 @@ export async function updateExpense(expenseId, updatedFields) {
   try {
     return await ExpenseModel.findByIdAndUpdate(expenseId, updatedFields, {
       new: true,
-    });
+    }).populate({ path: 'user', select: 'username' });
   } catch (err) {
     return { err };
   }
@@ -52,8 +61,10 @@ export async function updateExpense(expenseId, updatedFields) {
 // DELETE FUNCTION
 export async function deleteExpense(expenseId) {
   try {
-    const deletedExpense = await ExpenseModel.findByIdAndDelete(expenseId);
-    return deletedExpense ? true : false;
+    const deletedExpense = await ExpenseModel.findByIdAndDelete(
+      expenseId
+    ).populate({ path: 'user', select: 'username' });
+    return deletedExpense;
   } catch (err) {
     return { err };
   }
