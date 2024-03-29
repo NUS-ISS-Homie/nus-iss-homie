@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Home } from '../@types/HomeContext';
 import { LOCAL_STORAGE_HOME_KEY } from '../configs';
-import { STATUS_OK } from '../constants';
+import { STATUS_OK, homeSocketEvents as events } from '../constants';
 import { useSnackbar } from './SnackbarContext';
 import APIHome from '../utils/api-home';
 import { useSockets } from './SocketContext';
@@ -27,6 +27,7 @@ interface IHomeContext {
   deleteHome: VoidFunction;
   acceptJoinRequest: (sender: string, callback?: VoidFunction) => void;
   acceptInvite: (admin: string, callback?: VoidFunction) => void;
+  updateHome: VoidFunction;
 }
 
 const HomeContext = createContext<IHomeContext>({
@@ -36,6 +37,7 @@ const HomeContext = createContext<IHomeContext>({
   deleteHome: () => {},
   acceptJoinRequest: (sender: string, callback?: VoidFunction) => {},
   acceptInvite: (admin: string, callback?: VoidFunction) => {},
+  updateHome: () => {},
 });
 
 export function HomeProvider({ children }: { children: React.ReactNode }) {
@@ -83,7 +85,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         if (!home || !home._id) return;
         saveHomeInStorage(home);
         setHome(home);
-        homeSocket.emit('accept-join-req', {
+        homeSocket.emit(events.ACCEPT_JOIN_REQ, {
           homeId: home._id,
           userId: sender,
         });
@@ -103,10 +105,21 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
             if (!home || !home._id) return;
             saveHomeInStorage(home);
             setHome(home);
-            homeSocket.emit('join-home', home._id);
+            homeSocket.emit(events.JOIN_HOME, home._id);
             callback && callback();
           }
         );
+      })
+      .catch((err: Error) => snackbar.setError(err.message));
+  };
+
+  const updateHome = () => {
+    if (!home) return;
+    APIHome.getHome(home._id)
+      .then(({ data: { home, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        saveHomeInStorage(home);
+        setHome(home);
       })
       .catch((err: Error) => snackbar.setError(err.message));
   };
@@ -137,6 +150,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         deleteHome,
         acceptJoinRequest,
         acceptInvite,
+        updateHome,
       }}
     >
       {children}

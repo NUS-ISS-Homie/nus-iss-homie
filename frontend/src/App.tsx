@@ -13,6 +13,7 @@ import DashboardPage from './pages/home/DashboardPage';
 import HomeJoinPage from './pages/HomeJoinPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
+import GroceryListPage from './pages/GroceryListPage';
 import ExpenseMainPage from './pages/expenses/ExpenseMainPage';
 import ChoreMainPage from './pages/chores/ChoreMainPage';
 import { useUser } from './context/UserContext';
@@ -36,6 +37,7 @@ function App() {
       ></Route>
       <Route path='/expense' element={<ExpenseMainPage />}></Route>
       <Route path='/chore' element={<ChoreMainPage />}></Route>
+      <Route path='/grocery-list' element={<GroceryListPage />} />
       <Route path='*' element={<Navigate replace to='/home' />} />
     </Routes>
   );
