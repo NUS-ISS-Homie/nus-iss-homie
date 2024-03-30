@@ -22,6 +22,7 @@ export const homeSocketEvents = {
 
   // Socket events
   UPDATE_EXPENSES: 'update-expenses',
+  UPDATE_GROCERIES: 'update-groceries',
 
   // Notification events
   SEND_NOTIFICATION: 'send-notification',
