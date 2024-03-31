@@ -93,7 +93,6 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
         // success
         addItemToList(item);
         setDialogOpen(false);
-        homeSocket.emit(events.UPDATE_GROCERIES, home?._id);
       })
       .catch((err) => {
         snackBar.setError(err.toString());
@@ -106,6 +105,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
         if (status !== STATUS_OK) throw Error(message);
         getGroceryList();
         snackBar.setSuccess(`Item ${item.name} successfully created`, 2000);
+        homeSocket.emit(events.UPDATE_GROCERIES, home?._id);
       })
       .catch((err) => {
         snackBar.setError(err.toString());
