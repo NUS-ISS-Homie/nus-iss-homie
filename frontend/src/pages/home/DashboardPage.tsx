@@ -6,7 +6,6 @@ import TenantDetails from './TenantDetails';
 import { useAuth, useHome } from '../../context/HomeContext';
 import { useSockets } from '../../context/SocketContext';
 import { homeSocketEvents as events } from '../../constants';
-import { useGroceryAuth } from '../../context/GroceryContext';
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -14,7 +13,6 @@ function DashboardPage() {
   const home = useHome();
   const homeClient = useAuth();
   const { homeSocket } = useSockets();
-  const groceryClient = useGroceryAuth();
 
   useEffect(() => {
     homeSocket.on(events.UPDATE_HOME, homeClient.updateHome);
@@ -35,9 +33,6 @@ function DashboardPage() {
       )}
       <Button onClick={() => navigate('/expense')}>Expenses</Button>
       <Button onClick={() => navigate('/grocery-list')}>Grocery List</Button>
-      <Button onClick={() => groceryClient.updateGroceries()}>
-        Test Groceries
-      </Button>
     </>
   );
 

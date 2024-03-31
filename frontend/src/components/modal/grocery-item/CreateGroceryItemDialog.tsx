@@ -25,15 +25,18 @@ import { useUser } from '../../../context/UserContext';
 import { useHome } from '../../../context/HomeContext';
 import { GroceryItem } from '../../../@types/GroceryItemContext';
 import { Unit, Category } from '../../../enums';
+import { useSockets } from '../../../context/SocketContext';
+import { homeSocketEvents as events } from '../../../constants';
 
 type CreateGroceryItemDialogProps = {
   dialogOpen: boolean;
   setDialogOpen: (isOpen: boolean) => void;
   getGroceryList: () => void;
+  updateGrocery: () => void;
 };
 
 function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
-  const { dialogOpen, setDialogOpen, getGroceryList } = props;
+  const { dialogOpen, setDialogOpen, getGroceryList, updateGrocery } = props;
   const [loading, setLoading] = useState(false);
   const [unit, setUnit] = React.useState('');
   const [category, setCategory] = React.useState('');
@@ -42,6 +45,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
   const home = useHome();
   const homeId = home ? home._id : '';
   const snackBar = useSnackbar();
+  const { homeSocket } = useSockets();
 
   const handleUnitChange = (event: SelectChangeEvent) => {
     setUnit(event.target.value as string);
@@ -89,6 +93,7 @@ function CreateGroceryItemDialog(props: CreateGroceryItemDialogProps) {
         // success
         addItemToList(item);
         setDialogOpen(false);
+        homeSocket.emit(events.UPDATE_GROCERIES, home?._id);
       })
       .catch((err) => {
         snackBar.setError(err.toString());

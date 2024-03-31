@@ -23,6 +23,9 @@ import MenuItem from '@mui/material/MenuItem';
 import { GroceryItem } from '../../../@types/GroceryItemContext';
 import { Unit, Category } from '../../../enums';
 import { useUser } from '../../../context/UserContext';
+import { useSockets } from '../../../context/SocketContext';
+import { homeSocketEvents as events } from '../../../constants';
+import { useHome } from '../../../context/HomeContext';
 
 type UpdateGroceryItemDialogProps = {
   dialogOpen: boolean;
@@ -35,6 +38,8 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
   const { dialogOpen, setDialogOpen, groceryItem, getGroceryList } = props;
   const [loading, setLoading] = useState(false);
   const [itemState, setItemState] = useState(groceryItem);
+  const home = useHome();
+  const { homeSocket } = useSockets();
 
   const handleItemChange = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target;
@@ -89,6 +94,7 @@ function UpdateGroceryItemDialog(props: UpdateGroceryItemDialogProps) {
         // success
         getGroceryList();
         setDialogOpen(false);
+        homeSocket.emit(events.UPDATE_GROCERIES, home?._id);
         snackBar.setSuccess(
           `Item ${itemState.name} successfully updated`,
           2000

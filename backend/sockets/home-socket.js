@@ -57,6 +57,7 @@ const onUpdateExpensesEvent = (io, homeId) => {
 };
 
 const onUpdateGroceriesEvent = (io, homeId) => {
+  console.log(homeId);
   io.to(homeId).emit(events.UPDATE_GROCERIES);
 };
 
