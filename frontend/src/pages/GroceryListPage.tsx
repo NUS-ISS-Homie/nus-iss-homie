@@ -36,6 +36,7 @@ function GroceryListPage() {
       ({ data: { list, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
         if (list) {
+          //success
           setGroceryList(list.items);
         }
       }
