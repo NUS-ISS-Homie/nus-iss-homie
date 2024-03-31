@@ -10,6 +10,7 @@ import { SnackbarProvider } from './context/SnackbarContext';
 import { SocketProvider } from './context/SocketContext';
 import { UserProvider } from './context/UserContext';
 import { HomeProvider } from './context/HomeContext';
+import { GroceryProvider } from './context/GroceryContext';
 
 // @ts-ignore
 
@@ -21,9 +22,11 @@ root.render(
     <ThemeProvider theme={theme}>
       <UserProvider>
         <HomeProvider>
-          <SocketProvider>
-            <App />
-          </SocketProvider>
+          <GroceryProvider>
+            <SocketProvider>
+              <App />
+            </SocketProvider>
+          </GroceryProvider>
         </HomeProvider>
       </UserProvider>
     </ThemeProvider>

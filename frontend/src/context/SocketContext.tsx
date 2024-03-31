@@ -11,10 +11,12 @@ import { useUser } from './UserContext';
 import { useAuth, useHome } from './HomeContext';
 import APIHome from '../utils/api-home';
 import { STATUS_OK, homeSocketEvents as events } from '../constants';
+import APIGroceryList from '../utils/api-grocery-list';
 
 const SocketContext = createContext({
   ...sockets,
   joinHome: (homeId: string, onFail?: VoidFunction) => {},
+  updateGrocery: (homeId: string, onFail?: VoidFunction) => {},
 });
 
 const getSession = () => {
@@ -48,6 +50,19 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
           homeClient.setHome(home);
         })
         .catch((err) => snackbar.setError(err.message));
+    },
+    [homeClient, snackbar]
+  );
+
+  const updateGrocery = useCallback(
+    (homeId: string | undefined) => {
+      if (!homeId) return null;
+      APIGroceryList.getListByHomeId(homeId).then(
+        ({ data: { list, message }, status }) => {
+          if (status !== STATUS_OK) throw new Error(message);
+          console.log(list);
+        }
+      );
     },
     [homeClient, snackbar]
   );
@@ -89,7 +104,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [joinHome, updateHome, home, user_id, homeClient, snackbar]);
 
   return (
-    <SocketContext.Provider value={{ ...sockets, joinHome: joinHome }}>
+    <SocketContext.Provider
+      value={{ ...sockets, joinHome: joinHome, updateGrocery: updateGrocery }}
+    >
       {children}
     </SocketContext.Provider>
   );
