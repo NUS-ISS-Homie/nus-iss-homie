@@ -20,6 +20,7 @@ import { NOTIFICATION_INVITE, STATUS_CREATED, STATUS_OK } from '../constants';
 import { AuthClient } from '../utils/auth-client';
 import APINotification from '../utils/api-notification';
 import { useSockets } from '../context/SocketContext';
+import { homeSocketEvents as events } from '../constants';
 
 export enum HomeFormType {
   Register = 'Register',
@@ -110,7 +111,7 @@ function HomeRegisterPage(props: { type: HomeFormType }) {
   const navigate = useNavigate();
   const snackbar = useSnackbar();
   const { user_id, username } = useUser();
-  const { joinHome } = useSockets();
+  const { joinHome, homeSocket } = useSockets();
   const homeClient = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -147,6 +148,9 @@ function HomeRegisterPage(props: { type: HomeFormType }) {
       .then(({ data, status }) => {
         if (status !== STATUS_CREATED)
           throw new Error('Failed to send invites');
+        invites.recipients.forEach((r) =>
+          homeSocket.emit(events.SEND_NOTIFICATION, r)
+        );
         snackbar.setSuccess('Invitations sent');
       })
       .catch((err) => snackbar.setError(err.message));

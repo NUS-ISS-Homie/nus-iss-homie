@@ -32,7 +32,6 @@ enum LoginStatus {
 
 function LoginPage() {
   const [loading, setLoading] = useState(false);
-  const [passwordShown, setPasswordShown] = useState(false);
   const [loginStatus, setLoginStatus] = useState<LoginStatus>(
     LoginStatus.IN_PROGRESS
   );
@@ -61,27 +60,25 @@ function LoginPage() {
     };
 
     setLoading(true);
-    console.log(body);
     AuthClient.login(body)
       .then(({ data: { username, user_id, message }, status }) => {
         if (status !== STATUS_OK) throw new Error(message);
         authClient.setUser({ username, user_id });
         saveUserToLocalStorage({ username, user_id });
 
-        // Setup socket
-        homeSocket.auth = { userId: user_id };
-        homeSocket.connect();
-
         // Setup home
-
         APIHome.getHomeByUserId(user_id).then(
           ({ data: { home, message }, status }) => {
             switch (status) {
               case STATUS_OK:
                 homeClient.setHome(home);
+                homeSocket.auth = { userId: user_id, homeId: home._id };
+                homeSocket.connect();
                 break;
               case STATUS_NOT_FOUND:
                 homeClient.setHome(null);
+                homeSocket.auth = { userId: user_id };
+                homeSocket.connect();
                 break;
               default:
                 throw new Error(message);
@@ -161,7 +158,7 @@ function LoginPage() {
                 id='password'
                 label='Password'
                 name='password'
-                type={passwordShown ? 'text' : 'password'}
+                type='password'
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>

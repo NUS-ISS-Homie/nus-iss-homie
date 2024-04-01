@@ -1,7 +1,12 @@
 import React from 'react';
 import { Notification } from '../../../@types/Notification';
 import { Box, Button, DialogActions, Divider, Typography } from '@mui/material';
-import { NOTIFICATION_INVITE, NOTIFICATION_JOIN_REQ, NOTIFICATION_CHORE_REMINDER, NOTIFICATION_NEW_CHORE } from '../../../constants';
+import {
+  NOTIFICATION_INVITE,
+  NOTIFICATION_JOIN_REQ,
+  NOTIFICATION_CHORE_REMINDER,
+  NOTIFICATION_NEW_CHORE,
+} from '../../../constants';
 import { useAuth } from '../../../context/HomeContext';
 
 function NotificationDetails(props: {
@@ -44,7 +49,6 @@ function NotificationDetails(props: {
                     );
                     break;
                   case NOTIFICATION_INVITE:
-                    console.log('THIS IS INVITE');
                     homeClient.acceptInvite(sender._id, deleteNotification);
                     break;
                 }
@@ -55,20 +59,21 @@ function NotificationDetails(props: {
           </DialogActions>
         </>
       )}
-      {(message.title === NOTIFICATION_CHORE_REMINDER) || (message.title === NOTIFICATION_NEW_CHORE) && (
-        <>
-        <Divider />
-        <DialogActions>
-        <Button
-          color='primary'
-          variant='outlined'
-          onClick={deleteNotification}
-        >
-          Close
-        </Button>
-        </DialogActions>
-      </>
-      )}
+      {message.title === NOTIFICATION_CHORE_REMINDER ||
+        (message.title === NOTIFICATION_NEW_CHORE && (
+          <>
+            <Divider />
+            <DialogActions>
+              <Button
+                color='primary'
+                variant='outlined'
+                onClick={deleteNotification}
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </>
+        ))}
     </Box>
   );
 }

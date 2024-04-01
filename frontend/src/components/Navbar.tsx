@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -13,12 +13,13 @@ import {
 import { MailRounded, SettingsRounded as Settings } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '../context/UserContext';
-import { useAuth as useHomeAuth } from '../context/HomeContext';
+import { useHome, useAuth as useHomeAuth } from '../context/HomeContext';
 import ConfirmationDialog from './modal/ConfirmationDialog';
 import ChangeUsernameDialog from './modal/ChangeUsernameDialog';
 import ChangePasswordDialog from './modal/ChangePasswordDialog';
 import NotificationsDialog from './modal/notification/NotificationsDialog';
-import { useSockets } from '../context/SocketContext';
+import { removeSocketInStorage, useSockets } from '../context/SocketContext';
+import { homeSocketEvents as events } from '../constants';
 
 function Navbar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -33,6 +34,8 @@ function Navbar() {
 
   const user = useUser();
   const authClient = useAuth();
+
+  const home = useHome();
   const homeClient = useHomeAuth();
   const { homeSocket } = useSockets();
   const navigate = useNavigate();
@@ -58,23 +61,35 @@ function Navbar() {
 
   const handleDeleteUser = () => {
     authClient.deleteUser();
+    homeSocket.emit(events.LEAVE_HOME, home?._id);
     homeClient.leaveHome();
-    homeSocket.emit('delete-session', homeSocket.auth);
+    homeSocket.emit(events.DELETE_SESSION, homeSocket.auth);
     homeSocket.disconnect();
+    removeSocketInStorage();
     navigate('/');
   };
 
   const handleLogout = () => {
     authClient.logout();
     homeClient.setHome(null);
-    homeSocket.emit('delete-session', homeSocket.auth);
+    homeSocket.emit(events.DELETE_SESSION, homeSocket.auth);
     homeSocket.disconnect();
+    removeSocketInStorage();
     navigate('/');
   };
 
-  homeSocket.on('notify', () => {
-    setBadgeInvisible(false);
-  });
+  const handleLeaveHome = () => {
+    homeSocket.emit(events.LEAVE_HOME, home?._id);
+    homeClient.leaveHome();
+  };
+
+  useEffect(() => {
+    const onNotify = () => setBadgeInvisible(false);
+    homeSocket.on(events.NOTIFY, onNotify);
+    return () => {
+      homeSocket.off(events.NOTIFY, onNotify);
+    };
+  }, [homeSocket]);
 
   return (
     <AppBar
@@ -134,6 +149,9 @@ function Navbar() {
           <MenuItem onClick={handleDeleteAccount} sx={{ color: 'red' }}>
             Delete account
           </MenuItem>
+          {home && home.adminUser._id !== user.user_id && (
+            <MenuItem onClick={handleLeaveHome}> Leave Home</MenuItem>
+          )}
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
       </Toolbar>
