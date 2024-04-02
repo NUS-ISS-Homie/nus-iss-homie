@@ -59,21 +59,21 @@ function NotificationDetails(props: {
           </DialogActions>
         </>
       )}
-      {message.title === NOTIFICATION_CHORE_REMINDER ||
-        (message.title === NOTIFICATION_NEW_CHORE && (
-          <>
-            <Divider />
-            <DialogActions>
-              <Button
-                color='primary'
-                variant='outlined'
-                onClick={deleteNotification}
-              >
-                Close
-              </Button>
-            </DialogActions>
-          </>
-        ))}
+      {(message.title === NOTIFICATION_CHORE_REMINDER ||
+        message.title === NOTIFICATION_NEW_CHORE) && (
+        <>
+          <Divider />
+          <DialogActions>
+            <Button
+              color='primary'
+              variant='outlined'
+              onClick={deleteNotification}
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </>
+      )}
     </Box>
   );
 }
