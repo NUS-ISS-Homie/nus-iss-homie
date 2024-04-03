@@ -17,12 +17,10 @@ const DeletePopup: React.FC<DeletePopupProps> = ({
   };
 
   return (
-    <div className='popup-overlay' style={{zIndex : 1}}>
+    <div className='popup-overlay' style={{ zIndex: 1 }}>
       <div className='popup'>
         <h2>Delete Chore</h2>
-        <p>
-          Are you sure you want to delete the chore with ID "{choreId}"?
-        </p>
+        <p>Are you sure you want to delete the chore with ID "{choreId}"?</p>
         <div className='button-container expense-buttons'>
           <button onClick={handleDelete}>Delete</button>
           <button onClick={onClose}>Cancel</button>
