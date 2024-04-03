@@ -56,6 +56,11 @@ const onUpdateExpensesEvent = (io, homeId) => {
   io.to(homeId).emit(events.UPDATE_EXPENSES);
 };
 
+const onUpdateGroceriesEvent = (io, homeId) => {
+  console.log(homeId);
+  io.to(homeId).emit(events.UPDATE_GROCERIES);
+};
+
 const createEventListeners = (socket, io) => {
   socket.on(events.DELETE_SESSION, ({ sessionId }) =>
     sessionStore.removeSession(sessionId)
@@ -78,6 +83,10 @@ const registerHomeEvents = (socket, io) => {
 
   socket.on(events.UPDATE_EXPENSES, (homeId) =>
     onUpdateExpensesEvent(io, homeId)
+  );
+
+  socket.on(events.UPDATE_GROCERIES, (homeId) =>
+    onUpdateGroceriesEvent(io, homeId)
   );
 };
 

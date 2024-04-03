@@ -11,6 +11,7 @@ import { useUser } from './UserContext';
 import { useAuth, useHome } from './HomeContext';
 import APIHome from '../utils/api-home';
 import { STATUS_OK, homeSocketEvents as events } from '../constants';
+import APIGroceryList from '../utils/api-grocery-list';
 
 const SocketContext = createContext({
   ...sockets,

@@ -18,6 +18,8 @@ import UpdateGroceryItemDialog from '../components/modal/grocery-item/UpdateGroc
 import APIGroceryList from '../utils/api-grocery-list';
 import { useHome } from '../context/HomeContext';
 import { useNavigate } from 'react-router-dom';
+import { useSockets } from '../context/SocketContext';
+import { homeSocketEvents as events } from '../constants';
 
 type ItemProps = {
   item: GroceryItem;
@@ -31,6 +33,7 @@ function GroceryItemCard(props: ItemProps) {
   const snackBar = useSnackbar();
   const home = useHome();
   const navigate = useNavigate();
+  const { homeSocket } = useSockets();
 
   const handleOpenUpdateItem = (event: React.MouseEvent<HTMLElement>) => {
     setUpdateItemDialogOpen(true);
@@ -62,6 +65,7 @@ function GroceryItemCard(props: ItemProps) {
         if (status !== STATUS_OK) throw Error(message);
         setConfirmDeleteDialogOpen(false);
         navigate('/grocery-list');
+        homeSocket.emit(events.UPDATE_GROCERIES, home?._id);
       })
       .catch((err) => {
         snackBar.setError(err.toString());
