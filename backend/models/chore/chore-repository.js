@@ -13,6 +13,16 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
 
+//READ FUNCTION
+export async function getAllChores() {
+  try {
+    return await ChoreModel.find();
+  } catch (err) {
+    console.log(`ERROR: Could not get chores from DB.`);
+    return { err };
+  }
+}
+
 // CREATE FUNCTION
 export async function createChore(params) {
   try {

@@ -4,10 +4,28 @@ import {
   ormGetChore as _getChore,
   ormUpdateChore as _updateChore,
   ormDeleteChore as _deleteChore,
+  ormGetAllChores as _getAllChores
 } from '../models/chore/chore-orm.js';
 import mongoose from 'mongoose';
 
 export const entity = 'chore';
+
+export async function getAllChores(_,res) {
+  try {
+    const chores = await _getAllChores(); // Call the function to fetch all chores from the database
+    if (!chores || chores.length === 0) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: 'No chores found' });
+    }
+    return res.status(constants.STATUS_CODE_OK).json({ chores });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
 
 export async function createChore(req, res) {
   try {
