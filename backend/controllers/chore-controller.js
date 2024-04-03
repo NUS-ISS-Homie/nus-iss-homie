@@ -4,13 +4,14 @@ import {
   ormGetChore as _getChore,
   ormUpdateChore as _updateChore,
   ormDeleteChore as _deleteChore,
-  ormGetAllChores as _getAllChores
+  ormGetAllChores as _getAllChores,
+  ormGetAllChoresDueToday as _getAllChoresDueToday,
 } from '../models/chore/chore-orm.js';
 import mongoose from 'mongoose';
 
 export const entity = 'chore';
 
-export async function getAllChores(_,res) {
+export async function getAllChores(_, res) {
   try {
     const chores = await _getAllChores(); // Call the function to fetch all chores from the database
     if (!chores || chores.length === 0) {
@@ -139,5 +140,15 @@ export async function deleteChore(req, res) {
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
+export async function getAllChoresDueToday(_, res) {
+  try {
+    const choresDueToday = await _getAllChoresDueToday();
+    //console.log('choresDueToday: ', choresDueToday);
+    return choresDueToday;
+  } catch (err) {
+    console.error(err);
   }
 }
