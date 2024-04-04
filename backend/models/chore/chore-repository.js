@@ -1,4 +1,4 @@
-import ChoreModel from './chore-model.js'; // Import Mongoose model for chore
+import ChoreModel from './chore-model.js';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 
@@ -13,26 +13,13 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
 
-//READ FUNCTION
-export async function getAllChores() {
-  try {
-    return await ChoreModel.find();
-  } catch (err) {
-    console.log(`ERROR: Could not get chores from DB.`);
-    return { err };
-  }
-}
-
 // CREATE FUNCTION
 export async function createChore(params) {
   try {
-    console.log('Creating chore');
-    return await ChoreModel.create({
-      title: params.title,
-      assignedTo: params.assignedTo,
-      dueDate: params.dueDate,
-    });
+    const chore = await ChoreModel.create(params);
+    return getChore(chore._id);
   } catch (err) {
+    console.log(err);
     return { err };
   }
 }
@@ -40,9 +27,54 @@ export async function createChore(params) {
 // READ FUNCTION
 export async function getChore(choreId) {
   try {
-    return await ChoreModel.findById(choreId);
+    return await ChoreModel.findById(choreId).populate({
+      path: 'assignedTo',
+      select: 'username',
+    });
   } catch (err) {
     console.log(`ERROR: Could not get chore from DB.`);
+    return { err };
+  }
+}
+
+// READ FUNCTION
+export async function getAllChoresInHome(params) {
+  try {
+    return await ChoreModel.find(params).populate({
+      path: 'assignedTo',
+      select: 'username',
+    });
+  } catch (err) {
+    console.log(`ERROR: Could not get chores from DB.`);
+    return { err };
+  }
+}
+
+// READ FUNCTION
+export async function getAllChoresDueToday() {
+  try {
+    const today = new Date();
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const endOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
+    return await ChoreModel.find({
+      dueDate: {
+        $gte: startOfToday,
+        $lt: endOfToday,
+      },
+    }).populate({
+      path: 'assignedTo',
+      select: 'username',
+    });
+  } catch (err) {
+    console.log(`ERROR: Could not get chores from DB.`);
     return { err };
   }
 }
@@ -52,7 +84,7 @@ export async function updateChore(choreId, updatedFields) {
   try {
     return await ChoreModel.findByIdAndUpdate(choreId, updatedFields, {
       new: true,
-    });
+    }).populate({ path: 'assignedTo', select: 'username' });
   } catch (err) {
     return { err };
   }
@@ -61,21 +93,12 @@ export async function updateChore(choreId, updatedFields) {
 // DELETE FUNCTION
 export async function deleteChore(choreId) {
   try {
-    const deletedChore = await ChoreModel.findByIdAndDelete(choreId);
-    return deletedChore ? true : false;
+    const deletedChore = await ChoreModel.findByIdAndDelete(choreId).populate({
+      path: 'assignedTo',
+      select: 'username',
+    });
+    return deletedChore;
   } catch (err) {
-    return { err };
-  }
-}
-
-// Function to get all chores due today
-export async function getAllChoresDueToday() {
-  try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
-    return await ChoreModel.find({ dueDate: { $eq: today } });
-  } catch (err) {
-    console.log(`ERROR: Could not get chores due today from DB.`);
     return { err };
   }
 }

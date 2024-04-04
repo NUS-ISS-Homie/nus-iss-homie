@@ -1,8 +1,6 @@
-import { getAllChoresDueToday } from '../controllers/chore-controller.js';
-import { getUser } from '../models/user/user-repository.js';
-import { getHomeModelByUserId } from '../models/home/home-repository.js';
 import axios from 'axios';
 import cron from 'node-cron';
+import { getChores } from '../controllers/chore-controller';
 
 const URI_BACKEND = 'http://localhost:8000';
 const PREFIX_NOTIF_SVC = '/api/notification';
@@ -12,21 +10,14 @@ const NOTIFICATION_CHORE_REMINDER = '[CHORE REMINDER]';
 
 export const cronJob = cron.schedule('0 0 * * *', async () => {
   try {
-    const choresDueToday = await getAllChoresDueToday();
+    const choresDueToday = await getChores();
     // Loop through the chores and send reminders
     choresDueToday.forEach(async (chore) => {
-      const username = chore.assignedTo;
-      const user = await getUser(username);
-      if (user) {
-        const userId = user._id; // Extracting the user ID from the response
-        const home = await getHomeModelByUserId(userId);
-        const notificationMessage = `You have a chore: ${chore.title}, due today.`;
-
-        // Send notification to the user
-        await sendNotification(userId, notificationMessage, home.adminUser._id);
-      } else {
-        console.error(`Failed to retrieve user ID for ${username}`);
-      }
+      const userId = chore.assignedTo._id;
+      const home = chore.home;
+      const notificationMessage = `You have a chore: ${chore.title}, due today.`;
+      // Send notification to the user
+      await sendNotification(userId, notificationMessage, home.adminUser._id);
     });
   } catch (error) {
     console.error('Error sending chore reminders:', error);

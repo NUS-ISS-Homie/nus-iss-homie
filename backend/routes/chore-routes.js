@@ -2,19 +2,17 @@ import express from 'express';
 import {
   createChore,
   getChore,
+  getChores,
   updateChore,
   deleteChore,
-  getAllChores,
-  getAllChoresDueToday,
 } from '../controllers/chore-controller.js';
 
 const router = express.Router();
 
 // Controller will contain all the Chore-defined Routes
-router.get('/', getAllChores);
-router.get('/due-today', getAllChoresDueToday);
-router.post('/create', createChore);
+router.post('/', createChore);
 router.get('/:choreId', getChore);
+router.get('/', getChores);
 router.put('/:choreId', updateChore);
 router.delete('/:choreId', deleteChore);
 

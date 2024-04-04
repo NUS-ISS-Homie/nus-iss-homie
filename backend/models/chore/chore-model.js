@@ -8,16 +8,19 @@ const ChoreSchema = new Schema({
     required: true,
   },
   assignedTo: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: 'UserModel',
     required: true,
   },
   dueDate: {
     type: Date,
     required: true,
   },
+  home: { type: Schema.Types.ObjectId, ref: 'HomeModel', required: true },
   requestSwapNotificationId: {
-    type: String,
-    default: '',
+    type: Schema.Types.ObjectId,
+    ref: 'NotificationModel',
+    default: null,
   },
 });
 
