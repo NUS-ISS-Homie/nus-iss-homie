@@ -6,8 +6,11 @@ import {
   NOTIFICATION_JOIN_REQ,
   NOTIFICATION_CHORE_REMINDER,
   NOTIFICATION_NEW_CHORE,
+  NOTIFICATION_CHORE_SWAP_REQUEST,
+  NOTIFICATION_CHORE_SWAP_REQUEST_RESULT,
 } from '../../../constants';
 import { useAuth } from '../../../context/HomeContext';
+import { useChoreUtil } from '../../../utils/ChoreUtil';
 
 function NotificationDetails(props: {
   notification: Notification;
@@ -19,6 +22,8 @@ function NotificationDetails(props: {
   } = props;
 
   const homeClient = useAuth();
+
+  const { updateChores } = useChoreUtil();
 
   return (
     <Box padding='1rem' width='600px'>
@@ -60,7 +65,8 @@ function NotificationDetails(props: {
         </>
       )}
       {(message.title === NOTIFICATION_CHORE_REMINDER ||
-        message.title === NOTIFICATION_NEW_CHORE) && (
+        message.title === NOTIFICATION_NEW_CHORE ||
+        message.title === NOTIFICATION_CHORE_SWAP_REQUEST_RESULT) && (
         <>
           <Divider />
           <DialogActions>
@@ -70,6 +76,32 @@ function NotificationDetails(props: {
               onClick={deleteNotification}
             >
               Close
+            </Button>
+          </DialogActions>
+        </>
+      )}
+      {message.title === NOTIFICATION_CHORE_SWAP_REQUEST && (
+        <>
+          <Divider />
+          <DialogActions>
+            <Button
+              color='primary'
+              variant='outlined'
+              onClick={() => {
+                updateChores(props.notification, false);
+                deleteNotification();
+              }}
+            >
+              Decline
+            </Button>
+            <Button
+              variant='contained'
+              onClick={() => {
+                updateChores(props.notification, true);
+                deleteNotification();
+              }}
+            >
+              Accept
             </Button>
           </DialogActions>
         </>

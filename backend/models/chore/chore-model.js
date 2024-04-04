@@ -15,6 +15,10 @@ const ChoreSchema = new Schema({
     type: Date,
     required: true,
   },
+  requestSwapNotificationId: {
+    type: String,
+    default: '',
+  },
 });
 
 export default mongoose.model('ChoreModel', ChoreSchema);

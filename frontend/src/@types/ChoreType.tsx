@@ -3,4 +3,5 @@ export interface Chore {
   title: string;
   assignedTo: string;
   dueDate: Date;
+  requestSwapNotificationId: String;
 }

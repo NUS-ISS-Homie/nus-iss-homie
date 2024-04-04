@@ -16,6 +16,7 @@ import APINotification from '../../utils/api-notification';
 import { NOTIFICATION_NEW_CHORE, STATUS_CREATED } from '../../constants';
 import { AuthClient } from '../../utils/auth-client';
 import { useUser } from '../../context/UserContext';
+import SwapChoreList from '../../components/modal/chores/SwapChoreListPopUp';
 
 function ChoreMainPage() {
   // State variables for managing chores and pop-up visibility
@@ -26,9 +27,13 @@ function ChoreMainPage() {
   const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
   const [refreshChoreList, setRefreshChoreList] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
+  const [isSwapChoreListOpen, setIsSwapChoreListOpen] = useState(false);
   const home = useHome();
   const snackbar = useSnackbar();
-  const { user_id } = useUser();
+  const { user_id, username } = useUser();
+  const isAdmin = home?.adminUser?._id === user_id && user_id !== null;
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
 
   // Function to fetch chores from the backend API
 
@@ -47,7 +52,7 @@ function ChoreMainPage() {
       .catch((error) => {
         console.error('Error fetching chores:', error);
       });
-  }, [refreshChoreList]);
+  }, [refreshChoreList, home]);
 
   const handleSendNotification = async (
     recipientIds: string[],
@@ -160,7 +165,7 @@ function ChoreMainPage() {
     <div>
       <h1>Chore Tracker</h1>
       <div className='expense-buttons add-expense-container'>
-        <button onClick={openCreatePopup}>Add Chore</button>
+        {isAdmin && <button onClick={openCreatePopup}>Add Chore</button>}
       </div>
       <FullCalendar
         contentHeight='auto'
@@ -198,6 +203,11 @@ function ChoreMainPage() {
           openEditPopup={openEditPopup}
           setIsViewDetailsOpen={setIsViewDetailsOpen}
           openDeletePopup={openDeletePopup}
+          setIsSwapChoreListOpen={setIsSwapChoreListOpen}
+          user_id={user_id}
+          username={username}
+          home={home}
+          currentDate={currentDate}
         />
       )}
       {isCreateOpen && (
@@ -220,6 +230,19 @@ function ChoreMainPage() {
           choreId={selectedChore._id} // Pass the _id instead of the entire chore
           onClose={() => setDeleteOpen(false)}
           onDelete={handleDelete}
+        />
+      )}
+      {isSwapChoreListOpen && (
+        <SwapChoreList
+          selectedChore={selectedChore}
+          chores={chores}
+          setIsSwapChoreListOpen={setIsSwapChoreListOpen}
+          currentDate={currentDate}
+          home={home}
+          user_id={user_id}
+          snackbar={snackbar}
+          username={username}
+          setChores={setChores}
         />
       )}
     </div>

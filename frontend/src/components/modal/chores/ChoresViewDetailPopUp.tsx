@@ -1,12 +1,15 @@
 import React from 'react';
-import { useHome } from '../../../context/HomeContext';
-import { useUser } from '../../../context/UserContext';
 
 interface choreViewDetailProps {
   selectedChore: any;
   openEditPopup: any;
   setIsViewDetailsOpen: any;
   openDeletePopup: any;
+  setIsSwapChoreListOpen: any;
+  user_id: any;
+  username: any;
+  home: any;
+  currentDate: any;
 }
 
 const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
@@ -14,10 +17,19 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
   openEditPopup,
   setIsViewDetailsOpen,
   openDeletePopup,
+  setIsSwapChoreListOpen,
+  user_id,
+  username,
+  home,
+  currentDate,
 }) => {
-  const home = useHome();
-  const { user_id } = useUser();
   const isAdmin = home?.adminUser?._id === user_id && user_id !== null;
+  const validRequestForSwap =
+    selectedChore.assignedTo === username &&
+    new Date(selectedChore.dueDate) >= currentDate;
+  console.log(new Date(selectedChore.dueDate));
+  console.log(new Date());
+  console.log(selectedChore.dueDate >= new Date());
   return (
     <div className='popup-overlay' style={{ zIndex: 1 }}>
       <div className='popup' style={{ position: 'relative' }}>
@@ -48,14 +60,16 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
         {/* Edit and delete buttons (conditionally rendered) */}
         {selectedChore && (
           <div className='expense-buttons'>
-            <button
-              onClick={() => {
-                openEditPopup(selectedChore);
-                setIsViewDetailsOpen(false); // Close the modal after opening the edit popup
-              }}
-            >
-              Edit
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  openEditPopup(selectedChore);
+                  setIsViewDetailsOpen(false); // Close the modal after opening the edit popup
+                }}
+              >
+                Edit
+              </button>
+            )}
             {isAdmin && (
               <button
                 onClick={() => {
@@ -64,6 +78,16 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
                 }}
               >
                 Delete
+              </button>
+            )}
+            {validRequestForSwap && (
+              <button
+                onClick={() => {
+                  setIsSwapChoreListOpen(true);
+                  setIsViewDetailsOpen(false); // Close the modal after opening the edit popup
+                }}
+              >
+                Swap Chore
               </button>
             )}
           </div>
