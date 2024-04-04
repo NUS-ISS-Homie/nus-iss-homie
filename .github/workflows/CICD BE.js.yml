@@ -11,22 +11,43 @@ on:
 
 jobs:
   build:
-    runs-on: [backend] # Specify the label of the desired runner here
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
+    runs-on: [BE] # Specify the label of the desired runner here
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm ci
-        working-directory: backend
-      - run: npm run build --if-present
-        working-directory: backend
-      - run: sudo pm2 restart 0
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      - name: Login to docker hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker Image
+        run: docker build -t zephan99/homies  .
+      - name: Publish Image to docker hub
+        run: docker push zephan99/homies:latest
+
+  deploy:
+    needs: build
+    runs-on: [BE]
+    steps:
+      - name: Pull image from docker hub
+        run: docker pull zephan99/homies
+      - name: Delete old container
+        run: docker rm -f nodejs-app-container
+      - name: Run Docker Container
+        run:
+          docker run -d -p 4000:4000 --name nodejs-app-container -e MONGO_PASSWORD='${{ secrets.MONGO_PW }}' zephan99/homies
+
+          # strategy:
+    #   matrix:
+    #     node-version: [16.x]
+    #     # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    # steps:
+    #   - uses: actions/checkout@v3
+    #   - name: Use Node.js ${{ matrix.node-version }}
+    #     uses: actions/setup-node@v3
+    #     with:
+    #       node-version: ${{ matrix.node-version }}
+    #       cache: 'npm'
+    #   - run: npm ci
+    #     working-directory: backend
+    #   - run: npm run build --if-present
+    #     working-directory: backend
+    #   - run: sudo pm2 restart 0

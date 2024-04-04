@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: [frontend]
+    runs-on: [FE]
 
     strategy:
       matrix:
