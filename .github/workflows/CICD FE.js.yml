@@ -22,7 +22,7 @@ jobs:
       #   run: sudo docker buildx create --use
 
       - name: Build Docker Image
-        run: sudo docker buildx build -t TAG --annotation "zephan99/react_homies" --push .
+        run: sudo docker buildx build --tag "zephan99/react_homies" --push .
 
         # run: sudo docker build -t zephan99/react_homies .
         working-directory: frontend
