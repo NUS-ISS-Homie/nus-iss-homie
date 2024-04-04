@@ -19,7 +19,7 @@ jobs:
       - name: Login to docker hub
         run: sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker Image
-        run: sudo DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --tag zephan99/react_homies .
+        run: sudo docker build -t zephan99/react_homies .
         working-directory: frontend
 
       - name: Publish Image to docker hub
