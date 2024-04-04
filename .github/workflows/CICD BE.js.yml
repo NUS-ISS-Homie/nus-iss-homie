@@ -19,6 +19,8 @@ jobs:
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker Image
         run: docker build -t zephan99/homies  .
+        working-directory: backend
+
       - name: Publish Image to docker hub
         run: docker push zephan99/homies:latest
 
