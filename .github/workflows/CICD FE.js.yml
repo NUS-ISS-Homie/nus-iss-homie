@@ -18,8 +18,13 @@ jobs:
         uses: actions/checkout@v4
       - name: Login to docker hub
         run: sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Set up Docker Buildx
+        run: sudo docker buildx create --use
+
       - name: Build Docker Image
-        run: sudo docker build -t zephan99/react_homies .
+        run: sudo docker buildx build -t zephan99/react_homies .
+
+        # run: sudo docker build -t zephan99/react_homies .
         working-directory: frontend
 
       - name: Publish Image to docker hub
