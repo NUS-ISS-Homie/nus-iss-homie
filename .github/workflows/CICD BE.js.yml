@@ -32,7 +32,7 @@ jobs:
         run: docker rm -f nodejs-app-container
       - name: Run Docker Container
         run:
-          docker run -d -p 4000:4000 --name nodejs-app-container -e MONGO_PASSWORD='${{ secrets.MONGO_PW }}' zephan99/homies
+          docker run -d -p 8000:8000 --name nodejs-app-container -e MONGO_PASSWORD='${{ secrets.MONGO_PW }}' zephan99/homies
 
           # strategy:
     #   matrix:
