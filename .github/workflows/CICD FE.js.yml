@@ -18,21 +18,21 @@ jobs:
       - name: Login to docker hub
         run: sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker Image
-        run: docker build -t zephan99/react_homies .
+        run: sudo docker build -t zephan99/react_homies .
         working-directory: frontend
 
       - name: Publish Image to docker hub
-        run: docker push zephan99/react_homies:latest
+        run: sudo docker push zephan99/react_homies:latest
 
   deploy:
     needs: build
     runs-on: [FE]
     steps:
       - name: Pull image from docker hub
-        run: docker pull zephan99/react_homies
+        run: sudo docker pull zephan99/react_homies
       - name: Delete old container
-        run: docker rm -f reactjs-app-container
+        run: sudo docker rm -f reactjs-app-container
       - name: Run Docker Container
-        run: docker run -d -p 3000:3000 --name reactjs-app-container zephan99/react_homies
+        run: sudo docker run -d -p 3000:3000 --name reactjs-app-container zephan99/react_homies
 #       - run: npm run build
 #         working-directory: frontend
