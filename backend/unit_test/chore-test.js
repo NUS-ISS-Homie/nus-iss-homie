@@ -79,7 +79,20 @@ describe('Chore API CRUD', () => {
     });
   });
 
-  // Add more test cases for other CRUD operations (GET, PUT, DELETE) as neededs
+  // Add more test cases for other CRUD operations (GET, PUT, DELETE) as needed
+  describe('GET /api/chore', () => {
+    it('should retrieve all chores', async () => {
+      // Make a request to fetch all chores
+      const res = await chai.request(app).get(`/api/chore`);
+
+      // Assertions
+      chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
+      chai.expect(res.body.chores).to.be.an('array');
+      chai.expect(res.body.chores).to.have.length.greaterThan(0); // Ensure at least one chore is returned
+      // You can add more specific assertions based on your expected data structure
+    });
+  });
+
   describe('GET /api/chore/:id', () => {
     it('should retrieve a specific chore by ID', async () => {
       const chore = await ChoreModel.findOne({ title: 'Chore 1' });

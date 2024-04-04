@@ -55,12 +55,10 @@ export async function createGroceryItem(req, res) {
           .status(constants.STATUS_CODE_BAD_REQUEST)
           .json({ message: 'Could not create a new grocery item!' });
       } else {
-        return res
-          .status(constants.STATUS_CODE_CREATED)
-          .json({
-            item: resp,
-            message: constants.SUCCESS_CREATE(entity, name),
-          });
+        return res.status(constants.STATUS_CODE_CREATED).json({
+          item: resp,
+          message: constants.SUCCESS_CREATE(entity, name),
+        });
       }
     } else {
       return res

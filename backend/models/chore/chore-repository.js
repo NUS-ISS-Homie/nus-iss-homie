@@ -13,6 +13,16 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
 
+//READ FUNCTION
+export async function getAllChores() {
+  try {
+    return await ChoreModel.find();
+  } catch (err) {
+    console.log(`ERROR: Could not get chores from DB.`);
+    return { err };
+  }
+}
+
 // CREATE FUNCTION
 export async function createChore(params) {
   try {
@@ -54,6 +64,18 @@ export async function deleteChore(choreId) {
     const deletedChore = await ChoreModel.findByIdAndDelete(choreId);
     return deletedChore ? true : false;
   } catch (err) {
+    return { err };
+  }
+}
+
+// Function to get all chores due today
+export async function getAllChoresDueToday() {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+    return await ChoreModel.find({ dueDate: { $eq: today } });
+  } catch (err) {
+    console.log(`ERROR: Could not get chores due today from DB.`);
     return { err };
   }
 }

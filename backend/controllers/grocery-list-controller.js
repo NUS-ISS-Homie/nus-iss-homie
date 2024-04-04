@@ -126,12 +126,10 @@ export async function deleteFromList(req, res) {
         .json({ message: msg.FAIL_DATABASE_ERROR });
     }
 
-    return res
-      .status(msg.STATUS_CODE_OK)
-      .json({
-        list: updatedList,
-        message: msg.SUCCESS_ACTION('removed from', entity),
-      });
+    return res.status(msg.STATUS_CODE_OK).json({
+      list: updatedList,
+      message: msg.SUCCESS_ACTION('removed from', entity),
+    });
   } catch (err) {
     console.log('Error grocery list: ' + err);
     return res.status(msg.STATUS_CODE_SERVER_ERROR).json({ message: err });

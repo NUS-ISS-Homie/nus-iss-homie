@@ -10,6 +10,7 @@ import choreRoutes from './routes/chore-routes.js';
 import groceryItemRoutes from './routes/grocery-item-routes.js';
 import groceryListRoutes from './routes/grocery-list-routes.js';
 import socket from './controllers/socket-controller.js';
+import { cronJob } from './cron/sendDailyChoreReminder.js';
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -18,6 +19,8 @@ app.use(cors()); // config cors so that front-end can use
 app.options('*', cors());
 
 socket(app);
+
+cronJob.start();
 
 app.get('/', (req, res) => {
   res.send('Hello World from Homie!');
