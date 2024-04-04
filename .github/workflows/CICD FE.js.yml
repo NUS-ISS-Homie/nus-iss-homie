@@ -1,5 +1,6 @@
 # # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+#
 
 name: CICD FE1
 
@@ -18,7 +19,7 @@ jobs:
       - name: Login to docker hub
         run: sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker Image
-        run: sudo docker build -t zephan99/react_homies .
+        run: sudo docker buildx build -t zephan99/react_homies .
         working-directory: frontend
 
       - name: Publish Image to docker hub

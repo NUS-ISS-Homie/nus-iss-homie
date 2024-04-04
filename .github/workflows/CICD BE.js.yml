@@ -1,55 +1,55 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: CICD BE1
+# name: CICD BE1
 
-on:
-  push:
-    branches: ['main', 'HOMIE7-24-Setup-CD']
-  pull_request:
-    branches: ['main', 'HOMIE7-24-Setup-CD']
+# on:
+#   push:
+#     branches: ['main', 'HOMIE7-24-Setup-CD']
+#   pull_request:
+#     branches: ['main', 'HOMIE7-24-Setup-CD']
 
-jobs:
-  build:
-    runs-on: [BE] # Specify the label of the desired runner here
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-      - name: Login to docker hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build Docker Image
-        run: docker build -t zephan99/homies  .
-        working-directory: backend
+# jobs:
+#   build:
+#     runs-on: [BE] # Specify the label of the desired runner here
+#     steps:
+#       - name: Checkout Source
+#         uses: actions/checkout@v4
+#       - name: Login to docker hub
+#         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+#       - name: Build Docker Image
+#         run: docker buildx build -t zephan99/homies  .
+#         working-directory: backend
 
-      - name: Publish Image to docker hub
-        run: docker push zephan99/homies:latest
+#       - name: Publish Image to docker hub
+#         run: docker push zephan99/homies:latest
 
-  deploy:
-    needs: build
-    runs-on: [BE]
-    steps:
-      - name: Pull image from docker hub
-        run: docker pull zephan99/homies
-      - name: Delete old container
-        run: docker rm -f nodejs-app-container
-      - name: Run Docker Container
-        run:
-          docker run -d -p 8000:8000 --name nodejs-app-container -e ENV=TEST -e PORT=8000 -e DB_CLOUD_URI="mongodb+srv://nus-iss-monkeys:3ADNvI1fiW31UXom@nus-iss-homie.urndm50.mongodb.net/test" -e DB_CLOUD_URI_TEST="mongodb+srv://nus-iss-monkeys:3ADNvI1fiW31UXom@nus-iss-homie.urndm50.mongodb.net/test" -e SALT_ROUNDS="" zephan99/homies
+#   deploy:
+#     needs: build
+#     runs-on: [BE]
+#     steps:
+#       - name: Pull image from docker hub
+#         run: docker pull zephan99/homies
+#       - name: Delete old container
+#         run: docker rm -f nodejs-app-container
+#       - name: Run Docker Container
+#         run:
+#           docker run -d -p 8000:8000 --name nodejs-app-container -e ENV=TEST -e PORT=8000 -e DB_CLOUD_URI="mongodb+srv://nus-iss-monkeys:3ADNvI1fiW31UXom@nus-iss-homie.urndm50.mongodb.net/test" -e DB_CLOUD_URI_TEST="mongodb+srv://nus-iss-monkeys:3ADNvI1fiW31UXom@nus-iss-homie.urndm50.mongodb.net/test" -e SALT_ROUNDS="" zephan99/homies
 
-          # strategy:
-    #   matrix:
-    #     node-version: [16.x]
-    #     # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+#           # strategy:
+#     #   matrix:
+#     #     node-version: [16.x]
+#     #     # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-    # steps:
-    #   - uses: actions/checkout@v3
-    #   - name: Use Node.js ${{ matrix.node-version }}
-    #     uses: actions/setup-node@v3
-    #     with:
-    #       node-version: ${{ matrix.node-version }}
-    #       cache: 'npm'
-    #   - run: npm ci
-    #     working-directory: backend
-    #   - run: npm run build --if-present
-    #     working-directory: backend
-    #   - run: sudo pm2 restart 0
+#     # steps:
+#     #   - uses: actions/checkout@v3
+#     #   - name: Use Node.js ${{ matrix.node-version }}
+#     #     uses: actions/setup-node@v3
+#     #     with:
+#     #       node-version: ${{ matrix.node-version }}
+#     #       cache: 'npm'
+#     #   - run: npm ci
+#     #     working-directory: backend
+#     #   - run: npm run build --if-present
+#     #     working-directory: backend
+#     #   - run: sudo pm2 restart 0
