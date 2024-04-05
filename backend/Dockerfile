@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+ARG DB_CLOUD_URI
+
 # Env variables
 ENV ENV PROD
 ENV PORT 8000
