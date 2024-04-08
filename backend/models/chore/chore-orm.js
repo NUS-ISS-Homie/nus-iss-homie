@@ -1,8 +1,9 @@
 import {
   createChore,
   getChore,
-  getAllChoresInHome,
-  getAllChoresDueToday,
+  getChoresByHomeId,
+  getChoresByNotificationId,
+  getChoresScheduledToday,
   updateChore,
   deleteChore,
 } from './chore-repository.js';
@@ -30,9 +31,9 @@ export async function ormGetChore(choreId) {
 }
 
 // READ FUNCTION
-export async function ormGetAllChoresInHome(params) {
+export async function ormGetChoresByHomeId(homeId) {
   try {
-    const chores = await getAllChoresInHome(params);
+    const chores = await getChoresByHomeId(homeId);
     return chores;
   } catch (err) {
     console.log(err);
@@ -41,13 +42,24 @@ export async function ormGetAllChoresInHome(params) {
 }
 
 // READ FUNCTION
-export async function ormGetAllChoresDueToday() {
+export async function ormGetChoresByNotificationId(notificationId) {
   try {
-    const chores = await getAllChoresDueToday();
+    const chores = await getChoresByNotificationId(notificationId);
     return chores;
   } catch (err) {
     console.log(err);
     return { err };
+  }
+}
+
+// READ FUNCTION
+export async function ormGetChoresScheduledToday() {
+  try {
+    const chores = await getChoresScheduledToday();
+    return chores;
+  } catch (err) {
+    console.error('Error retrieving chores:', err);
+    return { error: 'Failed to retrieve chores' };
   }
 }
 

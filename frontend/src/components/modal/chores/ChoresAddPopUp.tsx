@@ -1,34 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { useHome } from '../../../context/HomeContext';
+import React, { useState } from 'react';
 
 interface CreatePopupProps {
   onClose: () => void;
   onSubmit: (formData: any) => void;
+  houseMembers: string[];
+  home: any;
+  today: any;
 }
 
-const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
+const CreatePopup: React.FC<CreatePopupProps> = ({
+  onClose,
+  onSubmit,
+  houseMembers,
+  home,
+  today,
+}) => {
   const [formData, setFormData] = useState({
     title: '',
     assignedTo: '',
-    dueDate: new Date(),
+    scheduledDate: new Date(),
+    home: home?._id,
   });
 
-  const [dueDateAsString, setDueDateAsString] = useState<string>('');
-  const today = new Date().toISOString().split('T')[0];
-  const [houseMembers, setHouseMembers] = useState<string[]>([]);
-  const home = useHome();
-
-  useEffect(() => {
-    if (!home) return;
-    console.log('HOME', home);
-
-    // Extract usernames from the array of objects
-    const usernames = home.users.map(({ username }) => username);
-    console.log('usernames:', usernames);
-
-    // Set the state with the array of usernames
-    setHouseMembers(usernames);
-  }, [home]);
+  const [scheduledDateAsString, setScheduledDateAsString] =
+    useState<string>('');
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -36,13 +31,15 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-  const handleDueDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleScheduledDateChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const selectedDate = e.target.value;
-    setDueDateAsString(selectedDate);
+    setScheduledDateAsString(selectedDate);
 
     setFormData({
       ...formData,
-      dueDate: new Date(selectedDate),
+      scheduledDate: new Date(selectedDate),
     });
   };
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,7 +49,8 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
     setFormData({
       title: '',
       assignedTo: '',
-      dueDate: new Date(),
+      scheduledDate: new Date(),
+      home: home?._id,
     });
   };
 
@@ -129,15 +127,15 @@ const CreatePopup: React.FC<CreatePopupProps> = ({ onClose, onSubmit }) => {
               marginBottom: '1rem',
             }}
           >
-            <label htmlFor='dueDate' style={{ marginBottom: '0.5rem' }}>
-              Due Date
+            <label htmlFor='scheduledDate' style={{ marginBottom: '0.5rem' }}>
+              Scheduled Date
             </label>
             <input
               type='date'
-              id='dueDate'
-              name='dueDate'
-              value={dueDateAsString}
-              onChange={handleDueDateChange}
+              id='scheduledDate'
+              name='scheduledDate'
+              value={scheduledDateAsString}
+              onChange={handleScheduledDateChange}
               min={today}
               required
               style={{

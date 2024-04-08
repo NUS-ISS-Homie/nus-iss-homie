@@ -1,38 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { Chore } from '../../../@types/ChoreType';
-import { useHome } from '../../../context/HomeContext';
-import { useUser } from '../../../context/UserContext';
+import React, { useState } from 'react';
+import { Chore } from '../../../@types/Chore';
 
 interface EditPopupProps {
+  isAdmin: boolean;
+  user_id: any;
+  home: any;
   chore: Chore;
+  houseMembers: string[];
   onClose: () => void;
   onEdit: (editedChore: Chore) => void;
+  today: any;
 }
 
-const EditPopup: React.FC<EditPopupProps> = ({ chore, onClose, onEdit }) => {
+const EditPopup: React.FC<EditPopupProps> = ({
+  chore,
+  onClose,
+  onEdit,
+  houseMembers,
+  isAdmin,
+  today,
+}) => {
   const [editedChore, setEditedChore] = useState<Chore>(chore);
-  const [dueDateAsString, setDueDateAsString] = useState<string>(
-    chore.dueDate
-      ? new Date(chore.dueDate).toISOString().split('T')[0]
-      : '2024-10-10'
+  const [scheduledDateAsString, setScheduleDateAsString] = useState<string>(
+    chore.scheduledDate
+      ? new Date(chore.scheduledDate).toISOString().split('T')[0]
+      : ''
   );
-  const today = new Date().toISOString().split('T')[0];
-  const home = useHome();
-  const { user_id } = useUser();
-  const [houseMembers, setHouseMembers] = useState<string[]>([]);
-  const isAdmin = home?.adminUser?._id === user_id && user_id !== null;
-
-  useEffect(() => {
-    if (!home) return;
-    console.log('HOME', home);
-
-    // Extract usernames from the array of objects
-    const usernames = home.users.map(({ username }) => username);
-    console.log('usernames:', usernames);
-
-    // Set the state with the array of usernames
-    setHouseMembers(usernames);
-  }, [home]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -40,13 +33,13 @@ const EditPopup: React.FC<EditPopupProps> = ({ chore, onClose, onEdit }) => {
     const { name, value } = e.target;
     setEditedChore({ ...editedChore, [name]: value });
   };
-  const handleDueDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleScheduleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = e.target.value;
-    setDueDateAsString(selectedDate);
+    setScheduleDateAsString(selectedDate);
 
     setEditedChore({
       ...editedChore,
-      dueDate: new Date(selectedDate),
+      scheduledDate: new Date(selectedDate),
     });
   };
   const handleSubmit = (e: React.FormEvent) => {
@@ -129,16 +122,16 @@ const EditPopup: React.FC<EditPopupProps> = ({ chore, onClose, onEdit }) => {
               marginBottom: '1rem',
             }}
           >
-            <label htmlFor='dueDate' style={{ marginBottom: '0.5rem' }}>
-              Due Date
+            <label htmlFor='scheduledDate' style={{ marginBottom: '0.5rem' }}>
+              Scheduled Date
             </label>
-            {dueDateAsString && (
+            {scheduledDateAsString && (
               <input
                 type='date'
-                id='dueDate'
-                name='dueDate'
-                value={dueDateAsString}
-                onChange={handleDueDateChange}
+                id='scheduledDate'
+                name='scheduledDate'
+                value={scheduledDateAsString}
+                onChange={handleScheduleDateChange}
                 min={today}
                 required
                 disabled={!isAdmin}

@@ -1,9 +1,9 @@
 import React from 'react';
 
 interface DeletePopupProps {
-  choreId: number; // Change the type to number for the chore ID
+  choreId: string;
   onClose: () => void;
-  onDelete: (choreId: number) => void; // Accept chore ID as a parameter
+  onDelete: (choreId: string) => void; // Accept chore ID as a parameter
 }
 
 const DeletePopup: React.FC<DeletePopupProps> = ({
@@ -12,7 +12,7 @@ const DeletePopup: React.FC<DeletePopupProps> = ({
   onDelete,
 }) => {
   const handleDelete = () => {
-    onDelete(choreId); // Pass the expense ID to onDelete
+    onDelete(choreId);
     onClose();
   };
 

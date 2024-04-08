@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from 'react';
 import CreatePopup from '../../components/modal/chores/ChoresAddPopUp';
 import EditPopup from '../../components/modal/chores/ChoresEditPopUp';
 import DeletePopup from '../../components/modal/chores/ChoresDeletePopUp';
 import '../../CSS/ExpenseMainPage.css'; // Import the CSS file
-import { URI_BACKEND } from '../../configs';
-import { Chore } from '../../@types/ChoreType';
+import { Chore, NewChore } from '../../@types/Chore';
 import FullCalendar from '@fullcalendar/react'; // Import FullCalendar component
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -13,57 +11,80 @@ import ChoreViewDetail from '../../components/modal/chores/ChoresViewDetailPopUp
 import { useHome } from '../../context/HomeContext';
 import { useSnackbar } from '../../context/SnackbarContext';
 import APINotification from '../../utils/api-notification';
-import { NOTIFICATION_NEW_CHORE, STATUS_CREATED } from '../../constants';
+import {
+  NOTIFICATION_NEW_CHORE,
+  NOTIFICATION_EDITED_CHORE,
+  STATUS_CREATED,
+  STATUS_OK,
+} from '../../constants';
 import { AuthClient } from '../../utils/auth-client';
 import { useUser } from '../../context/UserContext';
 import SwapChoreList from '../../components/modal/chores/SwapChoreListPopUp';
+import APIChore from '../../utils/api-chore';
+import { homeSocketEvents as events } from '../../constants';
+
+import { useSockets } from '../../context/SocketContext';
 
 function ChoreMainPage() {
   // State variables for managing chores and pop-up visibility
   const [chores, setChores] = useState<Chore[]>([]);
+  const [selectedChore, setSelectedChore] = useState<Chore>();
+  const [houseMembers, setHouseMembers] = useState<string[]>([]);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [isEditOpen, setEditOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
-  const [selectedChore, setSelectedChore] = useState<Chore | null>(null);
-  const [refreshChoreList, setRefreshChoreList] = useState(false);
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [isSwapChoreListOpen, setIsSwapChoreListOpen] = useState(false);
+
   const home = useHome();
   const snackbar = useSnackbar();
   const { user_id, username } = useUser();
+  const { homeSocket } = useSockets();
+
   const isAdmin = home?.adminUser?._id === user_id && user_id !== null;
+  const today = new Date().toISOString().split('T')[0];
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
-  // Function to fetch chores from the backend API
+  const updateChores = useCallback(() => {
+    if (!home) return;
+    APIChore.getChoresByHomeId(home._id)
+      .then(({ data: { chores, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        setChores(chores);
+      })
+      .catch((err) => snackbar.setError(err.message));
+  }, [home, snackbar]);
+
+  useEffect(updateChores, [updateChores]);
+
+  useEffect(() => {
+    homeSocket.on(events.UPDATE_CHORES, updateChores);
+    return () => {
+      homeSocket.off(events.UPDATE_CHORES, updateChores);
+    };
+  }, [homeSocket, updateChores]);
 
   useEffect(() => {
     if (!home) return;
-    axios
-      .get(URI_BACKEND + '/api/chore')
-      .then((response) => {
-        const allChores = response.data.chores;
-        // Filter chores based on usernames in the home
-        const filteredChores = allChores.filter((chore: Chore) =>
-          home.users.some((user) => user.username === chore.assignedTo)
-        );
-        setChores(filteredChores);
-      })
-      .catch((error) => {
-        console.error('Error fetching chores:', error);
-      });
-  }, [refreshChoreList, home]);
+    const usernames = home.users.map(({ username }) => username);
+    setHouseMembers(usernames);
+  }, [home]);
 
   const handleSendNotification = async (
     recipientIds: string[],
-    notificationMessage: string
+    notificationMessage: string,
+    messageTitle: string
   ) => {
+    console.log(recipientIds);
+    console.log(notificationMessage);
+    console.log(messageTitle);
     if (!home) return;
     const notification = {
       sender: user_id || '', // Provide the sender ID
       recipients: recipientIds, // Provide the recipient user IDs as an array
       message: {
-        title: NOTIFICATION_NEW_CHORE,
+        title: messageTitle,
         content: notificationMessage,
       },
     };
@@ -99,66 +120,72 @@ function ChoreMainPage() {
   };
 
   // Function to handle submitting new chore data
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: NewChore) => {
     const assigned = formData.assignedTo;
     const choreTitle = formData.title;
-    const dueDate = new Date(formData.dueDate).toLocaleDateString();
-    try {
-      const response = await axios.post(
-        URI_BACKEND + '/api/chore/create',
-        formData
-      );
-      setChores([...chores, response.data]);
-      setRefreshChoreList((refreshChoreList: any) => !refreshChoreList);
-
-      // Get the user ID synchronously
-      const userId = (await AuthClient.getUserId(assigned)).data.user_id;
-      const notificationMessage = `You have been assigned a new chore: ${choreTitle}, due on ${dueDate}.`;
-      // Pass the user ID as an array to handleSendNotification
-      handleSendNotification([userId], notificationMessage);
-    } catch (error) {
-      console.error('Error creating chore:', error);
-    }
-  };
-
-  // Function to handle editing an chore
-  const handleEdit = (editedChore: Chore) => {
-    axios
-      .put(URI_BACKEND + `/api/chore/${editedChore._id}`, editedChore)
-      .then(() => {
-        const updatedChores = chores.map((chore) =>
-          chore._id === editedChore._id ? editedChore : chore
-        );
-        setChores(updatedChores);
+    const scheduledDate = new Date(formData.scheduledDate).toLocaleDateString();
+    const userId = (await AuthClient.getUserId(assigned)).data.user_id;
+    const notificationMessage = `You have been assigned a new chore: ${choreTitle}, scheduled for ${scheduledDate}.`;
+    const messageTitle = NOTIFICATION_NEW_CHORE;
+    APIChore.createChore(formData)
+      .then(({ data: { chore, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        homeSocket.emit(events.UPDATE_CHORES, home?._id);
+        updateChores();
+        snackbar.setSuccess(message);
       })
-      .catch((error) => {
-        console.error('Error editing chores:', error);
-      });
+      .catch((err) => console.log(err.message));
+    handleSendNotification([userId], notificationMessage, messageTitle);
   };
 
-  // Function to handle deleting an chore
+  // Function to handle editing a chore
+  const handleEdit = async (editedChore: Chore) => {
+    const assigned = editedChore.assignedTo;
+    const choreTitle = editedChore.title;
+    const scheduledDate = new Date(
+      editedChore.scheduledDate
+    ).toLocaleDateString();
+    const userId = (await AuthClient.getUserId(assigned)).data.user_id;
+    const sameAssignedTo = selectedChore?.assignedTo === assigned;
+    const notificationMessage = sameAssignedTo
+      ? `The chore assigned to you has been updated: ${choreTitle}, scheduled for ${scheduledDate}.`
+      : `You have been assigned a new chore: ${choreTitle}, scheduled for ${scheduledDate}.`;
+    const messageTitle = sameAssignedTo
+      ? NOTIFICATION_EDITED_CHORE
+      : NOTIFICATION_NEW_CHORE;
+    APIChore.updateChore(editedChore)
+      .then(({ data: { chore, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        homeSocket.emit(events.UPDATE_CHORES, home?._id);
+        updateChores();
+        snackbar.setSuccess(message);
+        handleSendNotification([userId], notificationMessage, messageTitle);
+      })
+      .catch((err) => snackbar.setError(err.message));
+  };
+
+  // Function to handle deleting a chore
   const handleDelete = () => {
-    if (selectedChore) {
-      console.log(selectedChore._id);
-      axios
-        .delete(URI_BACKEND + `/api/chore/${selectedChore._id}`)
-        .then(() => {
-          const updatedChores = chores.filter(
-            (chore) => chore._id !== selectedChore._id
-          );
-          setChores(updatedChores);
-        })
-        .catch((error) => {
-          console.error('Error deleting chores:', error);
-        });
-    }
+    if (!selectedChore) return;
+    APIChore.deleteChore(selectedChore._id)
+      .then(({ data: { chore, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        homeSocket.emit(events.UPDATE_CHORES, home?._id);
+        updateChores();
+        snackbar.setSuccess(message);
+      })
+      .catch((err) => snackbar.setError(err.message));
   };
 
   const handleEventClick = (info: any) => {
-    const eventId = info.event.id;
-    const selectedChore = chores.find((chore) => chore._id === eventId);
-    setSelectedChore(selectedChore || null);
-    setIsViewDetailsOpen(true);
+    if (!info.event.id) return;
+    APIChore.getChore(info.event.id)
+      .then(({ data: { chore, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        setSelectedChore(chore);
+        setIsViewDetailsOpen(true);
+      })
+      .catch((err) => snackbar.setError(err.message));
   };
 
   return (
@@ -174,7 +201,7 @@ function ChoreMainPage() {
         events={chores.map((chore) => ({
           id: String(chore._id),
           title: chore.title,
-          start: chore.dueDate, // Assuming chore.dueDate is in ISO format
+          start: chore.scheduledDate, // Assuming chore.scheduledDate is in ISO format
           extendedProps: {
             assignedTo: chore.assignedTo,
           },
@@ -204,24 +231,31 @@ function ChoreMainPage() {
           setIsViewDetailsOpen={setIsViewDetailsOpen}
           openDeletePopup={openDeletePopup}
           setIsSwapChoreListOpen={setIsSwapChoreListOpen}
-          user_id={user_id}
           username={username}
-          home={home}
           currentDate={currentDate}
+          isAdmin={isAdmin}
         />
       )}
       {isCreateOpen && (
         <CreatePopup
           onClose={() => setCreateOpen(false)}
           onSubmit={handleSubmit}
+          houseMembers={houseMembers}
+          home={home}
+          today={today}
         />
       )}
       {/* Pass selectedChore and handleEdit to the edit popup */}
       {isEditOpen && selectedChore && (
         <EditPopup
+          isAdmin={isAdmin}
+          user_id={user_id}
+          home={home}
           chore={selectedChore}
+          houseMembers={houseMembers}
           onClose={() => setEditOpen(false)}
           onEdit={handleEdit}
+          today={today}
         />
       )}
       {/* Pass selectedChore and handleDelete to the delete popup */}
@@ -232,7 +266,7 @@ function ChoreMainPage() {
           onDelete={handleDelete}
         />
       )}
-      {isSwapChoreListOpen && (
+      {isSwapChoreListOpen && selectedChore && (
         <SwapChoreList
           selectedChore={selectedChore}
           chores={chores}
@@ -243,6 +277,8 @@ function ChoreMainPage() {
           snackbar={snackbar}
           username={username}
           setChores={setChores}
+          homeSocket={homeSocket}
+          updateChores={updateChores}
         />
       )}
     </div>

@@ -6,11 +6,12 @@ import {
   NOTIFICATION_JOIN_REQ,
   NOTIFICATION_CHORE_REMINDER,
   NOTIFICATION_NEW_CHORE,
+  NOTIFICATION_EDITED_CHORE,
   NOTIFICATION_CHORE_SWAP_REQUEST,
   NOTIFICATION_CHORE_SWAP_REQUEST_RESULT,
 } from '../../../constants';
 import { useAuth } from '../../../context/HomeContext';
-import { useChoreUtil } from '../../../utils/ChoreUtil';
+import { useSwapChoresRequest } from '../chores/SwapChoresRequest';
 
 function NotificationDetails(props: {
   notification: Notification;
@@ -23,7 +24,7 @@ function NotificationDetails(props: {
 
   const homeClient = useAuth();
 
-  const { updateChores } = useChoreUtil();
+  const { updateChores } = useSwapChoresRequest();
 
   return (
     <Box padding='1rem' width='600px'>
@@ -66,7 +67,8 @@ function NotificationDetails(props: {
       )}
       {(message.title === NOTIFICATION_CHORE_REMINDER ||
         message.title === NOTIFICATION_NEW_CHORE ||
-        message.title === NOTIFICATION_CHORE_SWAP_REQUEST_RESULT) && (
+        message.title === NOTIFICATION_CHORE_SWAP_REQUEST_RESULT ||
+        message.title === NOTIFICATION_EDITED_CHORE) && (
         <>
           <Divider />
           <DialogActions>

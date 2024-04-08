@@ -6,10 +6,9 @@ interface choreViewDetailProps {
   setIsViewDetailsOpen: any;
   openDeletePopup: any;
   setIsSwapChoreListOpen: any;
-  user_id: any;
   username: any;
-  home: any;
   currentDate: any;
+  isAdmin: boolean;
 }
 
 const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
@@ -18,18 +17,14 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
   setIsViewDetailsOpen,
   openDeletePopup,
   setIsSwapChoreListOpen,
-  user_id,
   username,
-  home,
   currentDate,
+  isAdmin,
 }) => {
-  const isAdmin = home?.adminUser?._id === user_id && user_id !== null;
-  const validRequestForSwap =
-    selectedChore.assignedTo === username &&
-    new Date(selectedChore.dueDate) >= currentDate;
-  console.log(new Date(selectedChore.dueDate));
-  console.log(new Date());
-  console.log(selectedChore.dueDate >= new Date());
+  const currentOrFutureDate =
+    new Date(selectedChore.scheduledDate) >= currentDate;
+  const choreOwner = selectedChore.assignedTo === username;
+
   return (
     <div className='popup-overlay' style={{ zIndex: 1 }}>
       <div className='popup' style={{ position: 'relative' }}>
@@ -53,14 +48,14 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
         <p>Assigned To: {selectedChore?.assignedTo}</p>
         <p>
           Date:{' '}
-          {selectedChore?.dueDate
-            ? new Date(selectedChore.dueDate).toLocaleDateString()
+          {selectedChore?.scheduledDate
+            ? new Date(selectedChore.scheduledDate).toLocaleDateString()
             : ''}
         </p>
         {/* Edit and delete buttons (conditionally rendered) */}
         {selectedChore && (
           <div className='expense-buttons'>
-            {isAdmin && (
+            {isAdmin && currentOrFutureDate && (
               <button
                 onClick={() => {
                   openEditPopup(selectedChore);
@@ -70,7 +65,7 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
                 Edit
               </button>
             )}
-            {isAdmin && (
+            {isAdmin && currentOrFutureDate && (
               <button
                 onClick={() => {
                   openDeletePopup(selectedChore);
@@ -80,7 +75,7 @@ const ChoreViewDetail: React.FC<choreViewDetailProps> = ({
                 Delete
               </button>
             )}
-            {validRequestForSwap && (
+            {choreOwner && currentOrFutureDate && (
               <button
                 onClick={() => {
                   setIsSwapChoreListOpen(true);

@@ -27,10 +27,7 @@ export async function createChore(params) {
 // READ FUNCTION
 export async function getChore(choreId) {
   try {
-    return await ChoreModel.findById(choreId).populate({
-      path: 'assignedTo',
-      select: 'username',
-    });
+    return await ChoreModel.findById(choreId);
   } catch (err) {
     console.log(`ERROR: Could not get chore from DB.`);
     return { err };
@@ -38,12 +35,9 @@ export async function getChore(choreId) {
 }
 
 // READ FUNCTION
-export async function getAllChoresInHome(params) {
+export async function getChoresByHomeId(homeId) {
   try {
-    return await ChoreModel.find(params).populate({
-      path: 'assignedTo',
-      select: 'username',
-    });
+    return await ChoreModel.find({ home: homeId });
   } catch (err) {
     console.log(`ERROR: Could not get chores from DB.`);
     return { err };
@@ -51,7 +45,17 @@ export async function getAllChoresInHome(params) {
 }
 
 // READ FUNCTION
-export async function getAllChoresDueToday() {
+export async function getChoresByNotificationId(notificationId) {
+  try {
+    return await ChoreModel.find({ requestSwapNotificationId: notificationId });
+  } catch (err) {
+    console.log(`ERROR: Could not get chores from DB.`);
+    return { err };
+  }
+}
+
+// READ FUNCTION
+export async function getChoresScheduledToday() {
   try {
     const today = new Date();
     const startOfToday = new Date(
@@ -65,17 +69,14 @@ export async function getAllChoresDueToday() {
       today.getDate() + 1
     );
     return await ChoreModel.find({
-      dueDate: {
+      scheduledDate: {
         $gte: startOfToday,
         $lt: endOfToday,
       },
-    }).populate({
-      path: 'assignedTo',
-      select: 'username',
     });
   } catch (err) {
-    console.log(`ERROR: Could not get chores from DB.`);
-    return { err };
+    console.error('ERROR: Could not get chores from DB.', err);
+    throw err; // Rethrow the error to handle it appropriately in the calling context
   }
 }
 
@@ -84,7 +85,7 @@ export async function updateChore(choreId, updatedFields) {
   try {
     return await ChoreModel.findByIdAndUpdate(choreId, updatedFields, {
       new: true,
-    }).populate({ path: 'assignedTo', select: 'username' });
+    });
   } catch (err) {
     return { err };
   }
@@ -93,10 +94,7 @@ export async function updateChore(choreId, updatedFields) {
 // DELETE FUNCTION
 export async function deleteChore(choreId) {
   try {
-    const deletedChore = await ChoreModel.findByIdAndDelete(choreId).populate({
-      path: 'assignedTo',
-      select: 'username',
-    });
+    const deletedChore = await ChoreModel.findByIdAndDelete(choreId);
     return deletedChore;
   } catch (err) {
     return { err };

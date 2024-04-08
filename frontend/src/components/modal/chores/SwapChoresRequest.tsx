@@ -1,31 +1,34 @@
-import axios from 'axios';
-import { URI_BACKEND } from '../configs';
-import { Chore } from '../@types/ChoreType';
-import { Notification } from '../@types/Notification';
+import { Chore } from '../../../@types/Chore';
+import { Notification } from '../../../@types/Notification';
 import {
   NOTIFICATION_CHORE_SWAP_REQUEST_RESULT,
   STATUS_CREATED,
-} from '../constants';
-import APINotification from './api-notification';
-import { useSnackbar } from '../context/SnackbarContext';
+  STATUS_OK,
+} from '../../../constants';
+import APINotification from '../../../utils/api-notification';
+import { useSnackbar } from '../../../context/SnackbarContext';
+import APIChore from '../../../utils/api-chore';
+import { useState } from 'react';
 
-interface ChoreUtil {
+interface SwapChoresRequest {
   updateChores: (notification: Notification, swap: boolean) => Promise<void>;
 }
 
-export const useChoreUtil = (): ChoreUtil => {
+export const useSwapChoresRequest = (): SwapChoresRequest => {
   const snackbar = useSnackbar();
 
   const fetchChoresRequestedToSwap = async (
     notificationId: string
   ): Promise<Chore[]> => {
     try {
-      const response = await axios.get(URI_BACKEND + '/api/chore');
-      const allChores: Chore[] = response.data.chores;
-      const choresRequestedToSwap = allChores.filter(
-        (chore: Chore) => chore.requestSwapNotificationId === notificationId
-      );
-      return choresRequestedToSwap;
+      const {
+        data: { chores, message },
+        status,
+      } = await APIChore.getChoresByNotificationId(notificationId);
+      if (status !== STATUS_OK) {
+        throw new Error(message);
+      }
+      return chores;
     } catch (error) {
       console.error('Error fetching chores:', error);
       throw error;
@@ -44,7 +47,10 @@ export const useChoreUtil = (): ChoreUtil => {
       const choresRequestedToSwap =
         await fetchChoresRequestedToSwap(notificationId);
       const updatedFilteredChores = choresRequestedToSwap.map((chore) => {
-        let updatedFilteredChore = { ...chore, requestSwapNotificationId: '' };
+        let updatedFilteredChore = {
+          ...chore,
+          requestSwapNotificationId: null,
+        };
         if (swap && chore.assignedTo === sender) {
           updatedFilteredChore = {
             ...updatedFilteredChore,
@@ -59,32 +65,37 @@ export const useChoreUtil = (): ChoreUtil => {
         return updatedFilteredChore;
       });
 
-      const notificationReceiverChore = updatedFilteredChores.find(
-        (chore) => chore.assignedTo === sender
-      );
-
-      // Loop through the updated chores and update the database
       await Promise.all(
-        updatedFilteredChores.map(async (chore) => {
+        updatedFilteredChores.map(async (updatedFilteredChore) => {
           try {
-            await axios.put(URI_BACKEND + `/api/chore/${chore._id}`, chore);
-            console.log('Chore updated successfully:', chore);
+            const {
+              data: { chore, message },
+              status,
+            } = await APIChore.updateChore(updatedFilteredChore);
+            if (status !== STATUS_OK) {
+              throw new Error(message);
+            }
           } catch (error) {
             console.error('Error updating chore:', error);
+            throw error;
           }
         })
       );
 
-      const dueDate = notificationReceiverChore?.dueDate;
-      const formattedDueDate = dueDate
-        ? new Date(dueDate).toLocaleDateString()
+      const notificationReceiverChore = updatedFilteredChores.find(
+        (chore) => chore.assignedTo === sender
+      );
+
+      const scheduledDate = notificationReceiverChore?.scheduledDate;
+      const formattedScheduleDate = scheduledDate
+        ? new Date(scheduledDate).toLocaleDateString()
         : 'Unknown';
       const recipientId = [notification.sender._id];
       const senderId = notification.recipients[0]._id;
 
       const notificationMessage: string = swap
-        ? `${recipient} has accepted your request to swap chores. Your new chore is ${notificationReceiverChore?.title} due on ${formattedDueDate}`
-        : `${recipient} has declined your request to swap chores, ${notificationReceiverChore?.title} due on ${formattedDueDate}`;
+        ? `${recipient} has accepted your request to swap chores. Your new chore is ${notificationReceiverChore?.title} scheduled for ${formattedScheduleDate}`
+        : `${recipient} has declined your request to swap chores, ${notificationReceiverChore?.title} scheduled for ${formattedScheduleDate}`;
 
       const notificationForChoreSwapRequest = {
         sender: senderId || '',

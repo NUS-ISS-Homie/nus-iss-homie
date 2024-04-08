@@ -1,16 +1,17 @@
-import axios from 'axios';
-import { Chore } from '../../../@types/ChoreType';
+import { Chore } from '../../../@types/Chore';
 import {
   NOTIFICATION_CHORE_SWAP_REQUEST,
   STATUS_CREATED,
+  STATUS_OK,
 } from '../../../constants';
 import APINotification from '../../../utils/api-notification';
 import { AuthClient } from '../../../utils/auth-client';
-import { URI_BACKEND } from '../../../configs';
 import { useEffect, useState } from 'react';
+import APIChore from '../../../utils/api-chore';
+import { homeSocketEvents as events } from '../../../constants';
 
 interface swapChoreListProps {
-  selectedChore: any;
+  selectedChore: Chore;
   chores: Chore[];
   setIsSwapChoreListOpen: any;
   currentDate: any;
@@ -19,6 +20,8 @@ interface swapChoreListProps {
   snackbar: any;
   username: any;
   setChores: any;
+  homeSocket: any;
+  updateChores: () => void;
 }
 
 const SwapChoreList: React.FC<swapChoreListProps> = ({
@@ -30,7 +33,8 @@ const SwapChoreList: React.FC<swapChoreListProps> = ({
   user_id,
   snackbar,
   username,
-  setChores,
+  homeSocket,
+  updateChores,
 }) => {
   const [message, setMessage] = useState('');
   const [notificationId, setNotificationId] = useState('');
@@ -57,7 +61,7 @@ const SwapChoreList: React.FC<swapChoreListProps> = ({
     const recipientId = [
       (await AuthClient.getUserId(chore.assignedTo)).data.user_id,
     ];
-    const notificationMessage = `${username} has requested to swap chores with you. Do you wish to swap your chore, ${chore.title} due on ${new Date(chore.dueDate).toLocaleDateString()}, with ${selectedChore.title} due on ${new Date(selectedChore.dueDate).toLocaleDateString()}?`;
+    const notificationMessage = `${username} has requested to swap chores with you. Do you wish to swap your chore, ${chore.title} scheduled for ${new Date(chore.scheduledDate).toLocaleDateString()}, with ${selectedChore.title} scheduled for ${new Date(selectedChore.scheduledDate).toLocaleDateString()}?`;
     if (!home) return;
     const notification = {
       sender: user_id || '', // Provide the sender ID
@@ -86,36 +90,38 @@ const SwapChoreList: React.FC<swapChoreListProps> = ({
     chore: Chore,
     notificationId: string
   ) => {
-    try {
-      // Update the requestedSwap field for the current chore
-      await axios.put(URI_BACKEND + `/api/chore/${chore._id}`, {
-        requestSwapNotificationId: notificationId,
-      });
+    APIChore.updateChore({
+      ...chore,
+      requestSwapNotificationId: notificationId,
+    })
+      .then(({ data: { chore, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        homeSocket.emit(events.UPDATE_CHORES, home?._id);
+        updateChores();
+        snackbar.setSuccess(message);
+      })
+      .catch((err) => snackbar.setError(err.message));
 
-      // Update the requestedSwap field for the selectedChore
-      if (selectedChore) {
-        await axios.put(URI_BACKEND + `/api/chore/${selectedChore._id}`, {
-          requestSwapNotificationId: notificationId,
-        });
-      }
-
-      // Update the local state to reflect the changes for both chores
-      const updatedChores = chores.map((c) => {
-        if (
-          c._id === chore._id ||
-          (selectedChore && c._id === selectedChore._id)
-        ) {
-          return { ...c, requestSwapNotificationId: notificationId };
-        } else {
-          return c;
-        }
-      });
-
-      setChores(updatedChores);
-    } catch (error) {
-      console.error('Error updating requestedSwap field:', error);
-    }
+    // Update the requestedSwap field for the selectedChore
+    APIChore.updateChore({
+      ...selectedChore,
+      requestSwapNotificationId: notificationId,
+    })
+      .then(({ data: { chore, message }, status }) => {
+        if (status !== STATUS_OK) throw new Error(message);
+        homeSocket.emit(events.UPDATE_CHORES, home?._id);
+        updateChores();
+        snackbar.setSuccess(message);
+      })
+      .catch((err) => snackbar.setError(err.message));
   };
+
+  const filteredChores = chores.filter(
+    (chore) =>
+      chore.assignedTo !== selectedChore.assignedTo &&
+      new Date(chore.scheduledDate) >= currentDate &&
+      chore.requestSwapNotificationId === null
+  );
 
   return (
     <div className='popup-overlay' style={{ zIndex: 1 }}>
@@ -142,24 +148,20 @@ const SwapChoreList: React.FC<swapChoreListProps> = ({
               <tr>
                 <th style={{ whiteSpace: 'nowrap' }}>Chore</th>
                 <th style={{ whiteSpace: 'nowrap' }}>Assigned To</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Due Date</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Scheduled Date</th>
                 <th style={{ whiteSpace: 'nowrap' }}>Request Swap</th>
               </tr>
             </thead>
             <tbody>
-              {chores
-                .filter(
-                  (chore) =>
-                    chore.assignedTo !== selectedChore.assignedTo &&
-                    new Date(chore.dueDate) >= currentDate &&
-                    chore.requestSwapNotificationId === ''
-                )
+              {filteredChores
                 .sort((a, b) => a.title.localeCompare(b.title))
                 .map((chore) => (
                   <tr key={chore._id}>
                     <td>{chore.title}</td>
                     <td>{chore.assignedTo}</td>
-                    <td>{new Date(chore.dueDate).toLocaleDateString()}</td>
+                    <td>
+                      {new Date(chore.scheduledDate).toLocaleDateString()}
+                    </td>
                     <td>
                       <div className='expense-buttons'>
                         <button

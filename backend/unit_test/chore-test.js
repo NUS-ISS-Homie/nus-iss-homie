@@ -9,6 +9,7 @@ import * as constants from '../common/messages.js';
 import ChoreModel from '../models/chore/chore-model.js';
 import HomeModel from '../models/home/home-model.js';
 import UserModel from '../models/user/user-model.js';
+import NotificationModel from '../models/notification/notification-model.js';
 import { entity } from '../controllers/chore-controller.js';
 import app from '../index.js';
 
@@ -35,22 +36,29 @@ describe('Chore API CRUD', () => {
     users: [user2._id],
   };
 
+  const notification = {
+    _id: new mongoose.Types.ObjectId().toString(),
+    sender: user1._id,
+    recipients: [user2._id],
+    message: { title: 'Notification Title', content: 'Hello!' },
+  };
+
   const chore1 = {
     _id: new mongoose.Types.ObjectId().toString(),
     title: 'Chore 1',
-    assignedTo: user1._id,
-    dueDate: today,
+    assignedTo: user1.username,
+    scheduledDate: today,
     home: home._id,
-    requestSwapNotificationId: null,
+    requestSwapNotificationId: notification._id,
   };
 
   const chore2 = {
     _id: new mongoose.Types.ObjectId().toString(),
     title: 'Chore 2',
-    assignedTo: user2._id,
-    dueDate: today,
+    assignedTo: user2.username,
+    scheduledDate: today,
     home: home._id,
-    requestSwapNotificationId: null,
+    requestSwapNotificationId: notification._id,
   };
 
   before('Connect to MongoDB', async () => {
@@ -67,6 +75,10 @@ describe('Chore API CRUD', () => {
     await HomeModel.deleteMany();
     await HomeModel.create(home);
 
+    // Create Notification
+    await NotificationModel.deleteMany();
+    await NotificationModel.create(notification);
+
     // Create Chores
     await ChoreModel.deleteMany();
     await ChoreModel.create(chore1);
@@ -77,8 +89,8 @@ describe('Chore API CRUD', () => {
     it('should create a new chore', (done) => {
       const newChore = {
         title: 'New Chore',
-        assignedTo: user1._id,
-        dueDate: new Date(),
+        assignedTo: user1,
+        scheduledDate: new Date(),
         home: home._id,
       };
 
@@ -118,8 +130,7 @@ describe('Chore API CRUD', () => {
     it('should retrieve a specific chore by ID', (done) => {
       const expected = {
         ...chore1,
-        assignedTo: user1,
-        dueDate: chore1.dueDate.toISOString(),
+        scheduledDate: chore1.scheduledDate.toISOString(),
       };
 
       chai
@@ -151,28 +162,25 @@ describe('Chore API CRUD', () => {
   });
 
   // Add more test cases for other CRUD operations (GET, PUT, DELETE) as needed
-  describe('GET /api/chore', () => {
-    it('should retrieve chores based on search params', (done) => {
-      const searchParams = { home: home._id };
+  describe('GET /api/chore/home/:homeId', () => {
+    it('should retrieve chores based on homeId', (done) => {
+      const homeId = home._id;
       const chores = {
         chores: [
           {
             ...chore1,
-            assignedTo: user1,
-            dueDate: chore1.dueDate.toISOString(),
+            scheduledDate: chore1.scheduledDate.toISOString(),
           },
           {
             ...chore2,
-            assignedTo: user2,
-            dueDate: chore2.dueDate.toISOString(),
+            scheduledDate: chore2.scheduledDate.toISOString(),
           },
         ],
       };
 
       chai
         .request(app)
-        .get(`/api/chore`)
-        .send(searchParams)
+        .get(`/api/chore/home/${homeId}`)
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
@@ -180,27 +188,43 @@ describe('Chore API CRUD', () => {
           done();
         });
     });
+    // Negative test case: Invalid home ID
+    it('should not return for non-existent home ID', (done) => {
+      const invalidHomeId = 'invalid_id';
 
-    it('should retrieve all chores due today', (done) => {
+      const expected = { message: constants.FAIL_NOT_EXIST(entity) };
+
+      chai
+        .request(app)
+        .get(`/api/chore/home/${invalidHomeId}`)
+        .end((err, res) => {
+          err && console.log(err);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
+          chai.expect(res.body).to.deep.equal(expected);
+          done();
+        });
+    });
+  });
+
+  describe('GET /api/chore/notification/:notificationId', () => {
+    it('should retrieve chores based on notificationId', (done) => {
+      const notificationId = notification._id;
       const chores = {
         chores: [
           {
             ...chore1,
-            assignedTo: user1,
-            dueDate: chore1.dueDate.toISOString(),
+            scheduledDate: chore1.scheduledDate.toISOString(),
           },
           {
             ...chore2,
-            assignedTo: user2,
-            dueDate: chore2.dueDate.toISOString(),
+            scheduledDate: chore2.scheduledDate.toISOString(),
           },
         ],
       };
 
       chai
         .request(app)
-        .get(`/api/chore`)
-        .send()
+        .get(`/api/chore/notification/${notificationId}`)
         .end((err, res) => {
           err && console.log(err);
           chai.expect(res).to.have.status(constants.STATUS_CODE_OK);
@@ -208,19 +232,17 @@ describe('Chore API CRUD', () => {
           done();
         });
     });
+    it('should not return for non-existent notification ID', (done) => {
+      const invalidNotificationId = 'invalid_id';
 
-    it('should return a 400 Bad Request for an invalid search params', (done) => {
-      const expected = { message: constants.FAIL_INCORRECT_FIELDS };
-
-      const invalidSearchParams = { assignedTo: user1._id };
+      const expected = { message: constants.FAIL_NOT_EXIST(entity) };
 
       chai
         .request(app)
-        .get(`/api/chore`)
-        .send(invalidSearchParams)
+        .get(`/api/chore/notification/${invalidNotificationId}`)
         .end((err, res) => {
           err && console.log(err);
-          chai.expect(res).to.have.status(constants.STATUS_CODE_BAD_REQUEST);
+          chai.expect(res).to.have.status(constants.STATUS_CODE_NOT_FOUND);
           chai.expect(res.body).to.deep.equal(expected);
           done();
         });

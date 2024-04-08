@@ -8,11 +8,10 @@ const ChoreSchema = new Schema({
     required: true,
   },
   assignedTo: {
-    type: Schema.Types.ObjectId,
-    ref: 'UserModel',
+    type: String,
     required: true,
   },
-  dueDate: {
+  scheduledDate: {
     type: Date,
     required: true,
   },

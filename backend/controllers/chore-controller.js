@@ -2,8 +2,9 @@ import * as constants from '../common/messages.js';
 import {
   ormCreateChore as _createChore,
   ormGetChore as _getChore,
-  ormGetAllChoresInHome as _getAllChoresInHome,
-  ormGetAllChoresDueToday as _getAllChoresDueToday,
+  ormGetChoresByHomeId as _getChoresByHomeId,
+  ormGetChoresByNotificationId as _getChoresByNotificationId,
+  ormGetChoresScheduledToday as _getChoresScheduledToday,
   ormUpdateChore as _updateChore,
   ormDeleteChore as _deleteChore,
 } from '../models/chore/chore-orm.js';
@@ -12,9 +13,9 @@ export const entity = 'chore';
 
 export async function createChore(req, res) {
   try {
-    const { title, assignedTo, dueDate, home } = req.body;
+    const { title, assignedTo, scheduledDate, home } = req.body;
 
-    if (title && assignedTo && dueDate && home) {
+    if (title && assignedTo && scheduledDate && home) {
       const chore = await _createChore(req.body);
       return res.status(constants.STATUS_CODE_CREATED).json({
         chore,
@@ -56,23 +57,56 @@ export async function getChore(req, res) {
   }
 }
 
-export async function getChores(req, res) {
+export async function getChoresByHomeId(req, res) {
   try {
-    const { home, ...otherParams } = req.body;
-
-    if (Object.keys(otherParams).length > 0) {
+    const { homeId } = req.params;
+    if (!homeId) {
       return res
         .status(constants.STATUS_CODE_BAD_REQUEST)
-        .json({ message: constants.FAIL_INCORRECT_FIELDS });
+        .json({ message: constants.FAIL_MISSING_FIELDS });
+    }
+    const chores = await _getChoresByHomeId(homeId);
+    if (!chores || chores.err) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
     }
 
-    if (home) {
-      const chores = await _getAllChoresInHome(req.body);
-      return res.status(200).json({ chores });
-    } else {
-      const chores = await _getAllChoresDueToday();
-      return res.status(200).json({ chores });
+    return res.status(constants.STATUS_CODE_OK).json({ chores });
+  } catch (err) {
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
+export async function getChoresByNotificationId(req, res) {
+  try {
+    const { notificationId } = req.params;
+    if (!notificationId) {
+      return res
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
     }
+    const chores = await _getChoresByNotificationId(notificationId);
+    if (!chores || chores.err) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    }
+
+    return res.status(constants.STATUS_CODE_OK).json({ chores });
+  } catch (err) {
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
+export async function getChoresScheduledToday(req, res) {
+  try {
+    const chores = await _getChoresScheduledToday();
+    return chores;
   } catch (error) {
     console.error('Error retrieving chores:', error);
     return res.status(500).json({ message: 'Failed to retrieve chores' });
