@@ -8,7 +8,6 @@ import {
 import APINotification from '../../../utils/api-notification';
 import { useSnackbar } from '../../../context/SnackbarContext';
 import APIChore from '../../../utils/api-chore';
-import { useState } from 'react';
 
 interface SwapChoresRequest {
   updateChores: (notification: Notification, swap: boolean) => Promise<void>;
@@ -69,7 +68,7 @@ export const useSwapChoresRequest = (): SwapChoresRequest => {
         updatedFilteredChores.map(async (updatedFilteredChore) => {
           try {
             const {
-              data: { chore, message },
+              data: { message },
               status,
             } = await APIChore.updateChore(updatedFilteredChore);
             if (status !== STATUS_OK) {

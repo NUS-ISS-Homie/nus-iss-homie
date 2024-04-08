@@ -1,16 +1,13 @@
-import axios from 'axios';
 import cron from 'node-cron';
 import { ormGetChoresScheduledToday } from '../models/chore/chore-orm.js';
 import { ormGetHome } from '../models/home/home-orm.js';
 import { ormGetUser } from '../models/user/user-orm.js';
+import { ormCreateNotification } from '../models/notification/notification-orm.js';
 
 const NOTIFICATION_CHORE_REMINDER = '[CHORE REMINDER]';
-const URI_BACKEND = 'http://localhost:8000';
-const PREFIX_NOTIF_SVC = '/api/notification';
-const URL_NOTIF_SVC = URI_BACKEND + PREFIX_NOTIF_SVC;
 // Define the cron job
 
-export const cronJob = cron.schedule('0 0 * * *', async () => {
+export const cronJob = cron.schedule('00 00 * * *', async () => {
   try {
     const choresScheduledToday = await ormGetChoresScheduledToday();
     // Loop through the chores and send reminders
@@ -40,7 +37,7 @@ async function sendNotification(userId, message, adminId) {
     message: { title: NOTIFICATION_CHORE_REMINDER, content: message },
   };
   try {
-    const response = await axios.post(URL_NOTIF_SVC, notification);
+    ormCreateNotification(notification);
     // console.log('Notification sent:', response.data);
   } catch (error) {
     console.error('Error sending notification:', error);
