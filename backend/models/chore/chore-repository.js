@@ -100,3 +100,15 @@ export async function deleteChore(choreId) {
     return { err };
   }
 }
+
+// Function to get all chores due today
+export async function getAllChoresDueToday() {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+    return await ChoreModel.find({ dueDate: { $eq: today } });
+  } catch (err) {
+    console.log(`ERROR: Could not get chores due today from DB.`);
+    return { err };
+  }
+}

@@ -170,3 +170,13 @@ export async function deleteChore(req, res) {
       .json({ message: constants.FAIL_DATABASE_ERROR });
   }
 }
+
+export async function getAllChoresDueToday(_, res) {
+  try {
+    const choresDueToday = await _getAllChoresDueToday();
+    //console.log('choresDueToday: ', choresDueToday);
+    return choresDueToday;
+  } catch (err) {
+    console.error(err);
+  }
+}
