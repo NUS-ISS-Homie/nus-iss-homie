@@ -8,8 +8,6 @@ import FullCalendar from '@fullcalendar/react'; // Import FullCalendar component
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import ChoreViewDetail from '../../components/modal/chores/ChoresViewDetailPopUp';
-import interactionPlugin from '@fullcalendar/interaction';
-import ChoreViewDetail from '../../components/modal/chores/ChoresViewDetailPopUp';
 import { useHome } from '../../context/HomeContext';
 import { useSnackbar } from '../../context/SnackbarContext';
 import APINotification from '../../utils/api-notification';
@@ -198,9 +196,7 @@ function ChoreMainPage() {
       </div>
       <FullCalendar
         contentHeight='auto'
-        contentHeight='auto'
         plugins={[dayGridPlugin, interactionPlugin]}
-        initialView='dayGridWeek'
         initialView='dayGridWeek'
         events={chores.map((chore) => ({
           id: String(chore._id),
@@ -221,12 +217,6 @@ function ChoreMainPage() {
           );
         }}
         eventClick={handleEventClick}
-        eventMouseEnter={(info) => {
-          info.el.style.cursor = 'pointer';
-        }}
-        eventMouseLeave={(info) => {
-          info.el.style.cursor = '';
-        }}
         eventMouseEnter={(info) => {
           info.el.style.cursor = 'pointer';
         }}
