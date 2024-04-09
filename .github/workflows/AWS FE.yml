@@ -12,7 +12,7 @@ env:
   ECS_SERVICE: homied_service
   ECS_CLUSTER: homiedCluster
   ECS_TASK_DEFINITION: .aws/task.json
-  CONTAINER_NAME: fargate
+  CONTAINER_NAME: homie
 
 jobs:
   deploy:
