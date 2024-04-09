@@ -6,9 +6,10 @@ name: CICD FE1
 
 on:
   push:
-    branches: ['main', 'HOMIE7-24-Setup-CD']
-  pull_request:
-    branches: ['main', 'HOMIE7-24-Setup-CD']
+    branches: ['na']
+    # branches: ['main', 'HOMIE7-24-Setup-CD']
+  # pull_request:
+  #   branches: ['main', 'HOMIE7-24-Setup-CD']
 
 jobs:
   build:
