@@ -11,7 +11,7 @@ env:
   ECR_REPOSITORY: homies
   ECS_SERVICE: homied_service
   ECS_CLUSTER: homiedCluster
-  ECS_TASK_DEFINITION: aws/task.json
+  ECS_TASK_DEFINITION: .aws/task.json
   CONTAINER_NAME: fargate
 
 jobs:
