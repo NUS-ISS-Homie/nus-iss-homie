@@ -25,6 +25,7 @@
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "mongoose": "^8.1.2",
+    "node-cron": "^3.0.3",
     "socket.io": "^4.7.4"
   }
 }

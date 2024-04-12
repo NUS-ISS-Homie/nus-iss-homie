@@ -4,7 +4,6 @@ import * as authClient from '../utils/auth-client';
 import { LOCAL_STORAGE_USER_KEY } from '../configs';
 import { STATUS_OK } from '../constants';
 import { useSnackbar } from './SnackbarContext';
-// import { useNavigate } from 'react-router-dom';
 
 export const defaultUser: User = {
   username: null,

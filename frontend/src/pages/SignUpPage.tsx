@@ -123,7 +123,7 @@ function SignUpPage() {
                 id='password'
                 label='Password'
                 name='password'
-                type={passwordShown ? 'text' : 'password'}
+                type='password'
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>

@@ -1,14 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 import { useUser } from '../../context/UserContext';
 import TenantDetails from './TenantDetails';
-import { useHome } from '../../context/HomeContext';
+import { useAuth, useHome } from '../../context/HomeContext';
+import { useSockets } from '../../context/SocketContext';
+import { homeSocketEvents as events } from '../../constants';
 
 function DashboardPage() {
   const navigate = useNavigate();
   const { user_id } = useUser();
   const home = useHome();
+  const homeClient = useAuth();
+  const { homeSocket } = useSockets();
+
+  useEffect(() => {
+    homeSocket.on(events.UPDATE_HOME, homeClient.updateHome);
+  }, [homeSocket, homeClient.updateHome]);
 
   const guestDashboard = (
     <>
@@ -24,6 +32,8 @@ function DashboardPage() {
         <Button onClick={() => navigate('/invite')}>Invite Tenants</Button>
       )}
       <Button onClick={() => navigate('/expense')}>Expenses</Button>
+      <Button onClick={() => navigate('/chore')}>Chores</Button>
+      <Button onClick={() => navigate('/grocery-list')}>Grocery List</Button>
     </>
   );
 

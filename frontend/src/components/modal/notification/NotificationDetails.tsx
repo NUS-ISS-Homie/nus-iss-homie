@@ -1,8 +1,17 @@
 import React from 'react';
 import { Notification } from '../../../@types/Notification';
 import { Box, Button, DialogActions, Divider, Typography } from '@mui/material';
-import { NOTIFICATION_INVITE, NOTIFICATION_JOIN_REQ } from '../../../constants';
+import {
+  NOTIFICATION_INVITE,
+  NOTIFICATION_JOIN_REQ,
+  NOTIFICATION_CHORE_REMINDER,
+  NOTIFICATION_NEW_CHORE,
+  NOTIFICATION_EDITED_CHORE,
+  NOTIFICATION_CHORE_SWAP_REQUEST,
+  NOTIFICATION_CHORE_SWAP_REQUEST_RESULT,
+} from '../../../constants';
 import { useAuth } from '../../../context/HomeContext';
+import { useSwapChoresRequest } from '../chores/SwapChoresRequest';
 
 function NotificationDetails(props: {
   notification: Notification;
@@ -14,6 +23,8 @@ function NotificationDetails(props: {
   } = props;
 
   const homeClient = useAuth();
+
+  const { updateChores } = useSwapChoresRequest();
 
   return (
     <Box padding='1rem' width='600px'>
@@ -44,10 +55,52 @@ function NotificationDetails(props: {
                     );
                     break;
                   case NOTIFICATION_INVITE:
-                    console.log('THIS IS INVITE');
                     homeClient.acceptInvite(sender._id, deleteNotification);
                     break;
                 }
+              }}
+            >
+              Accept
+            </Button>
+          </DialogActions>
+        </>
+      )}
+      {(message.title === NOTIFICATION_CHORE_REMINDER ||
+        message.title === NOTIFICATION_NEW_CHORE ||
+        message.title === NOTIFICATION_CHORE_SWAP_REQUEST_RESULT ||
+        message.title === NOTIFICATION_EDITED_CHORE) && (
+        <>
+          <Divider />
+          <DialogActions>
+            <Button
+              color='primary'
+              variant='outlined'
+              onClick={deleteNotification}
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </>
+      )}
+      {message.title === NOTIFICATION_CHORE_SWAP_REQUEST && (
+        <>
+          <Divider />
+          <DialogActions>
+            <Button
+              color='primary'
+              variant='outlined'
+              onClick={() => {
+                updateChores(props.notification, false);
+                deleteNotification();
+              }}
+            >
+              Decline
+            </Button>
+            <Button
+              variant='contained'
+              onClick={() => {
+                updateChores(props.notification, true);
+                deleteNotification();
               }}
             >
               Accept

@@ -11,9 +11,15 @@ const ChoreSchema = new Schema({
     type: String,
     required: true,
   },
-  dueDate: {
+  scheduledDate: {
     type: Date,
     required: true,
+  },
+  home: { type: Schema.Types.ObjectId, ref: 'HomeModel', required: true },
+  requestSwapNotificationId: {
+    type: Schema.Types.ObjectId,
+    ref: 'NotificationModel',
+    default: null,
   },
 });
 
