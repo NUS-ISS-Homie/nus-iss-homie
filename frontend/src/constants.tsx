@@ -9,6 +9,10 @@ export const NOTIFICATION_JOIN_REQ = '[HOME JOIN REQUEST]';
 export const NOTIFICATION_INVITE = '[HOME INVITE]';
 export const NOTIFICATION_CHORE_REMINDER = '[CHORE REMINDER]';
 export const NOTIFICATION_NEW_CHORE = '[NEW CHORE]';
+export const NOTIFICATION_EDITED_CHORE = '[EDITED CHORE]';
+export const NOTIFICATION_CHORE_SWAP_REQUEST = '[CHORE SWAP REQUEST]';
+export const NOTIFICATION_CHORE_SWAP_REQUEST_RESULT =
+  '[CHORE SWAP REQUEST RESULT]';
 
 export const homeSocketEvents = {
   CONNECTION: 'connection',
@@ -25,6 +29,7 @@ export const homeSocketEvents = {
   // Socket events
   UPDATE_EXPENSES: 'update-expenses',
   UPDATE_GROCERIES: 'update-groceries',
+  UPDATE_CHORES: 'update-chores',
 
   // Notification events
   SEND_NOTIFICATION: 'send-notification',

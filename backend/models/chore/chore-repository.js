@@ -1,4 +1,4 @@
-import ChoreModel from './chore-model.js'; // Import Mongoose model for chore
+import ChoreModel from './chore-model.js';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 
@@ -13,26 +13,13 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Successfully connected to MongoDB'));
 
-//READ FUNCTION
-export async function getAllChores() {
-  try {
-    return await ChoreModel.find();
-  } catch (err) {
-    console.log(`ERROR: Could not get chores from DB.`);
-    return { err };
-  }
-}
-
 // CREATE FUNCTION
 export async function createChore(params) {
   try {
-    console.log('Creating chore');
-    return await ChoreModel.create({
-      title: params.title,
-      assignedTo: params.assignedTo,
-      dueDate: params.dueDate,
-    });
+    const chore = await ChoreModel.create(params);
+    return getChore(chore._id);
   } catch (err) {
+    console.log(err);
     return { err };
   }
 }
@@ -44,6 +31,52 @@ export async function getChore(choreId) {
   } catch (err) {
     console.log(`ERROR: Could not get chore from DB.`);
     return { err };
+  }
+}
+
+// READ FUNCTION
+export async function getChoresByHomeId(homeId) {
+  try {
+    return await ChoreModel.find({ home: homeId });
+  } catch (err) {
+    console.log(`ERROR: Could not get chores from DB.`);
+    return { err };
+  }
+}
+
+// READ FUNCTION
+export async function getChoresByNotificationId(notificationId) {
+  try {
+    return await ChoreModel.find({ requestSwapNotificationId: notificationId });
+  } catch (err) {
+    console.log(`ERROR: Could not get chores from DB.`);
+    return { err };
+  }
+}
+
+// READ FUNCTION
+export async function getChoresScheduledToday() {
+  try {
+    const today = new Date();
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const endOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
+    return await ChoreModel.find({
+      scheduledDate: {
+        $gte: startOfToday,
+        $lt: endOfToday,
+      },
+    });
+  } catch (err) {
+    console.error('ERROR: Could not get chores from DB.', err);
+    throw err; // Rethrow the error to handle it appropriately in the calling context
   }
 }
 
@@ -62,7 +95,7 @@ export async function updateChore(choreId, updatedFields) {
 export async function deleteChore(choreId) {
   try {
     const deletedChore = await ChoreModel.findByIdAndDelete(choreId);
-    return deletedChore ? true : false;
+    return deletedChore;
   } catch (err) {
     return { err };
   }

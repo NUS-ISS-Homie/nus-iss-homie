@@ -2,53 +2,31 @@ import * as constants from '../common/messages.js';
 import {
   ormCreateChore as _createChore,
   ormGetChore as _getChore,
+  ormGetChoresByHomeId as _getChoresByHomeId,
+  ormGetChoresByNotificationId as _getChoresByNotificationId,
+  ormGetChoresScheduledToday as _getChoresScheduledToday,
   ormUpdateChore as _updateChore,
   ormDeleteChore as _deleteChore,
-  ormGetAllChores as _getAllChores,
-  ormGetAllChoresDueToday as _getAllChoresDueToday,
 } from '../models/chore/chore-orm.js';
-import mongoose from 'mongoose';
 
 export const entity = 'chore';
 
-export async function getAllChores(_, res) {
-  try {
-    const chores = await _getAllChores(); // Call the function to fetch all chores from the database
-    if (!chores || chores.length === 0) {
-      return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'No chores found' });
-    }
-    return res.status(constants.STATUS_CODE_OK).json({ chores });
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(constants.STATUS_CODE_SERVER_ERROR)
-      .json({ message: constants.FAIL_DATABASE_ERROR });
-  }
-}
-
 export async function createChore(req, res) {
   try {
-    const { title, assignedTo, dueDate } = req.body;
-    console.log('createChore ', title, assignedTo, dueDate);
+    const { title, assignedTo, scheduledDate, home } = req.body;
 
-    if (title && assignedTo && dueDate) {
-      const newChore = await _createChore({
-        title,
-        assignedTo,
-        dueDate,
-      });
+    if (title && assignedTo && scheduledDate && home) {
+      const chore = await _createChore(req.body);
       return res.status(constants.STATUS_CODE_CREATED).json({
+        chore,
         message: constants.SUCCESS_CREATE('chore', title),
-      }); // Pass 'chore' as entity and newChore.title as the parameter
-    } else {
-      return res
-        .status(constants.STATUS_CODE_BAD_REQUEST)
-        .json({ message: constants.FAIL_MISSING_FIELDS });
+      });
     }
+
+    return res
+      .status(constants.STATUS_CODE_BAD_REQUEST)
+      .json({ message: constants.FAIL_MISSING_FIELDS });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
@@ -58,38 +36,94 @@ export async function createChore(req, res) {
 export async function getChore(req, res) {
   try {
     const { choreId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(choreId)) {
+    if (!choreId) {
       return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'Chore not found' });
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
     }
 
     const chore = await _getChore(choreId);
-    console.log('chore: ', chore);
-    if (!chore) {
+    if (!chore || chore.err) {
       return res
         .status(constants.STATUS_CODE_NOT_FOUND)
         .json({ message: constants.FAIL_NOT_EXIST(entity) });
     }
+
     return res.status(constants.STATUS_CODE_OK).json({ chore });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
   }
 }
 
+export async function getChoresByHomeId(req, res) {
+  try {
+    const { homeId } = req.params;
+    if (!homeId) {
+      return res
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
+    }
+    const chores = await _getChoresByHomeId(homeId);
+    if (!chores || chores.err) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    }
+
+    return res.status(constants.STATUS_CODE_OK).json({ chores });
+  } catch (err) {
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
+export async function getChoresByNotificationId(req, res) {
+  try {
+    const { notificationId } = req.params;
+    if (!notificationId) {
+      return res
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
+    }
+    const chores = await _getChoresByNotificationId(notificationId);
+    if (!chores || chores.err) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    }
+
+    return res.status(constants.STATUS_CODE_OK).json({ chores });
+  } catch (err) {
+    return res
+      .status(constants.STATUS_CODE_SERVER_ERROR)
+      .json({ message: constants.FAIL_DATABASE_ERROR });
+  }
+}
+
+export async function getChoresScheduledToday(req, res) {
+  try {
+    const chores = await _getChoresScheduledToday();
+    return chores;
+  } catch (error) {
+    console.error('Error retrieving chores:', error);
+    return res.status(500).json({ message: 'Failed to retrieve chores' });
+  }
+}
+
 export async function updateChore(req, res) {
   try {
     const { choreId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(choreId)) {
+    if (!choreId) {
       return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'Chore not found' });
+        .status(constants.STATUS_CODE_BAD_REQUEST)
+        .json({ message: constants.FAIL_MISSING_FIELDS });
     }
+
     const updatedFields = req.body;
-    if (choreId && Object.keys(updatedFields).length > 0) {
+    if (Object.keys(updatedFields).length > 0) {
       const updatedChore = await _updateChore(choreId, updatedFields);
       if (!updatedChore) {
         return res
@@ -98,14 +132,13 @@ export async function updateChore(req, res) {
       }
       return res
         .status(constants.STATUS_CODE_OK)
-        .json({ message: constants.SUCCESS_UPDATE(entity, 'Updated Chore') });
-    } else {
-      return res
-        .status(constants.STATUS_CODE_BAD_REQUEST)
-        .json({ message: constants.FAIL_MISSING_FIELDS });
+        .json({ message: constants.SUCCESS_UPDATE(entity) });
     }
+
+    return res
+      .status(constants.STATUS_CODE_BAD_REQUEST)
+      .json({ message: constants.FAIL_MISSING_FIELDS });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });
@@ -115,28 +148,23 @@ export async function updateChore(req, res) {
 export async function deleteChore(req, res) {
   try {
     const { choreId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(choreId)) {
-      return res
-        .status(constants.STATUS_CODE_NOT_FOUND)
-        .json({ message: 'Chore not found' });
-    }
-    if (choreId) {
-      const isDeleted = await _deleteChore(choreId);
-      if (!isDeleted) {
-        return res
-          .status(constants.STATUS_CODE_NOT_FOUND)
-          .json({ message: constants.FAIL_NOT_EXIST(entity) });
-      }
-      return res
-        .status(constants.STATUS_CODE_OK)
-        .json({ message: constants.SUCCESS_DELETE(entity) });
-    } else {
+    if (!choreId) {
       return res
         .status(constants.STATUS_CODE_BAD_REQUEST)
         .json({ message: constants.FAIL_MISSING_FIELDS });
     }
+
+    const deleted = await _deleteChore(choreId);
+    if (!deleted || deleted.err) {
+      return res
+        .status(constants.STATUS_CODE_NOT_FOUND)
+        .json({ message: constants.FAIL_NOT_EXIST(entity) });
+    }
+
+    return res
+      .status(constants.STATUS_CODE_OK)
+      .json({ message: constants.SUCCESS_DELETE(entity) });
   } catch (err) {
-    console.error(err);
     return res
       .status(constants.STATUS_CODE_SERVER_ERROR)
       .json({ message: constants.FAIL_DATABASE_ERROR });

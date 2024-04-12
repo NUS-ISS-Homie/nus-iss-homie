@@ -1,32 +1,28 @@
-import { getAllChoresDueToday } from '../controllers/chore-controller.js';
-import { getUser } from '../models/user/user-repository.js';
-import { getHomeModelByUserId } from '../models/home/home-repository.js';
-import axios from 'axios';
 import cron from 'node-cron';
+import { ormGetChoresScheduledToday } from '../models/chore/chore-orm.js';
+import { ormGetHome } from '../models/home/home-orm.js';
+import { ormGetUser } from '../models/user/user-orm.js';
+import { ormCreateNotification } from '../models/notification/notification-orm.js';
 
-const URI_BACKEND = 'http://localhost:8000';
-const PREFIX_NOTIF_SVC = '/api/notification';
-const URL_NOTIF_SVC = URI_BACKEND + PREFIX_NOTIF_SVC;
 const NOTIFICATION_CHORE_REMINDER = '[CHORE REMINDER]';
 // Define the cron job
 
-export const cronJob = cron.schedule('0 0 * * *', async () => {
+export const cronJob = cron.schedule('00 00 * * *', async () => {
   try {
-    const choresDueToday = await getAllChoresDueToday();
+    const choresScheduledToday = await ormGetChoresScheduledToday();
     // Loop through the chores and send reminders
-    choresDueToday.forEach(async (chore) => {
+    choresScheduledToday.forEach(async (chore) => {
       const username = chore.assignedTo;
-      const user = await getUser(username);
-      if (user) {
-        const userId = user._id; // Extracting the user ID from the response
-        const home = await getHomeModelByUserId(userId);
-        const notificationMessage = `You have a chore: ${chore.title}, due today.`;
-
-        // Send notification to the user
-        await sendNotification(userId, notificationMessage, home.adminUser._id);
-      } else {
-        console.error(`Failed to retrieve user ID for ${username}`);
-      }
+      const userId = await ormGetUser(username);
+      const homeId = chore.home;
+      const home = await ormGetHome(homeId);
+      const notificationMessage = `You have a chore: ${chore.title}, scheduled today.`;
+      // Send notification to the user
+      await sendNotification(
+        [userId._id],
+        notificationMessage,
+        home.adminUser._id
+      );
     });
   } catch (error) {
     console.error('Error sending chore reminders:', error);
@@ -34,15 +30,15 @@ export const cronJob = cron.schedule('0 0 * * *', async () => {
 });
 
 // Function to send notification to a user
-async function sendNotification(userId, message, admin_id) {
+async function sendNotification(userId, message, adminId) {
   const notification = {
-    sender: admin_id.toString(),
-    recipients: userId.toString(),
+    sender: adminId,
+    recipients: userId,
     message: { title: NOTIFICATION_CHORE_REMINDER, content: message },
   };
   try {
-    const response = await axios.post(URL_NOTIF_SVC, notification);
-    console.log('Notification sent:', response.data);
+    ormCreateNotification(notification);
+    // console.log('Notification sent:', response.data);
   } catch (error) {
     console.error('Error sending notification:', error);
   }
