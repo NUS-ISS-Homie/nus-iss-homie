@@ -1,5 +1,5 @@
 export const URI_BACKEND =
-  'http://homie-backend-lb-281238917.ap-southeast-1.elb.amazonaws.com/';
+  'http://homie-backend-lb-281238917.ap-southeast-1.elb.amazonaws.com';
 const PREFIX_EXPENSE_SVC = '/api/expense';
 const PREFIX_HOME_SVC = '/api/home';
 const PREFIX_USER_SVC = '/api/user';
