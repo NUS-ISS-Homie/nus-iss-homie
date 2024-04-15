@@ -9,8 +9,8 @@ on:
 env:
   AWS_REGION: us-east-2
   ECR_REPOSITORY: homies
-  ECS_SERVICE: homied_service
-  ECS_CLUSTER: homiedCluster
+  ECS_SERVICE: Homied2
+  ECS_CLUSTER: homied
   ECS_TASK_DEFINITION: .aws/task.json
   CONTAINER_NAME: homieFE
 
