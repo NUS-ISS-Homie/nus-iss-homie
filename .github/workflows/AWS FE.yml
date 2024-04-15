@@ -7,7 +7,7 @@ on:
     branches: ['main', 'HOMIE7-24-Setup-CD']
 
 env:
-  AWS_REGION: us-east-2
+  AWS_REGION: ap-southeast-1
   ECR_REPOSITORY: homies
   ECS_SERVICE: Homied2
   ECS_CLUSTER: homied
