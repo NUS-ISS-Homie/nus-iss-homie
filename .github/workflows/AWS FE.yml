@@ -5,13 +5,12 @@ on:
     branches: ['main', 'HOMIE7-24-Setup-CD']
   pull_request:
     branches: ['main', 'HOMIE7-24-Setup-CD']
-    # aws ecr create-repository \
-    # --repository-name homiesrepository --region ap-southeast-1
+
 env:
-  AWS_REGION: ap-southeast-1
-  ECR_REPOSITORY: homiesrepository
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: homies
   ECS_SERVICE: Homied2
-  ECS_CLUSTER: homied
+  ECS_CLUSTER: homiedCluster
   ECS_TASK_DEFINITION: .aws/task.json
   CONTAINER_NAME: homieFE
 
