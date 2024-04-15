@@ -85,7 +85,7 @@ function SignUpPage() {
         <Avatar />
 
         <Typography component='h1' variant='h5'>
-          Sign up!!
+          Sign up now!!
         </Typography>
 
         <Box
