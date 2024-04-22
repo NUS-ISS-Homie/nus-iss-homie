@@ -1,0 +1,24 @@
+config:
+  target: 'http://hoime-backend-lb-1539778167.ap-southeast-1.elb.amazonaws.com/api'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: HOMIE Load Testing
+  payload:
+    path: 'credentials_sample.csv'
+    fields:
+      - 'username'
+      - 'password'
+    order: sequence
+    skipHeader: true
+scenarios:
+  - flow:
+      - log: 'Emitting captured values: {{ username }}, {{ password }}'
+      - post:
+          url: '/user/login'
+          json:
+            username: '{{username}}'
+            password: '{{password}}'
+      - get:
+          url: '/grocery-item'
