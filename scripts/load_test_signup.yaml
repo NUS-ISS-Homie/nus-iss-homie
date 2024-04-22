@@ -1,0 +1,21 @@
+config:
+  target: 'http://hoime-backend-lb-1539778167.ap-southeast-1.elb.amazonaws.com/api'
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      name: HOMIE Sign Up
+  payload:
+    path: 'credentials_sample.csv'
+    fields:
+      - 'username'
+      - 'password'
+    order: sequence
+    skipHeader: true
+scenarios:
+  - flow:
+      - log: 'Emitting captured values: {{ username }}, {{ password }}'
+      - post:
+          url: '/user/signup'
+          json:
+            username: '{{username}}'
+            password: '{{password}}'

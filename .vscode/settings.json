@@ -1,3 +1,9 @@
 {
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "yaml.schemas": {
+    "https://www.artillery.io/schema.json": [
+      "file:///root/NUS-ISS-Projects/nus-iss-homie/scripts/load_test_with_csv.yaml",
+      "file:///root/NUS-ISS-Projects/nus-iss-homie/scripts/load_test_signup.yaml"
+    ]
+  }
 }
