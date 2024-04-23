@@ -59,3 +59,19 @@ npm run dev
 cd frontend && npm run start
 cd backend && npm run dev
 ```
+### Setup Load Testing
+
+To setup Artillery.io, ensure that you have installed the most recent LTS release of Node.js.
+
+```bash
+# Install dependencies
+npm install -g artillery@latest
+
+# Check installation
+npx artillery dino
+artillery version
+
+# Run the test
+cd scripts
+artillery run load_test_with_csv.yaml
+```
